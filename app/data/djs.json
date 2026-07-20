@@ -1,0 +1,37 @@
+[
+  {
+    "name": "DJ Manchester",
+    "slug": "dj-manchester",
+    "photo": "/images/djs/dj-manchester.png",
+    "style": "Industrial / EBM",
+    "bio": "Industrial and EBM energy for the Sanctuary floor."
+  },
+  {
+    "name": "DJ Calamity",
+    "slug": "dj-calamity",
+    "photo": "/images/djs/dj-calamity.png",
+    "style": "Rock / Naughty Event",
+    "bio": "Chaos, attitude, and loud nights at Sanctuary Rocks."
+  },
+  {
+    "name": "DJ Sativa",
+    "slug": "dj-sativa",
+    "photo": "/images/djs/dj-sativa.png",
+    "style": "Hot and Heavy / Metal",
+    "bio": "Heavy nights, hot energy, and a room full of fire."
+  },
+  {
+    "name": "DJ CharlieJo",
+    "slug": "dj-charliejo",
+    "photo": "/images/djs/dj-charliejo.png",
+    "style": "Rock / Hard Rock / Heavy Metal",
+    "bio": "Cranking it up for the misfits, metalheads, and Sanctuary family."
+  },
+  {
+    "name": "Krankee and Lisa",
+    "slug": "krankee-and-lisa",
+    "photo": "/images/djs/default-dj.png",
+    "style": "Cover Sets / Requests",
+    "bio": "Cover nights, requests, and Sanctuary chaos."
+  }
+]
