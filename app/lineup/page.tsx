@@ -1,9 +1,19 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { FALLBACK_LOGO, findRosterMatch } from "../data/crewTypes";
+import { FALLBACK_LOGO, findRosterMatch, normalizeForMatch } from "../data/crewTypes";
 import type { CrewMember } from "../data/crewTypes";
 import LineupCarouselOverlay from "../components/LineupCarouselOverlay";
+
+// Explicit, lineup-only photo aliases for calendar DJ names that don't
+// match any roster photo by their own name - a typo'd roster filename, or
+// someone who DJs but only has a photo in the Host folder. Exact
+// normalized-key lookup only (never fuzzy/substring), and scoped to this
+// page alone so it can't affect the Crew page's roster names or photos.
+const LINEUP_PHOTO_ALIASES: Record<string, { source: "dj" | "host"; name: string }> = {
+  daan: { source: "dj", name: "Dann" }, // calendar says "DJ Daan"; roster photo is "Dann.png.jpg"
+  domi: { source: "host", name: "Domi" }, // calendar says "DJ Domi"; only a Host photo exists
+};
 
 type LineupSet = {
   eventTitle: string;
@@ -28,10 +38,16 @@ type LineupResponse = {
   };
 };
 
-function findProfile(djName: string, profiles: CrewMember[]) {
+function findProfile(djName: string, djRoster: CrewMember[], hostRoster: CrewMember[]) {
   if (!djName) return undefined;
 
-  return findRosterMatch(djName, profiles);
+  const direct = findRosterMatch(djName, djRoster);
+  if (direct) return direct;
+
+  const alias = LINEUP_PHOTO_ALIASES[normalizeForMatch(djName)];
+  if (!alias) return undefined;
+
+  return findRosterMatch(alias.name, alias.source === "host" ? hostRoster : djRoster);
 }
 
 function findHostProfile(hostName: string, hostRoster: CrewMember[]) {
@@ -209,7 +225,7 @@ export default function LineupPage() {
   }, []);
 
   const nextSet = lineup.nextSet ?? lineup.sets[0] ?? null;
-  const nextProfile = nextSet ? findProfile(nextSet.djName, djRoster) : null;
+  const nextProfile = nextSet ? findProfile(nextSet.djName, djRoster, hostRoster) : null;
   const nextHostProfile = nextSet?.host ? findHostProfile(nextSet.host, hostRoster) : undefined;
   const nextPanelPhoto =
     nextSet?.stagePhoto ??
@@ -327,7 +343,7 @@ export default function LineupPage() {
 
           <LineupCarouselOverlay
             sets={allScheduledSets}
-            findPhoto={(djName) => findProfile(djName, djRoster)}
+            findPhoto={(djName) => findProfile(djName, djRoster, hostRoster)}
             emptyMessage={
               status === "loading"
                 ? "Checking calendar..."
