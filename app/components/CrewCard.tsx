@@ -20,9 +20,11 @@ function getInitials(name: string) {
 export default function CrewCard({
   member,
   className,
+  onSelect,
 }: {
   member: CrewMember;
   className: string;
+  onSelect?: (member: CrewMember, trigger: HTMLButtonElement) => void;
 }) {
   const imgRef = useRef<HTMLImageElement>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -48,39 +50,53 @@ export default function CrewCard({
 
   return (
     <article className={className}>
-      <div className="crew-card-photo">
-        {/* Initials sit underneath at all times so a failed photo never
-            flashes the browser's default broken-image icon - the real
-            photo (once it loads) simply covers this. */}
-        <span
-          className="crew-card-initials"
-          aria-hidden="true"
-          style={{ opacity: imageLoaded ? 0 : 1 }}
-        >
-          {getInitials(member.name)}
-        </span>
+      {/* .crew-slot (className above) sets pointer-events: none - these
+          cards are absolutely-positioned overlays on a static poster
+          background. crew-card-trigger re-enables pointer-events just for
+          this button so the rest of the poster art stays inert, and takes
+          over the full slot's position/size so the photo/name/role/bio
+          inside keep the exact same absolute-positioned layout as before. */}
+      <button
+        type="button"
+        className="crew-card-trigger"
+        onClick={(event) => onSelect?.(member, event.currentTarget)}
+        aria-haspopup="dialog"
+        aria-label={`View ${member.name}'s biography`}
+      >
+        <div className="crew-card-photo">
+          {/* Initials sit underneath at all times so a failed photo never
+              flashes the browser's default broken-image icon - the real
+              photo (once it loads) simply covers this. */}
+          <span
+            className="crew-card-initials"
+            aria-hidden="true"
+            style={{ opacity: imageLoaded ? 0 : 1 }}
+          >
+            {getInitials(member.name)}
+          </span>
 
-        {canShowImage ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            ref={imgRef}
-            src={member.image}
-            alt={member.name}
-            style={{ opacity: imageLoaded ? 1 : 0 }}
-            onLoad={() => setImageLoaded(true)}
-            onError={() => setImageFailed(true)}
-          />
-        ) : null}
-      </div>
+          {canShowImage ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              ref={imgRef}
+              src={member.image}
+              alt={member.name}
+              style={{ opacity: imageLoaded ? 1 : 0 }}
+              onLoad={() => setImageLoaded(true)}
+              onError={() => setImageFailed(true)}
+            />
+          ) : null}
+        </div>
 
-      <h3 className="crew-card-name">{member.name}</h3>
-      <p className="crew-card-role">{member.role}</p>
-      <p className="crew-card-bio">
-        {member.bio}
-        {member.quote ? (
-          <span className="crew-card-quote">&ldquo;{member.quote}&rdquo;</span>
-        ) : null}
-      </p>
+        <h3 className="crew-card-name">{member.name}</h3>
+        <p className="crew-card-role">{member.role}</p>
+        <p className="crew-card-bio">
+          {member.bio}
+          {member.quote ? (
+            <span className="crew-card-quote">&ldquo;{member.quote}&rdquo;</span>
+          ) : null}
+        </p>
+      </button>
     </article>
   );
 }

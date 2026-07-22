@@ -6630,6 +6630,162 @@ h1 {
   outline-offset: 4px;
 }
 
+/* Meet the Crew biography modal - same visual language as the gallery
+   lightbox above (dark gradient panel, orange/rust border and buttons)
+   so it reads as the same site rather than a bolted-on generic modal. */
+.crew-bio-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.crew-bio-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background:
+    radial-gradient(circle at 50% 36%, rgba(255, 86, 18, 0.18), transparent 26rem),
+    rgba(0, 0, 0, 0.86);
+  cursor: pointer;
+}
+
+.crew-bio-modal-panel {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: min(520px, 100%);
+  max-height: calc(100vh - 48px);
+  gap: 14px;
+  border: 1px solid rgba(143, 137, 126, 0.46);
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255, 94, 22, 0.14), transparent 14rem),
+    linear-gradient(145deg, rgba(43, 45, 45, 0.98), rgba(7, 8, 9, 0.98));
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.035),
+    inset 0 -28px 48px rgba(0, 0, 0, 0.68),
+    0 24px 54px rgba(0, 0, 0, 0.78),
+    0 0 34px rgba(255, 82, 18, 0.18);
+  padding: clamp(18px, 4vw, 32px);
+  overflow-y: auto;
+}
+
+.crew-bio-modal-photo {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  max-width: 220px;
+  aspect-ratio: 1;
+  margin: 0 auto;
+  overflow: hidden;
+  border: 1px solid rgba(255, 104, 30, 0.26);
+  border-radius: 8px;
+  background: #050505;
+}
+
+.crew-bio-modal-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.crew-bio-modal-name {
+  margin: 0;
+  color: #f0e7db;
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 3.4vw, 2.2rem);
+  letter-spacing: 0.01em;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow:
+    0 1px 0 #050505,
+    0 0 16px rgba(255, 86, 18, 0.22);
+}
+
+.crew-bio-modal-role {
+  margin: -6px 0 0;
+  color: #ff5a3d;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+/* Scrollable independently of the panel so a long, real biography never
+   forces the whole modal taller than the viewport on mobile. */
+.crew-bio-modal-bio {
+  max-height: min(38vh, 320px);
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.crew-bio-modal-bio p {
+  margin: 0;
+  color: #d9d3ca;
+  font-size: 0.92rem;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+  white-space: pre-line;
+}
+
+.crew-bio-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  border: 1px solid rgba(255, 101, 24, 0.46);
+  border-radius: 4px;
+  background:
+    linear-gradient(180deg, rgba(188, 58, 20, 0.96), rgba(73, 15, 9, 0.96));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 215, 180, 0.18),
+    0 10px 18px rgba(0, 0, 0, 0.5);
+  color: #f4eadf;
+  cursor: pointer;
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  min-height: 44px;
+  padding: 0 14px;
+  text-transform: uppercase;
+}
+
+.crew-bio-modal-close:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 230, 200, 0.22),
+    0 0 24px rgba(255, 86, 18, 0.28);
+}
+
+.crew-bio-modal-close:focus-visible {
+  outline: 2px solid rgba(255, 126, 42, 0.92);
+  outline-offset: 4px;
+}
+
+@media (max-width: 560px) {
+  .crew-bio-modal {
+    padding: 14px;
+  }
+
+  .crew-bio-modal-panel {
+    max-height: calc(100vh - 28px);
+    padding: 20px 16px;
+  }
+
+  .crew-bio-modal-photo {
+    max-width: 160px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .gallery-template-slot {
     transition: none;
@@ -8111,6 +8267,34 @@ body:has(.crew-image-page) {
 .crew-dot.is-active {
   background: #ff4d2e;
   box-shadow: 0 0 6px rgba(255, 77, 46, 0.85);
+}
+
+/* .crew-slot (the card's outer wrapper) sets pointer-events: none since
+   these are absolutely-positioned overlays on a static poster background -
+   this button fills the slot exactly (inset: 0, same box as the slot) and
+   re-enables pointer-events just for itself, without changing anything
+   about how .crew-card-photo/-name/-role/-bio position inside it. */
+.crew-card-trigger {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.crew-card-trigger:focus-visible {
+  outline: 2px solid rgba(255, 126, 42, 0.92);
+  outline-offset: 2px;
+  border-radius: 6px;
 }
 
 .crew-card-photo {

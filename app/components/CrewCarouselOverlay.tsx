@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import CrewCard from "./CrewCard";
+import CrewBioModal from "./CrewBioModal";
 import { getVisibleItems } from "../data/crewTypes";
 import type { CrewMember } from "../data/crewTypes";
 
@@ -12,6 +13,7 @@ function CarouselSection({
   arrowClassPrefix,
   dotsClassName,
   sectionLabel,
+  onSelect,
 }: {
   items: CrewMember[];
   visibleCount: number;
@@ -19,6 +21,7 @@ function CarouselSection({
   arrowClassPrefix: string;
   dotsClassName: string;
   sectionLabel: string;
+  onSelect: (member: CrewMember, trigger: HTMLButtonElement) => void;
 }) {
   const [startIndex, setStartIndex] = useState(0);
   const canCycle = items.length > visibleCount;
@@ -44,6 +47,7 @@ function CarouselSection({
           key={member.image}
           member={member}
           className={`crew-slot ${slotClassPrefix}-${index + 1}`}
+          onSelect={onSelect}
         />
       ))}
 
@@ -83,6 +87,23 @@ export default function CrewCarouselOverlay({
   djs: CrewMember[];
   hosts: CrewMember[];
 }) {
+  // One modal shared by both carousels (DJs and Hosts), so only one can
+  // ever be open. Each CrewCard already renders with its own real member
+  // object (see getVisibleItems above) rather than a shared index, so
+  // whichever card is clicked - including after paging the carousel - is
+  // exactly the member whose bio opens here; nothing to keep in sync.
+  const [activeMember, setActiveMember] = useState<CrewMember | null>(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+
+  const handleSelect = (member: CrewMember, trigger: HTMLButtonElement) => {
+    triggerRef.current = trigger;
+    setActiveMember(member);
+  };
+
+  const handleClose = () => {
+    setActiveMember(null);
+  };
+
   return (
     <>
       <CarouselSection
@@ -92,6 +113,7 @@ export default function CrewCarouselOverlay({
         arrowClassPrefix="crew-arrow--dj"
         dotsClassName="crew-dots--dj"
         sectionLabel="DJs"
+        onSelect={handleSelect}
       />
       <CarouselSection
         items={hosts}
@@ -100,6 +122,13 @@ export default function CrewCarouselOverlay({
         arrowClassPrefix="crew-arrow--host"
         dotsClassName="crew-dots--host"
         sectionLabel="Hosts"
+        onSelect={handleSelect}
+      />
+
+      <CrewBioModal
+        member={activeMember}
+        onClose={handleClose}
+        returnFocusRef={triggerRef}
       />
     </>
   );
