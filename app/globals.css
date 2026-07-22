@@ -8440,6 +8440,300 @@ button.crew-card:focus-visible {
   }
 }
 
+/* Meet the Crew page: the ORIGINAL percentage-positioned overlay that sits
+   directly on top of the blank metal frames baked into crew_hero.png, so
+   the cards track the poster's scale at every viewport width without ever
+   touching the artwork itself. Restored from commit 86a028e. Named
+   crew-overlay-card-* (not crew-card-*) because the Lineup page's
+   schedule cards also use crew-card-photo/-name/-role as a base (see
+   .lineup-schedule-card above) - reusing those names here would collide
+   and break the Lineup page. */
+.crew-slot {
+  position: absolute;
+  pointer-events: none;
+}
+
+.crew-slot--dj-1,
+.crew-slot--dj-2,
+.crew-slot--dj-3,
+.crew-slot--dj-4 {
+  top: 33.1%;
+  height: 20.6%;
+  width: 20.5%;
+}
+
+.crew-slot--dj-1 {
+  left: 10.2%;
+}
+
+.crew-slot--dj-2 {
+  left: 30.6%;
+}
+
+.crew-slot--dj-3 {
+  left: 51.1%;
+}
+
+.crew-slot--dj-4 {
+  left: 71.5%;
+}
+
+.crew-slot--host-1,
+.crew-slot--host-2,
+.crew-slot--host-3,
+.crew-slot--host-4,
+.crew-slot--host-5 {
+  top: 60.4%;
+  height: 17.9%;
+  width: 17.8%;
+}
+
+.crew-slot--host-1 {
+  left: 6.6%;
+}
+
+.crew-slot--host-2 {
+  left: 24.4%;
+}
+
+.crew-slot--host-3 {
+  left: 42.2%;
+}
+
+.crew-slot--host-4 {
+  left: 60%;
+}
+
+.crew-slot--host-5 {
+  left: 77.8%;
+}
+
+/* Carousel arrows: fully transparent hit-areas sitting exactly over the
+   "<" / ">" chevron buttons already drawn into crew_hero.png - the artwork
+   supplies 100% of the visuals, this just makes that art clickable. A
+   subtle glow on hover/focus is the only visual we add. */
+.crew-arrow {
+  position: absolute;
+  top: 40.1%;
+  z-index: 8;
+  width: 6%;
+  height: 4.6%;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.crew-arrow:hover,
+.crew-arrow:focus-visible {
+  background: rgba(255, 90, 30, 0.16);
+  box-shadow: 0 0 16px rgba(255, 80, 20, 0.35);
+  outline: none;
+}
+
+.crew-arrow--dj-prev {
+  left: 1.2%;
+}
+
+.crew-arrow--dj-next {
+  left: 92.6%;
+}
+
+.crew-arrow--host-prev {
+  top: 66.6%;
+  left: 0%;
+}
+
+.crew-arrow--host-next {
+  top: 66.6%;
+  left: 95.1%;
+}
+
+.crew-dots {
+  position: absolute;
+  top: 54.5%;
+  left: 50%;
+  z-index: 7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 20%;
+  height: 2.6%;
+  border-radius: 999px;
+  background: #060505;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.crew-dots--host {
+  top: 79.2%;
+}
+
+.crew-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(150, 130, 120, 0.55);
+}
+
+.crew-dot.is-active {
+  background: #ff4d2e;
+  box-shadow: 0 0 6px rgba(255, 77, 46, 0.85);
+}
+
+/* .crew-slot (the card's outer wrapper) sets pointer-events: none since
+   these are absolutely-positioned overlays on a static poster background -
+   this button fills the slot exactly (inset: 0, same box as the slot) and
+   re-enables pointer-events just for itself, without changing anything
+   about how crew-overlay-card-photo/-name/-role/-bio position inside it. */
+.crew-overlay-card-trigger {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.crew-overlay-card-trigger:focus-visible {
+  outline: 2px solid rgba(255, 126, 42, 0.92);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.crew-overlay-card-photo {
+  position: absolute;
+  top: 13%;
+  left: 6%;
+  right: 6%;
+  height: 40%;
+  overflow: hidden;
+}
+
+.crew-overlay-card-photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  transition: opacity 200ms ease;
+}
+
+.crew-overlay-card-initials {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 120, 90, 0.55);
+  font-family: var(--font-display);
+  font-size: clamp(0.7rem, 3.1vw, 2rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 12px rgba(255, 70, 20, 0.35);
+  transition: opacity 200ms ease;
+}
+
+.crew-overlay-card-name {
+  position: absolute;
+  top: 55%;
+  left: 4%;
+  right: 4%;
+  height: 10%;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: #fff6ee;
+  font-family: var(--font-display);
+  font-size: clamp(0.4rem, 1.35vw, 0.95rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.05;
+  text-align: center;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 0, 0, 0.6);
+}
+
+.crew-overlay-card-role {
+  position: absolute;
+  top: 67%;
+  left: 5%;
+  right: 5%;
+  height: 8%;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: #ff5a3d;
+  font-size: clamp(0.32rem, 0.95vw, 0.66rem);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1.1;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+.crew-overlay-card-bio {
+  position: absolute;
+  top: 77%;
+  left: 6%;
+  right: 6%;
+  height: 20%;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: #d9d3ca;
+  font-size: clamp(0.28rem, 0.78vw, 0.56rem);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.25;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+}
+
+.crew-overlay-card-quote {
+  display: block;
+  margin-top: 0.2em;
+  color: #ffb199;
+  font-style: italic;
+  opacity: 0.85;
+}
+
+@media (max-width: 560px) {
+  .crew-overlay-card-name {
+    letter-spacing: 0;
+  }
+
+  .crew-overlay-card-bio {
+    -webkit-line-clamp: 3;
+  }
+}
+
+/* Very small screens: the frames get too cramped for a full bio, so drop
+   it and keep photo/name/role - which is what the user actually scans
+   for on a phone anyway. */
+@media (max-width: 380px) {
+  .crew-overlay-card-bio {
+    display: none;
+  }
+}
+
 /* Sponsors: a standalone dark-metal panel below the poster (crew_hero.png
    has no baked-in space for a logo strip), reusing the same riveted-corner
    + red/orange glow language as the rest of the site. */

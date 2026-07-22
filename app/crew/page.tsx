@@ -1,4 +1,4 @@
-import CrewRoster from "../components/CrewRoster";
+import CrewCarouselOverlay from "../components/CrewCarouselOverlay";
 import SponsorCard from "../components/SponsorCard";
 import { loadDjs, loadHosts, loadSponsors } from "../data/crew";
 import { shuffleCrew } from "../data/crewTypes";
@@ -22,9 +22,9 @@ export default function CrewPage() {
           alt="Sanctuary Rocks - Meet the Crew"
           className="crew-page-image"
         />
-      </div>
 
-      <CrewRoster djs={djs} hosts={hosts} bioImages={bioImages} />
+        <CrewCarouselOverlay djs={djs} hosts={hosts} bioImages={bioImages} />
+      </div>
 
       {sponsors.length > 0 ? (
         <section className="crew-sponsors" aria-label="Sponsors">
