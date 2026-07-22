@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { FALLBACK_LOGO, findRosterMatch, getVisibleItems } from "../data/crewTypes";
+import { FALLBACK_LOGO, findRosterMatch } from "../data/crewTypes";
 import type { CrewMember } from "../data/crewTypes";
-
-const LINEUP_VISIBLE_COUNT = 8;
+import ScrollRow from "../components/ScrollRow";
 
 type LineupSet = {
   eventTitle: string;
@@ -39,10 +38,6 @@ function findHostProfile(hostName: string, hostRoster: CrewMember[]) {
   if (!hostName || hostName.trim().toLowerCase() === "tba") return undefined;
 
   return findRosterMatch(hostName, hostRoster);
-}
-
-function findNextSet(profile: CrewMember, sets: LineupSet[]) {
-  return sets.find((set) => findRosterMatch(set.djName, [profile]));
 }
 
 function DjImage({
@@ -115,7 +110,6 @@ export default function LineupPage() {
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [djRoster, setDjRoster] = useState<CrewMember[]>([]);
   const [hostRoster, setHostRoster] = useState<CrewMember[]>([]);
-  const [djStartIndex, setDjStartIndex] = useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -223,13 +217,11 @@ export default function LineupPage() {
     nextHostProfile?.image ??
     FALLBACK_LOGO;
   const hasRealSets = status === "ready" && lineup.sets.length > 0;
-  const canCycleDjs = djRoster.length > LINEUP_VISIBLE_COUNT;
-  const djPageCount = canCycleDjs ? Math.ceil(djRoster.length / LINEUP_VISIBLE_COUNT) : 0;
-  const djCurrentPage = canCycleDjs
-    ? Math.round(djStartIndex / LINEUP_VISIBLE_COUNT) % djPageCount
-    : 0;
-  const crewCards = getVisibleItems(djRoster, djStartIndex, LINEUP_VISIBLE_COUNT);
-  const upcomingSets = hasRealSets ? lineup.sets.slice(0, 8) : [];
+  // Every calendar set, in order - not deduplicated per DJ. If the same DJ
+  // has multiple events (e.g. two nights this week), each one gets its own
+  // card with its own day/time, matching what the calendar actually says
+  // rather than collapsing them into a single "next set" per person.
+  const allScheduledSets = hasRealSets ? lineup.sets : [];
   const updatedLabel = useMemo(() => {
     if (!lineup.updatedAt) return "";
 
@@ -240,14 +232,6 @@ export default function LineupPage() {
       minute: "2-digit",
     }).format(new Date(lineup.updatedAt));
   }, [lineup.updatedAt]);
-
-  const goToPrevDjPage = () => {
-    setDjStartIndex((current) => (current - LINEUP_VISIBLE_COUNT + djRoster.length) % djRoster.length);
-  };
-
-  const goToNextDjPage = () => {
-    setDjStartIndex((current) => (current + LINEUP_VISIBLE_COUNT) % djRoster.length);
-  };
 
   return (
     <main className="lineup-page lineup-template-page">
@@ -337,96 +321,47 @@ export default function LineupPage() {
             </section>
           )}
 
-          <section className="lineup-template-roster" aria-label="Full Crew">
-            {crewCards.map((profile, index) => {
-              const nextProfileSet = hasRealSets
-                ? findNextSet(profile, lineup.sets)
-                : null;
-
-              return (
-              <article
-                className={`lineup-card-slot lineup-card-slot--${index + 1}`}
-                key={profile.image}
-              >
-                <DjImage
-                  alt={`${profile.name} photo`}
-                  className="lineup-card-photo"
-                  src={profile.image}
-                />
-
-                <div className="lineup-card-body">
-                  <h3>{profile.name}</h3>
-                  <p>{profile.role}</p>
-                  <span className="lineup-card-bio">{profile.bio}</span>
-                </div>
-
-                <div className="lineup-card-next">
-                  <strong>Next Set</strong>
-                  {nextProfileSet ? (
-                    <>
-                      <p>{nextProfileSet.dateLabel}</p>
-                      <span>{nextProfileSet.timeLabel}</span>
-                    </>
-                  ) : (
-                    <p>Schedule TBA</p>
-                  )}
-                </div>
-              </article>
-              );
-            })}
-
-            {canCycleDjs ? (
-              <>
-                <button
-                  type="button"
-                  className="lineup-roster-arrow lineup-roster-arrow--prev"
-                  onClick={goToPrevDjPage}
-                  aria-label="Show previous DJs"
-                >
-                  <span aria-hidden="true">&#8249;</span>
-                </button>
-                <button
-                  type="button"
-                  className="lineup-roster-arrow lineup-roster-arrow--next"
-                  onClick={goToNextDjPage}
-                  aria-label="Show next DJs"
-                >
-                  <span aria-hidden="true">&#8250;</span>
-                </button>
-
-                <div className="lineup-roster-dots" aria-hidden="true">
-                  {Array.from({ length: djPageCount }).map((_, page) => (
-                    <span
-                      key={page}
-                      className={`lineup-roster-dot${page === djCurrentPage ? " is-active" : ""}`}
-                    />
-                  ))}
-                </div>
-              </>
-            ) : null}
-          </section>
-
           {updatedLabel ? (
             <p className="lineup-template-updated">Updated {updatedLabel}</p>
           ) : null}
         </div>
 
-        <section className="lineup-mobile-upcoming" aria-label="Upcoming Sets">
-          <h2>Upcoming Sets</h2>
+        <section className="crew-roster-section" aria-labelledby="lineup-schedule-heading">
+          <h2 className="crew-roster-heading" id="lineup-schedule-heading">
+            Full Lineup
+          </h2>
+
           {status === "loading" ? (
-            <p>Checking calendar...</p>
+            <p className="lineup-schedule-status">Checking calendar...</p>
           ) : status === "error" ? (
-            <p>Calendar lineup unavailable. Please check back soon.</p>
-          ) : upcomingSets.length > 0 ? (
-            upcomingSets.map((set) => (
-              <article key={`${set.start}-${set.djName}`}>
-                <strong>{set.djName}</strong>
-                <span>{set.dateLabel} / {set.timeLabel}</span>
-                <p>{set.eventTitle}</p>
-              </article>
-            ))
+            <p className="lineup-schedule-status">
+              Calendar lineup unavailable. Please check back soon.
+            </p>
+          ) : allScheduledSets.length > 0 ? (
+            <ScrollRow ariaLabel="the full DJ lineup">
+              {allScheduledSets.map((set, index) => {
+                const profile = findProfile(set.djName, djRoster);
+
+                return (
+                  <div
+                    className="crew-card lineup-schedule-card"
+                    key={`${set.start}-${set.djName}-${index}`}
+                  >
+                    <DjImage
+                      alt={`${set.djName} photo`}
+                      className="crew-card-photo"
+                      src={profile?.image}
+                    />
+                    <span className="crew-card-name">{set.djName}</span>
+                    <span className="crew-card-role">{set.dateLabel}</span>
+                    <span className="crew-card-role">{set.timeLabel}</span>
+                    <span className="lineup-schedule-event">{set.eventTitle}</span>
+                  </div>
+                );
+              })}
+            </ScrollRow>
           ) : (
-            <p>No upcoming calendar sets are posted yet.</p>
+            <p className="lineup-schedule-status">No upcoming calendar sets are posted yet.</p>
           )}
         </section>
       </section>

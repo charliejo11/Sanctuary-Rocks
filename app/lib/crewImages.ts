@@ -101,6 +101,33 @@ export function loadRoster(
   });
 }
 
+// Scans public/images/Bios for hand-made biography graphics and builds a
+// normalized-name -> encoded URL lookup. The filenames aren't consistent
+// ("DJ Corbyn Bio.png.jpg", "Betsy bio.png.jpg", "Irish BeautyBio.png.png",
+// "Rita_Bio.png.png", double extensions throughout), so this strips every
+// recognized image extension (stripAllExtensions already handles the
+// doubled-up ".png.jpg" case), removes the word "bio" wherever it appears
+// (glued on or separated by a space/dot/underscore), and runs what's left
+// through the same normalizeForMatch used for calendar/roster matching.
+// Matching is an exact normalized-key lookup only - never a substring/fuzzy
+// guess - so a bio image can only attach to the crew member whose name
+// normalizes to the exact same key. A handful of real filenames don't (e.g.
+// a typo'd name); those are handled with an explicit `bioImage` override in
+// crewBios.ts rather than guessed here.
+export function loadBioImages(folder = "Bios"): Record<string, string> {
+  const map: Record<string, string> = {};
+
+  for (const filename of listImageFiles(folder)) {
+    const stem = stripAllExtensions(filename).replace(/bio/gi, " ");
+    const key = normalizeForMatch(stem);
+    if (!key || map[key]) continue;
+
+    map[key] = `/images/${folder}/${encodeURIComponent(filename)}`;
+  }
+
+  return map;
+}
+
 // Re-exported for convenience so server-side code can import everything
 // (folder scanning + the fallback logo constant) from one place. The
 // canonical definition lives in crewTypes.ts because it's a plain string

@@ -13,6 +13,14 @@ import { normalizeForMatch } from "./crewTypes";
 // "Bio coming soon." on their card. Do not invent bios here - only real,
 // provided text belongs in this file.
 //
+// Biography IMAGES (public/images/Bios/*) are matched to a crew member
+// automatically by name - see loadBioImages() in app/lib/crewImages.ts -
+// so most people never need an entry here just to get their bio image
+// connected. Only set `bioImage` below when a bio graphic's filename
+// doesn't normalize to the same name as the crew photo (a typo, a
+// shortened/expanded name, etc.) - see the four overrides below for real
+// examples found in this repo.
+//
 // Adding a brand-new crew member's photo to the image folder does not
 // require an entry here - the modal will just show "Bio coming soon."
 // for them until someone adds one.
@@ -23,6 +31,9 @@ export type CrewBioEntry = {
   role: "DJ" | "Host";
   image: string;
   bio: string;
+  // Optional override for when public/images/Bios/<file> doesn't normalize
+  // to the same name as `name` (see loadBioImages() in crewImages.ts).
+  bioImage?: string;
 };
 
 export const CREW_BIOS: CrewBioEntry[] = [
@@ -42,11 +53,35 @@ export const CREW_BIOS: CrewBioEntry[] = [
   { id: "dj-kaya", name: "DJ Kaya", role: "DJ", image: "/images/djs/DJ%20Kaya.png.jpg", bio: "" },
   { id: "dj-krankee", name: "DJ Krankee", role: "DJ", image: "/images/djs/DJ%20Krankee.png.jpg", bio: "" },
   { id: "dj-lucky", name: "DJ Lucky", role: "DJ", image: "/images/djs/DJ%20Lucky_.png.jpg", bio: "" },
-  { id: "dj-magas", name: "DJ Magas", role: "DJ", image: "/images/djs/DJ%20Magas.png.jpg", bio: "" },
-  { id: "dj-sound", name: "DJ Sound", role: "DJ", image: "/images/djs/DJ%20Sound.png.png", bio: "" },
+  {
+    id: "dj-magas",
+    name: "DJ Magas",
+    role: "DJ",
+    image: "/images/djs/DJ%20Magas.png.jpg",
+    bio: "",
+    // Bio file is "Megas Bio.png.jpg" - doesn't match "Magas" (roster photo).
+    bioImage: "/images/Bios/Megas%20Bio.png.jpg",
+  },
+  {
+    id: "dj-sound",
+    name: "DJ Sound",
+    role: "DJ",
+    image: "/images/djs/DJ%20Sound.png.png",
+    bio: "",
+    // Bio file is "DJ Soundtrack Bio.png.png" - doesn't match "DJ Sound".
+    bioImage: "/images/Bios/DJ%20Soundtrack%20Bio.png.png",
+  },
   { id: "dj-trelk", name: "DJ Trelk", role: "DJ", image: "/images/djs/DJ%20Trelk.png.png", bio: "" },
   { id: "dj-vandon", name: "DJ Vandon", role: "DJ", image: "/images/djs/DJ%20Vandon.png.png", bio: "" },
-  { id: "dj-dann", name: "Dann", role: "DJ", image: "/images/djs/Dann.png.jpg", bio: "" },
+  {
+    id: "dj-dann",
+    name: "Dann",
+    role: "DJ",
+    image: "/images/djs/Dann.png.jpg",
+    bio: "",
+    // Bio file is "Daan Bio.png.jpg" - doesn't match "Dann" (roster photo).
+    bioImage: "/images/Bios/Daan%20Bio.png.jpg",
+  },
   { id: "dj-manchester", name: "Manchester", role: "DJ", image: "/images/djs/Manchester.png.png", bio: "" },
   { id: "dj-moose", name: "Moose", role: "DJ", image: "/images/djs/Moose.png.jpg", bio: "" },
   { id: "dj-nashty", name: "Nashty", role: "DJ", image: "/images/djs/Nashty.png.jpg", bio: "" },
@@ -60,7 +95,15 @@ export const CREW_BIOS: CrewBioEntry[] = [
   { id: "host-domi", name: "Domi", role: "Host", image: "/images/hosts/Domi.png.jpg", bio: "" },
   { id: "host-ginny", name: "Ginny", role: "Host", image: "/images/hosts/Ginny.png.jpg", bio: "" },
   { id: "host-irish-beauty", name: "Irish Beauty", role: "Host", image: "/images/hosts/Irish_Beauty.png.png", bio: "" },
-  { id: "host-justi", name: "Justi", role: "Host", image: "/images/hosts/Justi.png.png", bio: "" },
+  {
+    id: "host-justi",
+    name: "Justi",
+    role: "Host",
+    image: "/images/hosts/Justi.png.png",
+    bio: "",
+    // Bio file is "Justina Bio.png.png" - doesn't match "Justi" (roster photo).
+    bioImage: "/images/Bios/Justina%20Bio.png.png",
+  },
   { id: "host-legs", name: "Legs", role: "Host", image: "/images/hosts/Legs.png.png", bio: "" },
   { id: "host-lozzy", name: "Lozzy", role: "Host", image: "/images/hosts/Lozzy.png.jpg", bio: "" },
   { id: "host-mistine", name: "Mistine", role: "Host", image: "/images/hosts/Mistine.png.jpg", bio: "" },
@@ -74,16 +117,15 @@ export const CREW_BIOS: CrewBioEntry[] = [
   { id: "host-victor", name: "Victor", role: "Host", image: "/images/hosts/Victor.png.jpg", bio: "" },
 ];
 
-const BIO_BY_NORMALIZED_NAME = new Map(
-  CREW_BIOS.map((entry) => [normalizeForMatch(entry.name), entry.bio]),
+const BIO_ENTRY_BY_NORMALIZED_NAME = new Map(
+  CREW_BIOS.map((entry) => [normalizeForMatch(entry.name), entry]),
 );
 
-// Looks up a bio by display name (matches the same way calendar/roster
-// names are matched elsewhere - case/spacing/punctuation-insensitive, and
-// tolerant of a missing "DJ "/"Host " prefix). Returns undefined if there's
-// no entry OR the entry's bio is still blank - callers should show "Bio
-// coming soon." in either case.
-export function findBio(name: string): string | undefined {
-  const bio = BIO_BY_NORMALIZED_NAME.get(normalizeForMatch(name));
-  return bio ? bio : undefined;
+// Looks up a crew member's hand-edited bio entry (text + optional bioImage
+// override) by display name - matches the same way calendar/roster names
+// are matched elsewhere (case/spacing/punctuation-insensitive, tolerant of
+// a missing "DJ "/"Host " prefix). Returns undefined if there's no entry
+// for this name at all.
+export function findBioEntry(name: string): CrewBioEntry | undefined {
+  return BIO_ENTRY_BY_NORMALIZED_NAME.get(normalizeForMatch(name));
 }
