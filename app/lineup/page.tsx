@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { FALLBACK_LOGO, findRosterMatch } from "../data/crewTypes";
 import type { CrewMember } from "../data/crewTypes";
-import ScrollRow from "../components/ScrollRow";
+import LineupCarouselOverlay from "../components/LineupCarouselOverlay";
 
 type LineupSet = {
   eventTitle: string;
@@ -324,46 +324,21 @@ export default function LineupPage() {
           {updatedLabel ? (
             <p className="lineup-template-updated">Updated {updatedLabel}</p>
           ) : null}
+
+          <LineupCarouselOverlay
+            sets={allScheduledSets}
+            findPhoto={(djName) => findProfile(djName, djRoster)}
+            emptyMessage={
+              status === "loading"
+                ? "Checking calendar..."
+                : status === "error"
+                  ? "Calendar lineup unavailable. Please check back soon."
+                  : allScheduledSets.length === 0
+                    ? "No upcoming calendar sets are posted yet."
+                    : null
+            }
+          />
         </div>
-
-        <section className="crew-roster-section" aria-labelledby="lineup-schedule-heading">
-          <h2 className="crew-roster-heading" id="lineup-schedule-heading">
-            Full Lineup
-          </h2>
-
-          {status === "loading" ? (
-            <p className="lineup-schedule-status">Checking calendar...</p>
-          ) : status === "error" ? (
-            <p className="lineup-schedule-status">
-              Calendar lineup unavailable. Please check back soon.
-            </p>
-          ) : allScheduledSets.length > 0 ? (
-            <ScrollRow ariaLabel="the full DJ lineup">
-              {allScheduledSets.map((set, index) => {
-                const profile = findProfile(set.djName, djRoster);
-
-                return (
-                  <div
-                    className="crew-card lineup-schedule-card"
-                    key={`${set.start}-${set.djName}-${index}`}
-                  >
-                    <DjImage
-                      alt={`${set.djName} photo`}
-                      className="crew-card-photo"
-                      src={profile?.image}
-                    />
-                    <span className="crew-card-name">{set.djName}</span>
-                    <span className="crew-card-role">{set.dateLabel}</span>
-                    <span className="crew-card-role">{set.timeLabel}</span>
-                    <span className="lineup-schedule-event">{set.eventTitle}</span>
-                  </div>
-                );
-              })}
-            </ScrollRow>
-          ) : (
-            <p className="lineup-schedule-status">No upcoming calendar sets are posted yet.</p>
-          )}
-        </section>
       </section>
     </main>
   );
