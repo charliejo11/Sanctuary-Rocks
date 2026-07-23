@@ -83,11 +83,9 @@ function CarouselSection({
 export default function CrewCarouselOverlay({
   djs,
   hosts,
-  bioImages,
 }: {
   djs: CrewMember[];
   hosts: CrewMember[];
-  bioImages: Record<string, string>;
 }) {
   // One modal shared by both carousels (DJs and Hosts), so only one can
   // ever be open. Each CrewCard already renders with its own real member
@@ -131,7 +129,6 @@ export default function CrewCarouselOverlay({
         member={activeMember}
         onClose={handleClose}
         returnFocusRef={triggerRef}
-        bioImages={bioImages}
       />
     </>
   );

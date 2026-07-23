@@ -2,7 +2,6 @@ import CrewCarouselOverlay from "../components/CrewCarouselOverlay";
 import SponsorCard from "../components/SponsorCard";
 import { loadDjs, loadHosts, loadSponsors } from "../data/crew";
 import { shuffleCrew } from "../data/crewTypes";
-import { loadBioImages } from "../lib/crewImages";
 
 // Force a fresh render (and a fresh shuffle) on every request/refresh,
 // instead of Next.js statically caching a single random order at build time.
@@ -12,7 +11,6 @@ export default function CrewPage() {
   const djs = shuffleCrew(loadDjs());
   const hosts = shuffleCrew(loadHosts());
   const sponsors = loadSponsors();
-  const bioImages = loadBioImages();
 
   return (
     <main className="crew-image-page">
@@ -23,7 +21,7 @@ export default function CrewPage() {
           className="crew-page-image"
         />
 
-        <CrewCarouselOverlay djs={djs} hosts={hosts} bioImages={bioImages} />
+        <CrewCarouselOverlay djs={djs} hosts={hosts} />
       </div>
 
       {sponsors.length > 0 ? (

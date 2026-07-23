@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { Fragment, useEffect, useRef, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import type { CrewMember } from "../data/crewTypes";
-import { FALLBACK_LOGO, normalizeForMatch } from "../data/crewTypes";
+import { FALLBACK_LOGO } from "../data/crewTypes";
 import { findBioEntry } from "../data/crewBios";
 
 function BioPhoto({ member }: { member: CrewMember }) {
@@ -21,38 +21,27 @@ function BioPhoto({ member }: { member: CrewMember }) {
   );
 }
 
-// Renders the hand-made biography graphic (public/images/Bios/*). Keyed by
-// its own src so switching to a different person's bio image always starts
-// from a clean "not failed" state instead of carrying over a stale error
-// from whoever was open before. Reports failure up to the parent (via
-// onError) so a broken/missing file falls back to "Bio coming soon." text
-// instead of leaving a broken-image icon in the modal.
-function BioImage({
-  src,
-  name,
-  onError,
-}: {
-  src: string;
-  name: string;
-  onError: () => void;
-}) {
-  const [failed, setFailed] = useState(false);
+// Splits a bio string into real <p> paragraphs on blank lines, preserving
+// single line breaks within a paragraph as <br />. This is what makes the
+// biography render as genuine selectable HTML text (per the redesign spec)
+// instead of an image or a single wall of text with no paragraph spacing.
+function renderBio(bioText: string) {
+  const paragraphs = bioText.split(/\n{2,}/).filter((p) => p.trim().length > 0);
 
-  if (failed) return null;
+  if (paragraphs.length === 0) {
+    return <p>Bio coming soon.</p>;
+  }
 
-  return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      key={src}
-      className="crew-bio-modal-image"
-      src={src}
-      alt={`${name} biography`}
-      onError={() => {
-        setFailed(true);
-        onError();
-      }}
-    />
-  );
+  return paragraphs.map((paragraph, pIndex) => (
+    <p key={pIndex}>
+      {paragraph.split("\n").map((line, lIndex, lines) => (
+        <Fragment key={lIndex}>
+          {line}
+          {lIndex < lines.length - 1 ? <br /> : null}
+        </Fragment>
+      ))}
+    </p>
+  ));
 }
 
 // Sanctuary Rocks-styled biography modal for the Meet the Crew page.
@@ -64,16 +53,13 @@ export default function CrewBioModal({
   member,
   onClose,
   returnFocusRef,
-  bioImages,
 }: {
   member: CrewMember | null;
   onClose: () => void;
   returnFocusRef: RefObject<HTMLElement | null>;
-  bioImages: Record<string, string>;
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
-  const [bioImageFailed, setBioImageFailed] = useState(false);
   // Portal target only exists in the browser - guards against an SSR/
   // hydration mismatch (Next.js renders this component's shell on the
   // server, where document.body isn't the same tree it'll portal into).
@@ -92,7 +78,6 @@ export default function CrewBioModal({
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     closeButtonRef.current?.focus();
-    setBioImageFailed(false);
 
     return () => {
       document.body.style.overflow = previousOverflow;
@@ -138,8 +123,6 @@ export default function CrewBioModal({
   if (!member || !mounted) return null;
 
   const bioEntry = findBioEntry(member.name);
-  const bioImage = bioEntry?.bioImage || bioImages[normalizeForMatch(member.name)];
-  const hasBioImage = Boolean(bioImage) && !bioImageFailed;
   const bioText = bioEntry?.bio || "";
 
   // Rendered through a portal straight into document.body so nothing about
@@ -169,28 +152,20 @@ export default function CrewBioModal({
           ref={closeButtonRef}
           aria-label="Close biography"
         >
-          Close
+          <span aria-hidden="true">&times;</span>
         </button>
 
         <div className="crew-bio-modal-photo">
           <BioPhoto member={member} />
         </div>
 
-        <h2 id="crew-bio-modal-name" className="crew-bio-modal-name">
-          {member.name}
-        </h2>
-        <p className="crew-bio-modal-role">{member.role}</p>
+        <div className="crew-bio-modal-content">
+          <h2 id="crew-bio-modal-name" className="crew-bio-modal-name">
+            {member.name}
+          </h2>
+          <p className="crew-bio-modal-role">{member.role}</p>
 
-        <div className="crew-bio-modal-bio">
-          {hasBioImage ? (
-            <BioImage
-              src={bioImage as string}
-              name={member.name}
-              onError={() => setBioImageFailed(true)}
-            />
-          ) : (
-            <p>{bioText || "Bio coming soon."}</p>
-          )}
+          <div className="crew-bio-modal-bio">{renderBio(bioText)}</div>
         </div>
       </div>
     </div>,

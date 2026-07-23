@@ -6652,44 +6652,72 @@ h1 {
   cursor: pointer;
 }
 
+/* Wide two-column dossier layout: photo on the left, name/role/biography on
+   the right. The frame chrome (metal border, corner rivets, chain accents,
+   red/purple glow) is drawn entirely in CSS rather than stretching the old
+   portrait-shaped background graphic, which would visibly distort at this
+   panel's much wider aspect ratio. The panel itself never scrolls past
+   max-height - only .crew-bio-modal-bio (the text column) does, so a long
+   biography can't push the close button or photo off-screen. */
 .crew-bio-modal-panel {
   position: relative;
   z-index: 1;
-  display: grid;
-  width: min(520px, 100%);
-  max-height: calc(100vh - 48px);
-  gap: 14px;
-  border: 1px solid rgba(143, 137, 126, 0.46);
-  border-radius: 8px;
-  /* Framed-parchment background graphic (public/images/Bios) - a dark
-     fallback color shows first/underneath in case the image fails to load.
-     Padding is generous and scales with viewport width so the name, role,
-     and bio content stay inside the frame's clear center and never sit on
-     top of the metal border or the corner chains. */
-  background-color: #09080b;
-  background-image: url("/images/Bios/crew-bio-background.png.png");
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 100% 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  width: min(85vw, 1200px);
+  max-height: 85vh;
+  gap: clamp(20px, 3vw, 44px);
+  border: 3px solid #2a251f;
+  border-radius: 16px;
+  background:
+    radial-gradient(circle 8px at 20px 20px, #6b6357, #241f19 68%, transparent 72%),
+    radial-gradient(circle 8px at calc(100% - 20px) 20px, #6b6357, #241f19 68%, transparent 72%),
+    radial-gradient(circle 8px at 20px calc(100% - 20px), #6b6357, #241f19 68%, transparent 72%),
+    radial-gradient(circle 8px at calc(100% - 20px) calc(100% - 20px), #6b6357, #241f19 68%, transparent 72%),
+    radial-gradient(ellipse at 12% 8%, rgba(150, 60, 210, 0.18), transparent 55%),
+    radial-gradient(ellipse at 92% 96%, rgba(255, 86, 18, 0.16), transparent 55%),
+    linear-gradient(160deg, #100d0c 0%, #08070a 55%, #0c0908 100%);
   box-shadow:
-    inset 0 0 0 2px rgba(255, 255, 255, 0.035),
-    0 24px 54px rgba(0, 0, 0, 0.78),
-    0 0 34px rgba(255, 82, 18, 0.18);
-  padding: clamp(70px, 8vw, 115px) clamp(45px, 7vw, 95px);
-  overflow-y: auto;
+    inset 0 0 0 2px rgba(255, 255, 255, 0.05),
+    inset 0 0 60px rgba(0, 0, 0, 0.65),
+    0 30px 70px rgba(0, 0, 0, 0.8),
+    0 0 48px rgba(255, 82, 18, 0.2);
+  padding: clamp(26px, 3.2vw, 48px);
+  overflow: hidden;
+}
+
+.crew-bio-modal-panel::before,
+.crew-bio-modal-panel::after {
+  content: "\26D3";
+  position: absolute;
+  top: -6px;
+  color: rgba(198, 188, 172, 0.55);
+  font-size: clamp(20px, 2.6vw, 30px);
+  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+}
+
+.crew-bio-modal-panel::before {
+  left: clamp(10px, 2vw, 26px);
+  transform: rotate(-18deg);
+}
+
+.crew-bio-modal-panel::after {
+  right: clamp(10px, 2vw, 26px);
+  transform: rotate(18deg);
 }
 
 .crew-bio-modal-photo {
-  display: grid;
-  place-items: center;
-  width: 100%;
-  max-width: 220px;
-  aspect-ratio: 1;
-  margin: 0 auto;
+  flex: 0 0 clamp(230px, 38%, 440px);
+  display: block;
   overflow: hidden;
-  border: 1px solid rgba(255, 104, 30, 0.26);
-  border-radius: 8px;
+  border: 1px solid rgba(255, 104, 30, 0.3);
+  border-radius: 12px;
   background: #050505;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 12px 30px rgba(0, 0, 0, 0.5);
 }
 
 .crew-bio-modal-photo img {
@@ -6700,85 +6728,91 @@ h1 {
   object-position: top center;
 }
 
+.crew-bio-modal-content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  gap: 4px;
+}
+
 .crew-bio-modal-name {
-  margin: 0;
-  color: #f0e7db;
+  margin: 6px 0 0;
+  color: #f4ecdf;
   font-family: var(--font-display);
-  font-size: clamp(1.4rem, 3.4vw, 2.2rem);
+  font-size: clamp(1.6rem, 2.6vw, 2.4rem);
   letter-spacing: 0.01em;
   line-height: 1;
-  text-align: center;
+  text-align: left;
   text-transform: uppercase;
   text-shadow:
     0 1px 0 #050505,
-    0 0 16px rgba(255, 86, 18, 0.22);
+    0 0 18px rgba(255, 86, 18, 0.26);
 }
 
 .crew-bio-modal-role {
-  margin: -6px 0 0;
-  color: #ff5a3d;
-  font-size: 0.8rem;
+  margin: 8px 0 0;
+  color: #ff6b45;
+  font-size: 0.86rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-align: center;
+  letter-spacing: 0.1em;
+  text-align: left;
   text-transform: uppercase;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
 }
 
-/* Scrollable independently of the panel so a long, real biography (text or
-   image) never forces the whole modal taller than the viewport on mobile. */
+/* The ONLY element that scrolls when a biography is long - the panel and
+   the photo stay put, so the close button and photo never move. */
 .crew-bio-modal-bio {
-  max-height: min(48vh, 420px);
+  flex: 1 1 auto;
+  min-height: 0;
+  margin-top: 18px;
   overflow-y: auto;
-  padding-right: 4px;
-}
-
-/* Hand-made biography graphic: never cropped or stretched - width fills
-   the available column, height follows to preserve its own aspect ratio. */
-.crew-bio-modal-image {
-  display: block;
-  width: 100%;
-  height: auto;
-  object-fit: contain;
+  padding-right: 14px;
 }
 
 .crew-bio-modal-bio p {
-  margin: 0;
-  color: #d9d3ca;
-  font-size: 0.92rem;
-  font-weight: 500;
-  line-height: 1.5;
-  text-align: center;
+  margin: 0 0 1.1em;
+  color: #ece6db;
+  font-size: clamp(1.125rem, 0.5vw + 1rem, 1.25rem);
+  font-weight: 400;
+  line-height: 1.65;
+  text-align: left;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
-  white-space: pre-line;
+}
+
+.crew-bio-modal-bio p:last-child {
+  margin-bottom: 0;
 }
 
 .crew-bio-modal-close {
   position: absolute;
-  top: clamp(18px, 4vw, 38px);
-  right: clamp(18px, 4vw, 38px);
+  top: clamp(14px, 2.2vw, 26px);
+  right: clamp(14px, 2.2vw, 26px);
   z-index: 2;
-  border: 1px solid rgba(255, 101, 24, 0.46);
-  border-radius: 4px;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border: 1px solid rgba(255, 101, 24, 0.5);
+  border-radius: 50%;
   background:
     linear-gradient(180deg, rgba(188, 58, 20, 0.96), rgba(73, 15, 9, 0.96));
   box-shadow:
     inset 0 1px 0 rgba(255, 215, 180, 0.18),
-    0 10px 18px rgba(0, 0, 0, 0.5);
+    0 10px 20px rgba(0, 0, 0, 0.55);
   color: #f4eadf;
   cursor: pointer;
-  font-size: 0.74rem;
-  font-weight: 900;
-  letter-spacing: 0.1em;
-  min-height: 44px;
-  padding: 0 14px;
-  text-transform: uppercase;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .crew-bio-modal-close:hover {
   box-shadow:
     inset 0 1px 0 rgba(255, 230, 200, 0.22),
-    0 0 24px rgba(255, 86, 18, 0.28);
+    0 0 26px rgba(255, 86, 18, 0.32);
 }
 
 .crew-bio-modal-close:focus-visible {
@@ -6786,22 +6820,57 @@ h1 {
   outline-offset: 4px;
 }
 
-@media (max-width: 560px) {
-  .crew-bio-modal {
-    padding: 14px;
-  }
-
+@media (max-width: 900px) {
   .crew-bio-modal-panel {
-    max-height: calc(100vh - 28px);
-    /* Padding intentionally NOT overridden here - the base rule's
-       clamp(70px, 8vw, 115px) / clamp(45px, 7vw, 95px) already relaxes
-       down to its 70px/45px floor at this width, which is exactly enough
-       to keep content clear of the frame's metal border and corner chains
-       without wasting extra space on a small screen. */
+    flex-direction: column;
+    width: min(96vw, 640px);
+    max-height: 90vh;
+    padding: 22px;
+    gap: 16px;
   }
 
   .crew-bio-modal-photo {
-    max-width: 160px;
+    flex: 0 0 auto;
+    width: 100%;
+    height: clamp(200px, 42vw, 320px);
+  }
+
+  .crew-bio-modal-name {
+    margin-top: 10px;
+    font-size: clamp(1.5rem, 5vw, 2rem);
+  }
+
+  .crew-bio-modal-bio {
+    margin-top: 12px;
+    padding-right: 6px;
+  }
+}
+
+@media (max-width: 560px) {
+  .crew-bio-modal {
+    padding: 10px;
+  }
+
+  .crew-bio-modal-panel {
+    width: 100%;
+    max-height: 94vh;
+    padding: 18px 16px;
+    border-radius: 12px;
+  }
+
+  .crew-bio-modal-photo {
+    height: 46vw;
+    min-height: 170px;
+  }
+
+  .crew-bio-modal-close {
+    width: 46px;
+    height: 46px;
+    font-size: 26px;
+  }
+
+  .crew-bio-modal-bio p {
+    font-size: 1.125rem;
   }
 }
 
