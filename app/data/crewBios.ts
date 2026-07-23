@@ -171,6 +171,16 @@ export const CREW_BIOS: CrewBioEntry[] = [
     bio: "Hi,\n\nMy name is Daan Shuffle, living in the Netherlands (north-west Europe).\n\nI love music. A wide range of music that I like, but my heart lies with rock (even the classic) and metal. I love music in general, so I also like all other kinds of music.\n\nI am retired from the navy after almost 40 years of service.\n\nAt a local radio station I am a DJ and present a news show with local news, interviews, etc.\n\nStarted with bonsai last year, which is not really easy to keep them alive, but I followed a course so we'll see if I learned something.\n\nHopefully this will do for now, if not, let me know.\n\nGrtz Daan",
   },
   {
+    // Moved here from the Hosts section - her photo file was relocated
+    // from public/images/hosts/ to public/images/djs/, so the folder-scan
+    // roster now lists her as a DJ. Bio text is unchanged.
+    id: "dj-domi",
+    name: "Domi",
+    role: "DJ",
+    image: "/images/djs/Domi.png.jpg",
+    bio: "I've been spinning in Second Life about 6 years. I went from being obsessed with spinning and grabbing any set I could, to eventually dropping down to 3 times a week. Rock and metal are my jam, though I've been known to spin a bit of country from time to time.\n\nMy real life is fairly busy with my two businesses. Ranching is where my heart is. I'm single in real life and have no kids. In Second Life I've been partnered to Ozzy Giordano for 2.5 years, but we have been together for nearly 4 years.\n\nLife is good in both worlds!\n\nLove and light,\nDomi",
+  },
+  {
     id: "dj-manchester",
     name: "Manchester",
     role: "DJ",
@@ -267,13 +277,6 @@ export const CREW_BIOS: CrewBioEntry[] = [
     role: "Host",
     image: "/images/hosts/Dante.png",
     bio: "Hey there! I'm Dante, hosting here at Sanctuary Rocks for a couple years now, from all the way down South America! You can always find me on Sanctuary during sets, rocking and partying along with everyone to some great music while somehow not spilling a single drop off my whiskey. When I'm not around the stage, you can either find me exploring around the grid or, for the most part, gaming outside of SL.",
-  },
-  {
-    id: "host-domi",
-    name: "Domi",
-    role: "Host",
-    image: "/images/hosts/Domi.png.jpg",
-    bio: "I've been spinning in Second Life about 6 years. I went from being obsessed with spinning and grabbing any set I could, to eventually dropping down to 3 times a week. Rock and metal are my jam, though I've been known to spin a bit of country from time to time.\n\nMy real life is fairly busy with my two businesses. Ranching is where my heart is. I'm single in real life and have no kids. In Second Life I've been partnered to Ozzy Giordano for 2.5 years, but we have been together for nearly 4 years.\n\nLife is good in both worlds!\n\nLove and light,\nDomi",
   },
   {
     id: "host-ginny",
