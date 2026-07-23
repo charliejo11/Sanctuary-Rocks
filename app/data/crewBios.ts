@@ -350,7 +350,7 @@ export const CREW_BIOS: CrewBioEntry[] = [
     name: "Shari",
     role: "Host",
     image: "/images/hosts/Shari.png.jpg",
-    bio: "",
+    bio: "I love all kinds of music but I especially love seeing people enjoy it and how they react to it. I've hosted off and on during my SL life with a brief stint as a dancer. I came back to hosting cause it was my true love! When I'm not laughing with the crowd and making announcements I enjoy making new friends, playing games or just hanging out at the club following local chat. Hosting has always been a great way for me to come out of my shell as I tend to be quite introverted. In RL I enjoy creating content for my YouTube crafting channel and hanging out with my orange, one-eyed kitty who's a total lovebug and an SPCA rescue! I'm a Canadian born and raised, but a permanent resident of the US, based in Florida. I love the quirkiness of the state and have gotten used to dealing with hurricanes and their aftermath! I have a weird sense of humor often at my own expense and can usually make a joke out of the most mundane comments!",
   },
   {
     id: "host-skeeter",

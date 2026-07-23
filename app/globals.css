@@ -8749,12 +8749,12 @@ button.crew-card:focus-visible {
   overflow: hidden;
   color: #fff6ee;
   font-family: var(--font-display);
-  font-size: clamp(0.4rem, 1.35vw, 0.95rem);
+  font-size: clamp(0.68rem, 1.9vw, 1.2rem);
   font-weight: 700;
   letter-spacing: 0.02em;
-  line-height: 1.05;
+  line-height: 1.08;
   text-align: center;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 10px rgba(0, 0, 0, 0.7);
 }
 
 .crew-overlay-card-role {
