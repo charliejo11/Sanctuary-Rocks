@@ -108,11 +108,39 @@ export const CREW_BIOS: CrewBioEntry[] = [
     bio: "Coo @ Sanctuary Rocks Club & Sim\n\nI have been in SL for almost 19 years. I started off as a dancer way back in 2007. Then moved to hosting and DJ'ing. Now one of the co-owners of one of the best Rock/metal clubs in all of SL.\n\nMusic is a HUGE part of who I am. 80's music is my weakness, I have no shame in my game.. If there is no music I would DIE! LOL. I am the AFK Queen, because I'm usually either making dinner, running around, or doing work behind the scenes for the club. I give absolutely zero what anyone thinks of me, I will always tell the truth even if it hurts your feelings. I am sarcastic, mouthy, & blunt. Oh & I swear ALOT!",
   },
   {
-    id: "dj-kakou",
-    name: "DJ Kakou",
+    id: "dj-amira",
+    name: "Amira",
     role: "DJ",
-    image: "/images/djs/DJ%20Kakou.png.jpg",
-    bio: "Aloha no kakou,\n\nI have been in Second Life for 15 years. I have lots of alts cause I need a cast of characters for projects. I used to make machinima and now I am working on a Hawaiian legend graphic novel. I have a Master's Degree in Educational Technology from the University of Hawaii. For whatever reason I named myself after my island home. I don't like metal but love the big hair bands from back in the day. I don't like the new, stricter song criteria either. So, I am surprised I have lasted this long. But I search out metal covers, and my \"fans\" always feed my cover fanaticism with requests.",
+    image: "/images/djs/Amira.png.jpg",
+    bio: "Amira Farshore—also known as DJ Amira, The Vixen—is a proud member of the Sanctuary Rocks family. She is also the owner of Roja's and Hellforged and co-owner of Blackwood Systems™. With a passion for powerful music, unforgettable energy, and bringing people together, she creates a place where everyone can escape, have fun, and enjoy the moment.\n\nFierce, loyal, playful, and always unapologetically herself, Amira believes music should be felt—not merely heard. Whether she is rocking the stream, supporting her friends, or getting the crowd moving, The Vixen brings her heart, fire, and attitude to everything she does.\n\nTurn it up, let go, and come rock the Sanctuary with DJ Amira—The Vixen!",
+  },
+  {
+    id: "dj-caro",
+    name: "DJ Caro",
+    role: "DJ",
+    image: "/images/djs/DJ%20Caro.png.jpg",
+    bio: "Hi! I'm Carolina, known as DJ Caro at Sanctuary Rocks. I joined the team a few years ago and I really enjoy sharing metal and hard rock with all the listeners. I like to explore all the subgenres and showcase new bands to help them reach a wider audience. When I'm not here, I produce metal radio shows and I'm in constant contact with musicians and record labels in the metal genre.",
+  },
+  {
+    id: "dj-gothy",
+    name: "DJ Gothy",
+    role: "DJ",
+    image: "/images/djs/DJ%20Gothy.png.jpg",
+    bio: "Hey there! I'm DJ Gothy or as I say... DJ GothMan, I've been a DJ for nearly 20 years and have a massive love for rock and metal, my guilty pleasure is rock covers of today's and yesteryears hits. My nose is most likely buried in the many seas of YouTube, Spotify and any platform that holds a grand slam of music of all sorts. I'm usually very friendly and outgoing with just about any topic of conversation and love to laugh and have fun! My persona is slapstick and the humor in all things serious and sometimes controversial. Above all that, I'm a man with a massive heart who cares a lot about people and giving the crowd what they like. I'm always up for intelligent and respectful conversations, hit me up anytime! (I also have a love for the dark, creepy, and interesting things.. wanna know more, feel free to ask!) I'm an open book with a vast mind for anything.",
+  },
+  {
+    id: "dj-junglist",
+    name: "DJ Junglist",
+    role: "DJ",
+    image: "/images/djs/DJ%20Junglist.png.png",
+    bio: "Been DJing for about 22 - 25 years, even before SL. Took a few years break because got burned out, but im back baby!!\n\nI'm about the tunes and making people laugh even at my own risk. I feel if you can make people laugh and help them listen to tunes that move them, you can help them forget about the BS of the normal day just for a bit, and that bit is everything for them.\n\nLove all types of music but SR actually made me want to start DJing again so I love this club and will fight for it anytime they need me to.\n\nJunglist Diesel",
+  },
+  {
+    id: "dj-logan",
+    name: "Logan",
+    role: "DJ",
+    image: "/images/djs/Logan.png.jpg",
+    bio: "I've been DJing for over 10 years now, and I still enjoy every minute of it. I'm a born-and-raised Texan and have called Texas home my entire life.\n\nBefore I ever stepped behind the virtual decks, I was a musician. I was fortunate enough to meet and spend time with many incredible artists in the Metal scene before life took me in one of the most unexpected directions imaginable—I became a firefighter. I've been doing that for more years than I care to admit, and they say the fire gets in your blood. They're absolutely right.\n\nI'm a true music junkie who enjoys just about every genre, but Metal was one of the first styles of music I discovered on my own, and it remains a huge part of who I am.\n\nWhen I'm not spinning tunes or saying something completely ridiculous on the mic, you'll usually find me creating new pieces for my shop, Mythworks LTD, or working on my novel, which I hope to release in the not-too-distant future. If I could just convince my brain that editing is as much fun as writing, I'd probably be finished by now.\n\nOh, and I have ADHD and proudly advocate for the neurodivergent community. If that means I occasionally go off on a tangent... well, now you know why.\n\nSee you at Sanctuary!",
   },
   {
     id: "dj-kaya",
@@ -445,6 +473,37 @@ export const CREW_BIOS: CrewBioEntry[] = [
     role: "Host",
     image: "/images/hosts/Tifani.png.png",
     bio: "Hey there!!! I'm Tifani!!! I love Hosting and Dancing the Any kind of Rock and metal music I hear. I love Getting on the Stage and Working along time any of the DJs we have at the club. Listening to Rock and Metal music I sometimes just get lost Listening to the Beats and the works that are in the Song. I love working on Pictures and making Epic posters. So I may get lost in making pictures.",
+  },
+  {
+    id: "host-imogen",
+    name: "Imogen",
+    role: "Host",
+    image: "/images/hosts/Imogen.png.jpg",
+    bio: "I love being at Sanctuary rocks because they accept me for who I am and the staff and VIPs are non-judgmental. You can have a lot of fun at SR but also when I'm there, I feel like part of the family and everyone is so supportive. Yes its great music and I love that I can listen to SR via radio in the real world. If I'm not in the club then I'm at my land listening on the radio.",
+  },
+  {
+    id: "host-mocha",
+    name: "Mocha",
+    role: "Host",
+    image: "/images/hosts/Mocha.png.jpg",
+    bio: "Hey, I'm Mocha. Music has always been more than background noise to me—it's where I feel most alive. Music is my escape, sarcasm is my favorite language, and laughter is something I never run out of. I enjoy meeting new people, making real connections, and turning ordinary nights into unforgettable memories. Whether we're talking music, sharing a drink, or just causing a little harmless chaos, you'll usually find me right where the energy is. Life's too short for fake vibes... so if you're looking for good company and a great night, come say hi.",
+  },
+  {
+    // Was "DJ Kakou" - same person, same bio, renamed to Molokai and moved
+    // from the djs/ folder to hosts/, so the roster now lists them as a
+    // Host. See the (now-removed) dj-kakou entry this replaced.
+    id: "host-molokai",
+    name: "Molokai",
+    role: "Host",
+    image: "/images/hosts/Molokai.png.jpg",
+    bio: "Aloha no kakou,\n\nI have been in Second Life for 15 years. I have lots of alts cause I need a cast of characters for projects. I used to make machinima and now I am working on a Hawaiian legend graphic novel. I have a Master's Degree in Educational Technology from the University of Hawaii. For whatever reason I named myself after my island home. I don't like metal but love the big hair bands from back in the day. I don't like the new, stricter song criteria either. So, I am surprised I have lasted this long. But I search out metal covers, and my \"fans\" always feed my cover fanaticism with requests.",
+  },
+  {
+    id: "host-tilly",
+    name: "Tilly",
+    role: "Host",
+    image: "/images/hosts/Tilly.png.jpg",
+    bio: "What you see is what you get with me, at same time I am fun, kind and loving to all. I love hosting on stage and watching everyone smile and laugh, it brings happiness to me to see this. I love horses and I love to talk about my Jimmy who is a half arab breed, along with my companion, my big lurcher deer hound/saluki. He and my horse is my world, and if im not with them you can find me normally reading a raunchy novel or two in the corner minding my own business. UK is my home in sunny Cornwall. My mind is a new adventure every day and I wonder always where my personal jouney will take me. PS IM THE TYPO QUEEN",
   },
 ];
 
