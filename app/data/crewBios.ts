@@ -290,6 +290,17 @@ export const CREW_BIOS: CrewBioEntry[] = [
     image: "/images/djs/Shann.png.png",
     bio: "As a retired United States Coast Guard Rescue Swimmer, dedication, teamwork, and serving others have always been at the heart of who I am. That same passion now lives on through music.\n\nWhen I'm behind the decks, my goal is simple—to bring people together through the power of music. Whether I'm playing for newcomers discovering Sanctuary Rocks for the first time or entertaining our amazing VIPs, I strive to create an atmosphere where everyone feels welcome, included, and connected.\n\nMusic has always been more than just sound to me; it's a universal language that unites people from all walks of life. Every set I play is about building energy, creating memories, and keeping the good vibes flowing. I believe rhythm has the power to bring souls together as one, regardless of where we come from.",
   },
+  {
+    // Bio image (public/images/Bios/DJ Tweek Bio.png.png) is cropped and
+    // starts mid-sentence - no earlier text exists anywhere on disk. Added
+    // verbatim at the user's request rather than inventing an opening; the
+    // missing beginning can be pasted in later if it turns up.
+    id: "dj-tweek",
+    name: "DJ Tweek",
+    role: "DJ",
+    image: "/images/djs/DJ%20Tweek.png.jpg",
+    bio: "the recognition; I do it for the love of the music and the feeling it creates when the right song hits at the right moment.\n\nI love bringing people together through music, whether that's filling a dance floor, sparking a singalong, or introducing someone to a track they didn't know they needed. My sets are built around rock and metal at heart, but if it fits the vibe and keeps the energy flowing, you'll hear it. Every crowd is different, and that's what makes every set its own experience.\n\nIf you've spent any time around me, you'll know I don't take life too seriously. I'm cheeky, I love a laugh, and I'm always up for a bit of banter. Life's too short not to have fun, and I try to bring that same energy every time I jump behind the decks.\n\nFor me, DJing has never been about pressing play—it's about creating memories, sharing the music I love, and giving people a few hours where nothing else matters except good tunes and good company.\n\nSo if you're looking for good vibes, loud music, and someone who's just as happy singing along with the crowd as he is behind the decks, you've found the right DJ. Come say hi, throw me a request, and let's make it a night to remember.",
+  },
 
   // ---- Hosts (public/images/hosts) ----
   {
@@ -504,6 +515,13 @@ export const CREW_BIOS: CrewBioEntry[] = [
     role: "Host",
     image: "/images/hosts/Tilly.png.jpg",
     bio: "What you see is what you get with me, at same time I am fun, kind and loving to all. I love hosting on stage and watching everyone smile and laugh, it brings happiness to me to see this. I love horses and I love to talk about my Jimmy who is a half arab breed, along with my companion, my big lurcher deer hound/saluki. He and my horse is my world, and if im not with them you can find me normally reading a raunchy novel or two in the corner minding my own business. UK is my home in sunny Cornwall. My mind is a new adventure every day and I wonder always where my personal jouney will take me. PS IM THE TYPO QUEEN",
+  },
+  {
+    id: "host-fanny-foofoo",
+    name: "Fanny FooFoo",
+    role: "Host",
+    image: "/images/hosts/Fanny%20FooFoo.png.jpg",
+    bio: "Hi, I'm Fanny FooFoo—hostess at Sanctuary Rocks, where the music is loud, the drinks are questionable, and bad decisions make the best stories.\n\nI'm the kind of gal who can welcome you to the club, start a dance party, accidentally enable your shopping addiction, and convince you that buying just one more outfit is practically self-care.\n\nWhen I'm not causing perfectly acceptable levels of mayhem at Sanctuary Rocks, you'll find me DJing somewhere in Second Life, making YouTube videos about Second Life tips, tricks, news, and all the wonderfully weird things this virtual world has to offer. If I'm not filming or spinning tunes, I'm probably designing clothes, exploring the grid, collecting new friends like they're rare achievements, or wandering off on another adventure because... ooh, shiny!\n\nI'm outgoing, adventurous, slightly over-caffeinated, and firmly believe laughter should be mandatory. I love meeting new people, making connections, and proving that life is way more fun when you don't take yourself too seriously.\n\nLife's too short for boring avatars and silent dance floors. So grab a drink, crank the volume to eleven, and if you here a random cry of \"WHAT COULD POSSIBLY GO WRONG?\"... yeah, that's probably me.\n\nI don't just bring the party... I bring the Foo!",
   },
 ];
 
