@@ -46,9 +46,12 @@ function GalleryImage({
   );
 }
 
+const BOARD_SLOT_COUNT = 15;
+
 export default function GalleryPage() {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const activePhoto = activeIndex === null ? null : data.photos[activeIndex];
+  const overflowPhotos = data.photos.slice(BOARD_SLOT_COUNT);
 
   const closeLightbox = () => {
     setActiveIndex(null);
@@ -107,7 +110,7 @@ export default function GalleryPage() {
           </div>
 
           <div className="gallery-template-grid" aria-label="Gallery photos">
-            {data.photos.slice(0, 15).map((photo, index) => (
+            {data.photos.slice(0, BOARD_SLOT_COUNT).map((photo, index) => (
               <button
                 className={`gallery-template-slot gallery-template-slot--${index + 1}`}
                 key={`${photo.src}-${index}`}
@@ -123,6 +126,31 @@ export default function GalleryPage() {
             ))}
           </div>
         </div>
+
+        {overflowPhotos.length > 0 ? (
+          <div className="gallery-overflow" aria-label="More gallery photos">
+            <h2 className="gallery-overflow-heading">More Photos</h2>
+            <div className="gallery-overflow-scroll">
+              {overflowPhotos.map((photo, overflowIndex) => {
+                const index = BOARD_SLOT_COUNT + overflowIndex;
+                return (
+                  <button
+                    className="gallery-overflow-item"
+                    key={`${photo.src}-${index}`}
+                    type="button"
+                    onClick={() => {
+                      setActiveIndex(index);
+                    }}
+                    aria-label={`Open ${photo.caption}`}
+                  >
+                    <GalleryImage photo={photo} index={index} />
+                    <span className="gallery-template-caption">{photo.caption}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
       </section>
 
       {activePhoto ? (
