@@ -263,6 +263,16 @@ export const CREW_BIOS: CrewBioEntry[] = [
     bio: "Panda is one of the epic DJs at Sanctuary Rocks, bringing incredible music, energy, and entertainment to the stage. Whether he's spinning crowd favourites or keeping the dance floor buzzing, Panda knows how to create an unforgettable atmosphere. When he's not behind the decks, Panda is one of the Club Managers, always approachable, supportive, and happy to help guests, VIPs, and staff whenever they need assistance. If I'm not at the club I'm working on a custom bike (look at my picks) or hanging with my MC or family.",
   },
   {
+    // Was filed under Hosts (host-molokai) with an outdated bio and photo -
+    // moved here since Molokai has DJ'd (not hosted) since 2016 per their
+    // own updated bio below, and their photo now lives in public/images/djs.
+    id: "dj-molokai",
+    name: "Molokai",
+    role: "DJ",
+    image: "/images/djs/Molokai.jpg",
+    bio: "I have always worked in my 15 years in SL, beginning when I was 3 months old as a stripper until Hurricane Sandy shut that club down. I was a host until 2016 when I became a country dj. Didn't like country much but lasted in that genre for 2 years. Hopped from rock club to rock club with some of them closing because of new owners. I rather like classic rock and the guitar rifts found in tunes like \"Smoke on the Water\" and \"California Hotel\". My musical tastes center around Hawaiian music, Jawaiian and jangalang styles. Given how obscure that is for the rest of the world, I just DJ without the love for hard rock and metal. My fans know I like cover requests the most.",
+  },
+  {
     id: "dj-raevyn",
     name: "Raevyn",
     role: "DJ",
@@ -344,13 +354,6 @@ export const CREW_BIOS: CrewBioEntry[] = [
     role: "Host",
     image: "/images/hosts/Legs.png.png",
     bio: "Born in Cali but raised in Kansas, I have my prissy side but mostly my sassy ass country side. I'm a loyal and dedicated friend, always willing to listen with a friendly ear. Lover of dragons and butterflies and exotic cats.. I'm creative in both worlds, love to work with my hands. My furbaby is my ride or die and best friend.. Legz has a \"I don't give a shit\" attitude and will snap your britches when needed. I will laugh at your goofy jokes as I love to laugh. I was a nurse's aide for 30 yrs, so yes, I have a caring heart and I love to cook.",
-  },
-  {
-    id: "host-lozzy",
-    name: "Lozzy",
-    role: "Host",
-    image: "/images/hosts/Lozzy.png.jpg",
-    bio: "",
   },
   {
     id: "host-mistine",
@@ -498,16 +501,6 @@ export const CREW_BIOS: CrewBioEntry[] = [
     role: "Host",
     image: "/images/hosts/Mocha.png.jpg",
     bio: "Hey, I'm Mocha. Music has always been more than background noise to me—it's where I feel most alive. Music is my escape, sarcasm is my favorite language, and laughter is something I never run out of. I enjoy meeting new people, making real connections, and turning ordinary nights into unforgettable memories. Whether we're talking music, sharing a drink, or just causing a little harmless chaos, you'll usually find me right where the energy is. Life's too short for fake vibes... so if you're looking for good company and a great night, come say hi.",
-  },
-  {
-    // Was "DJ Kakou" - same person, same bio, renamed to Molokai and moved
-    // from the djs/ folder to hosts/, so the roster now lists them as a
-    // Host. See the (now-removed) dj-kakou entry this replaced.
-    id: "host-molokai",
-    name: "Molokai",
-    role: "Host",
-    image: "/images/hosts/Molokai.png.jpg",
-    bio: "Aloha no kakou,\n\nI have been in Second Life for 15 years. I have lots of alts cause I need a cast of characters for projects. I used to make machinima and now I am working on a Hawaiian legend graphic novel. I have a Master's Degree in Educational Technology from the University of Hawaii. For whatever reason I named myself after my island home. I don't like metal but love the big hair bands from back in the day. I don't like the new, stricter song criteria either. So, I am surprised I have lasted this long. But I search out metal covers, and my \"fans\" always feed my cover fanaticism with requests.",
   },
   {
     id: "host-tilly",
