@@ -1,5 +1,33 @@
 {
-  "month": "Coming Soon",
-  "headline": "Upcoming Events",
-  "events": []
+  "month": "August 2026",
+  "headline": "August Events",
+  "events": [
+    {
+      "date": "August 4",
+      "day": "Tuesday",
+      "time": "6pm-8pm SLT",
+      "title": "Gaming Tuesday",
+      "dj": "Payne & Mando",
+      "host": "",
+      "description": "A special birthday celebration for Hollywood"
+    },
+    {
+      "date": "August 10",
+      "day": "Monday",
+      "time": "6am-8am SLT",
+      "title": "Goth's Ball",
+      "dj": "DJ Syri",
+      "host": "Hostie Nikcara",
+      "description": "The second annual Goth's Ball"
+    },
+    {
+      "date": "August 22",
+      "day": "Saturday",
+      "time": "4pm-6pm SLT",
+      "title": "Headbangers Ball",
+      "dj": "DJ Krankee",
+      "host": "Hostie Lisa",
+      "description": ""
+    }
+  ]
 }
