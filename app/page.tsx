@@ -6,9 +6,10 @@ export default function Home() {
       <section className="home-poster-art sanctuary-main-page" aria-label="Sanctuary Rocks">
         <img
           className="home-poster-image sanctuary-art"
-          src="/images/hero/hero3.png"
+          src="/images/hero/sanctuary-hero-new.png"
           alt="Sanctuary Rocks - Hard, Fast, and Loud"
         />
+        <span className="hero-gradient-overlay" aria-hidden="true" />
         <span className="castle-glow" aria-hidden="true" />
         <span className="dragon-smoke" aria-hidden="true" />
         <span className="dragon-smoke smoke-two" aria-hidden="true" />
@@ -36,6 +37,13 @@ export default function Home() {
           rel="noopener noreferrer"
           className="home-poster-hotspot home-poster-hotspot--discord"
           aria-label="Join the Sanctuary Rocks Discord"
+        />
+        <a
+          href="https://gridster.elfavina89.workers.dev"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="home-poster-hotspot home-poster-hotspot--gridster"
+          aria-label="Visit Gridster"
         />
 
         <div className="home-poster-player">

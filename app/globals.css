@@ -344,14 +344,29 @@ a {
   overflow: hidden;
   border-bottom: 0;
   background:
-    linear-gradient(180deg, rgba(5, 5, 5, 0.5) 0%, rgba(5, 5, 5, 0.08) 36%, rgba(5, 5, 5, 0.3) 100%),
-    radial-gradient(circle at 10% 10%, rgba(244, 122, 34, 0.16), transparent 9rem),
-    url("/images/hero/hero3.png") top center / 100% auto no-repeat,
+    linear-gradient(180deg, rgba(5, 5, 5, 0.55) 0%, rgba(5, 5, 5, 0.12) 32%, rgba(5, 5, 5, 0.45) 100%),
+    radial-gradient(circle at 50% 40%, rgba(244, 122, 34, 0.12), transparent 14rem),
+    url("/images/hero/sanctuary-hero-new.png") top center / 100% auto no-repeat,
     linear-gradient(135deg, var(--color-matte-black), #16070a 55%, #050505);
 }
 
 .hero-shell::before {
   content: none;
+}
+
+/* Hero cinematic overlay for the new artwork */
+.hero-gradient-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(5, 5, 5, 0.52) 0%, rgba(5, 5, 5, 0.08) 34%, rgba(12, 8, 8, 0.55) 100%),
+    radial-gradient(circle at 50% 38%, rgba(244, 122, 34, 0.1), transparent 14rem),
+    radial-gradient(circle at 20% 20%, rgba(135, 23, 27, 0.12), transparent 18rem),
+    linear-gradient(90deg, rgba(5, 5, 5, 0.25), rgba(21, 15, 15, 0.08) 50%, rgba(5, 5, 5, 0.3));
+  mix-blend-mode: multiply;
+  opacity: 0.92;
 }
 
 .home-poster-page {
@@ -625,6 +640,13 @@ a {
 .home-poster-hotspot--discord {
   top: 79%;
   height: 8.3%;
+}
+
+.home-poster-hotspot--gridster {
+  right: 2.6%;
+  bottom: 6.2%;
+  width: 12.4%;
+  height: 7.6%;
 }
 
 /* Live stream player overlay: sits in the open road area of the poster art,
@@ -3397,7 +3419,7 @@ h1 {
     background:
       linear-gradient(180deg, rgba(5, 5, 5, 0.54) 0%, rgba(5, 5, 5, 0.1) 36%, rgba(5, 5, 5, 0.34) 100%),
       radial-gradient(circle at 13% 12%, rgba(244, 122, 34, 0.14), transparent 8rem),
-      url("/images/hero/hero3.png") top center / auto 100% no-repeat,
+      url("/images/hero/sanctuary-hero-new.png") top center / auto 100% no-repeat,
       linear-gradient(135deg, var(--color-matte-black), #16070a 55%, #050505);
   }
 
