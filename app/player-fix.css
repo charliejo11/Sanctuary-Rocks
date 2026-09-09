@@ -1,0 +1,173 @@
+﻿
+/* =========================================
+   SANCTUARY HOMEPAGE PLAYER ONLY
+   ========================================= */
+
+.home-poster-player {
+  position: absolute !important;
+  top: 43% !important;
+  left: 50% !important;
+  z-index: 100 !important;
+
+  width: min(360px, 72vw) !important;
+  height: auto !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  transform: translate(-50%, -50%) !important;
+
+  pointer-events: none !important;
+}
+
+.home-poster-player .live-now-wrap {
+  position: static !important;
+
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  transform: none !important;
+
+  display: block !important;
+}
+
+.home-poster-player .live-mp3-player {
+  --player-rest-y: 0px !important;
+  --player-tilt: 0deg !important;
+
+  position: relative !important;
+
+  width: 100% !important;
+  max-width: none !important;
+  height: auto !important;
+  min-height: 0 !important;
+
+  margin: 0 !important;
+  padding: 7px 8px !important;
+
+  animation: none !important;
+  transform: none !important;
+
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 88px !important;
+  align-items: center !important;
+  gap: 7px !important;
+
+  pointer-events: auto !important;
+}
+
+/* Left display */
+.home-poster-player .mp3-screen {
+  padding: 5px 7px !important;
+  min-height: 0 !important;
+}
+
+.home-poster-player .mp3-kicker {
+  margin: 0 !important;
+
+  font-size: 7px !important;
+  line-height: 1 !important;
+  letter-spacing: 1px !important;
+}
+
+.home-poster-player .mp3-screen h2 {
+  margin: 3px 0 0 !important;
+
+  font-size: 15px !important;
+  line-height: 1 !important;
+}
+
+.home-poster-player .mp3-track {
+  margin-top: 4px !important;
+  padding: 4px 5px !important;
+}
+
+.home-poster-player .mp3-track span {
+  font-size: 6px !important;
+  line-height: 1 !important;
+}
+
+.home-poster-player .mp3-track strong {
+  display: block !important;
+
+  margin-top: 1px !important;
+
+  font-size: 9px !important;
+  line-height: 1.1 !important;
+
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Tiny equalizer */
+.home-poster-player .mini-equalizer {
+  height: 7px !important;
+  margin-top: 3px !important;
+}
+
+/* Right buttons */
+.home-poster-player .mp3-controls {
+  width: 88px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 4px !important;
+}
+
+.home-poster-player .mp3-play-button,
+.home-poster-player .mp3-lineup-button {
+  width: 100% !important;
+
+  min-height: 24px !important;
+
+  padding: 4px !important;
+
+  font-size: 7px !important;
+  line-height: 1 !important;
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+  .home-poster-player {
+    top: 43% !important;
+    width: min(340px, 76vw) !important;
+  }
+}
+
+/* Phone */
+@media (max-width: 560px) {
+  .home-poster-player {
+    top: 43% !important;
+    width: min(285px, 82vw) !important;
+  }
+
+  .home-poster-player .live-mp3-player {
+    grid-template-columns: minmax(0, 1fr) 74px !important;
+  }
+
+  .home-poster-player .mp3-controls {
+    width: 74px !important;
+  }
+
+  .home-poster-player .mp3-screen h2 {
+    font-size: 12px !important;
+  }
+}
+
+
+
+
+
+.sanctuary-main-page .home-poster-player { top: 51% !important; left: 50% !important; transform: translate(-50%, -50%) translateY(-7px) !important; }
+
+
+
+
