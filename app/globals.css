@@ -649,19 +649,18 @@ a {
   height: 7.6%;
 }
 
-/* Live stream player overlay: sits in the open road area of the poster art,
-   centered above the "We Are The Misfit Pixels" copy (which is left-aligned,
-   so the player's anchor point is pulled left of page-center to sit over it)
-   and well clear of the footer band, VIP card, social icons, and "Crank It
-   Up" sign baked into the bottom-right of the same image. Percentage-based
-   so it tracks the poster's scale at every viewport width. */
+/* Live stream player overlay: compact, centered, and positioned above
+   the "FEATURED ARTISTS" section (anchored at 68%). Sits clear of the
+   road, logo, bands, and hero artwork. Percentage-based so it tracks
+   the poster's scale at every viewport width. */
 .home-poster-player {
   position: absolute;
-  top: 52%;
-  left: 33%;
+  top: 60%;
+  left: 50%;
   z-index: 6;
-  width: min(380px, 74%);
+  width: min(280px, 48%);
   transform: translateX(-50%);
+  margin-bottom: 24px;
   pointer-events: none;
 }
 
@@ -680,20 +679,19 @@ a {
 
 @media (max-width: 900px) {
   .home-poster-player {
-    top: 52%;
-    width: min(330px, 78%);
+    top: 60%;
+    width: min(280px, 52%);
   }
 }
 
 @media (max-width: 560px) {
   .home-poster-player {
-    top: 50%;
-    left: 50%;
-    width: min(260px, 74%);
+    top: 56%;
+    width: min(240px, 54%);
   }
 
   .home-poster-player .live-mp3-player {
-    padding: 14px;
+    padding: 12px;
     transform: none;
   }
 
@@ -703,7 +701,7 @@ a {
 
   .home-poster-player .mp3-screen h2 {
     margin-top: 5px;
-    font-size: 1.28rem;
+    font-size: 1.2rem;
   }
 
   .home-poster-player .mp3-track {
@@ -731,9 +729,8 @@ a {
 
 @media (max-width: 380px) {
   .home-poster-player {
-    top: 49%;
-    left: 50%;
-    width: min(228px, 76%);
+    top: 54%;
+    width: min(220px, 56%);
   }
 }
 
