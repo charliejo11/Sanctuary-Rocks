@@ -1,4 +1,4 @@
-import LiveNowBox from "./components/LiveNowBox";
+﻿import LiveNowBox from "./components/LiveNowBox";
 
 export default function Home() {
   return (
@@ -32,11 +32,11 @@ export default function Home() {
           aria-label="Visit Sanctuary Rocks on Facebook"
         />
         <a
-          href="https://discord.gg/239QyWDW4"
+          href="https://gridster.elfavina89.workers.dev"
           target="_blank"
           rel="noopener noreferrer"
           className="home-poster-hotspot home-poster-hotspot--discord"
-          aria-label="Join the Sanctuary Rocks Discord"
+          aria-label="Visit Gridster"
         />
         <a
           href="https://gridster.elfavina89.workers.dev"
@@ -53,3 +53,4 @@ export default function Home() {
     </main>
   );
 }
+
