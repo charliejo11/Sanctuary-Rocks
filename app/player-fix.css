@@ -171,3 +171,31 @@
 
 
 
+
+/* ===== FINAL GRIDSTER CLICK AREA ===== */
+
+/* Old artwork buttons no longer exist — prevent them stealing clicks */
+.home-poster-hotspot--vip,
+.home-poster-hotspot--discord {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+/* Cover the actual purple GRIDSTER panel */
+.home-poster-hotspot--gridster {
+  position: absolute !important;
+  right: 7% !important;
+  bottom: 6% !important;
+  width: 21% !important;
+  height: 13% !important;
+
+  display: block !important;
+  z-index: 500 !important;
+
+  background: transparent !important;
+  border: 0 !important;
+
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+

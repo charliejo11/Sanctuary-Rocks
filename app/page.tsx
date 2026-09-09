@@ -35,13 +35,6 @@ export default function Home() {
           href="https://gridster.elfavina89.workers.dev"
           target="_blank"
           rel="noopener noreferrer"
-          className="home-poster-hotspot home-poster-hotspot--discord"
-          aria-label="Visit Gridster"
-        />
-        <a
-          href="https://gridster.elfavina89.workers.dev"
-          target="_blank"
-          rel="noopener noreferrer"
           className="home-poster-hotspot home-poster-hotspot--gridster"
           aria-label="Visit Gridster"
         />
@@ -53,4 +46,5 @@ export default function Home() {
     </main>
   );
 }
+
 
