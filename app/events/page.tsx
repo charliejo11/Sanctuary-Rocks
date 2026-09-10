@@ -1,4 +1,4 @@
-import eventsData from "../data/events.json";
+﻿import eventsData from "../data/events.json";
 
 type EventItem = {
   date: string;
@@ -48,7 +48,7 @@ export default function EventsPage() {
           <div className="events-template-board">
             <img
               className="events-template-image"
-              src="/images/hero/events-calandar.png"
+              src="/images/hero/events-template.png"
               alt=""
               aria-hidden="true"
             />
@@ -63,7 +63,7 @@ export default function EventsPage() {
 
             {data.events.length === 0 ? (
               <p className="events-template-empty">
-                No upcoming events yet — check back soon.
+                No upcoming events yet â€” check back soon.
               </p>
             ) : (
             <ol className="events-template-list" aria-label={`${data.month} events`}>
@@ -124,3 +124,4 @@ export default function EventsPage() {
     </main>
   );
 }
+

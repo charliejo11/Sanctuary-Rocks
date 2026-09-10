@@ -1,32 +1,32 @@
 {
-  "month": "August 2026",
-  "headline": "August Events",
+  "month": "September 2026",
+  "headline": "September Events",
   "events": [
     {
-      "date": "August 4",
-      "day": "Tuesday",
-      "time": "6pm-8pm SLT",
-      "title": "Gaming Tuesday",
-      "dj": "Payne & Mando",
+      "date": "September 2-9",
+      "day": "Wed-Wed",
+      "time": "",
+      "title": "Labor Day Weekend Beach Party",
+      "dj": "",
       "host": "",
-      "description": "A special birthday celebration for Hollywood"
+      "description": ""
     },
     {
-      "date": "August 10",
-      "day": "Monday",
-      "time": "6am-8am SLT",
-      "title": "Goth's Ball",
-      "dj": "DJ Syri",
-      "host": "Hostie Nikcara",
-      "description": "The second annual Goth's Ball"
-    },
-    {
-      "date": "August 22",
-      "day": "Saturday",
+      "date": "September 13",
+      "day": "Sunday",
       "time": "4pm-6pm SLT",
-      "title": "Headbangers Ball",
-      "dj": "DJ Krankee",
-      "host": "Hostie Lisa",
+      "title": "Abba Gone Metal",
+      "dj": "DJ Calamity",
+      "host": "Host Teaghen",
+      "description": ""
+    },
+    {
+      "date": "September 15",
+      "day": "Tuesday",
+      "time": "10am SLT",
+      "title": "80s Hair Band",
+      "dj": "DJ Raevyn",
+      "host": "Host Imogen",
       "description": ""
     }
   ]
