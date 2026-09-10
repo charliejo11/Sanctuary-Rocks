@@ -93,7 +93,7 @@ export default function GalleryPage() {
         <div className="gallery-template-board">
           <img
             className="gallery-template-image"
-            src="/images/hero/Gallery.png.png"
+            src="/images/hero/Gallery photos.png"
             alt=""
             aria-hidden="true"
           />

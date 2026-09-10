@@ -9032,3 +9032,7 @@ button.crew-card:focus-visible {
 }
 
 
+
+/* NEW GALLERY PHOTO ALIGNMENT */
+.gallery-template-slot--1 { left: 11.3% !important; top: 40% !important; width: 19.4% !important; height: 12.5% !important; }
+.gallery-template-slot--1 img { width: 100% !important; height: 100% !important; object-fit: cover !important; object-position: center 35% !important; }
