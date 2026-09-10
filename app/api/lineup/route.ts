@@ -11,7 +11,7 @@ import https from "node:https";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-const CALENDAR_EMAIL = "chellzbellz01@gmail.com";
+const CALENDAR_EMAIL = "ba33d2d221fc80a1a2bf0d55439608ea1f7896d48077388fd77f36dbc622a70e@group.calendar.google.com";
 const MAX_UPCOMING_SETS = 24;
 
 type LineupSet = {

@@ -22,7 +22,7 @@ export type SponsorEntry = {
 
 // Official Sanctuary Rocks logo, reused as a safe fallback whenever a DJ or
 // host photo is missing/unmatched/fails to load in the browser.
-export const FALLBACK_LOGO = "/images/hero/sanctuary-rocks-logo.png.png";
+export const FALLBACK_LOGO = "/images/hero/SRslogo_aug26.png";
 
 const ROLE_PREFIXES = ["dj", "host"];
 
