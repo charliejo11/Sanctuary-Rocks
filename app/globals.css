@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   --color-matte-black: #050505;
   --color-charcoal: #151515;
   --color-burnt-orange: #c05a18;
@@ -6138,7 +6138,7 @@ h1 {
     border-radius: 6px;
     background:
       linear-gradient(180deg, rgba(0, 0, 0, 0.36), rgba(0, 0, 0, 0.82)),
-      url("/images/dj-lineup-template-blank.png") top center / cover no-repeat;
+      url("/images/hero/dj-lineup-hero.png") top center / cover no-repeat;
     box-shadow:
       0 24px 54px rgba(0, 0, 0, 0.76),
       0 0 30px rgba(255, 82, 18, 0.14);
@@ -7156,7 +7156,7 @@ h1 {
   background-image:
     linear-gradient(90deg, rgba(0, 0, 0, 0.76), rgba(0, 0, 0, 0.08) 50%, rgba(0, 0, 0, 0.76)),
     radial-gradient(circle at 50% 22%, rgba(255, 86, 18, 0.18), transparent 28rem),
-    url("/images/dj-lineup-template-blank.png");
+    url("/images/hero/dj-lineup-hero.png");
   background-position: top center;
   padding: 58px 0 0;
 }
@@ -7343,7 +7343,7 @@ h1 {
   background:
     linear-gradient(180deg, rgba(0, 0, 0, 0.44), rgba(0, 0, 0, 0.2) 42%, rgba(0, 0, 0, 0.5)),
     radial-gradient(circle at 50% 10%, rgba(255, 86, 18, 0.2), transparent 30rem),
-    url("/images/dj-lineup-template-blank.png") top center / cover no-repeat,
+    url("/images/hero/dj-lineup-hero.png") top center / cover no-repeat,
     #000;
   background-attachment: scroll;
 }
@@ -7352,7 +7352,7 @@ h1 {
   padding: 58px 0 0;
   background:
     linear-gradient(90deg, rgba(0, 0, 0, 0.18), transparent 22%, transparent 78%, rgba(0, 0, 0, 0.18)),
-    url("/images/dj-lineup-template-blank.png") top center / cover no-repeat,
+    url("/images/hero/dj-lineup-hero.png") top center / cover no-repeat,
     #000;
 }
 
@@ -7360,7 +7360,7 @@ body:has(.lineup-template-page) {
   overflow-x: hidden;
   background:
     linear-gradient(180deg, rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0.16) 42%, rgba(0, 0, 0, 0.44)),
-    url("/images/dj-lineup-template-blank.png") top center / cover no-repeat,
+    url("/images/hero/dj-lineup-hero.png") top center / cover no-repeat,
     #000;
 }
 

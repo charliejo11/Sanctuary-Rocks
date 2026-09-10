@@ -255,7 +255,7 @@ export default function LineupPage() {
         <div className="lineup-template-wrap">
           <img
             className="lineup-template-image"
-            src="/images/hero/dj-lineup-template-blank.png"
+            src="/images/hero/dj-lineup-hero.png"
             alt=""
             aria-hidden="true"
           />
