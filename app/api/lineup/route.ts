@@ -203,9 +203,31 @@ function toDisplayPersonName(value: string) {
     });
 }
 
+function stripScheduleCodes(value: string) {
+  return value
+    .replace(/\s*\((?:\d+|[A-Z]{2,4})\)\s*/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 function extractDjName(title: string, description: string) {
-  const combined = `${title} ${description}`.trim();
+  const combined = stripScheduleCodes(`${title} ${description}`);
+
+  const djMatch = combined.match(
+    /\bDJ\s+([A-Za-z0-9][A-Za-z0-9'._-]*)/i,
+  );
+
+  if (djMatch?.[1]) {
+    const djName = toDisplayPersonName(`DJ ${djMatch[1]}`);
+
+    if (/^DJ\s+TBD$/i.test(djName)) {
+      return "Sanctuary Rocks DJ";
+    }
+
+    return djName;
+  }
+
   const normalized = combined.toLowerCase();
+
   const knownDj = profiles.find((profile) => {
     const name = profile.name.toLowerCase();
     const nameWithoutPrefix = name.replace(/^dj\s+/, "");
@@ -213,22 +235,17 @@ function extractDjName(title: string, description: string) {
     return normalized.includes(name) || normalized.includes(nameWithoutPrefix);
   });
 
-  if (knownDj) return knownDj.name;
-
-  const djMatch = combined.match(
-    /\b(DJ\s+(?!(?:and|&|with|host|at|on|in|bring|brings)\b)[A-Za-z0-9][A-Za-z0-9'._-]*(?:\s+(?!(?:and|&|with|host|at|on|in|bring|brings)\b)[A-Za-z0-9][A-Za-z0-9'._-]*){0,2})(?=\s+(?:and|&|with|host|at|on|in|bring|brings)\b|[.,;:!)]|$)/i,
-  );
-
-  return toDisplayPersonName(cleanText(djMatch?.[1], "Sanctuary Rocks DJ"));
+  return knownDj?.name ?? "Sanctuary Rocks DJ";
 }
 
 function extractHost(title: string, description: string) {
-  const combined = `${title} ${description}`.trim();
+  const combined = stripScheduleCodes(`${title} ${description}`);
   const hostMatch = combined.match(
     /\b(Host\s+[A-Za-z0-9][A-Za-z0-9'._-]*(?:\s+[A-Za-z0-9][A-Za-z0-9'._-]*)?)(?=\s+(?:and|&|with|at|on|in|bring|brings)\b|[.,;:!)]|$)/i,
   );
 
-  return toDisplayPersonName(cleanText(hostMatch?.[1]));
+  const host = toDisplayPersonName(cleanText(hostMatch?.[1]));
+  return /^Host\s+Tbd$/i.test(host) ? "" : host;
 }
 
 function extractTitle(summary: string, description: string, djName: string, host: string) {
@@ -277,8 +294,8 @@ function formatTime(date: Date, timeZone: string) {
 }
 
 function toLineupSet(event: CalendarOccurrence): LineupSet {
-  const summary = cleanText(event.summary, "Sanctuary Rocks Set");
-  const description = cleanText(event.description, summary);
+  const summary = stripScheduleCodes(cleanText(event.summary, "Sanctuary Rocks Set"));
+  const description = stripScheduleCodes(cleanText(event.description, summary));
   const djName = extractDjName(summary, description);
   const host = extractHost(summary, description);
 

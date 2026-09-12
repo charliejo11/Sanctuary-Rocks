@@ -1,11 +1,51 @@
 {
-  "title": "Sanctuary Rocks Gallery",
-  "subtitle": "Captured moments. Unforgettable nights. This is Sanctuary Rocks.",
-  "photos": [
-    {
-      "src": "/images/gallery/Frenchies-Photo.jpg",
-      "alt": "Frenchie at Sanctuary Rocks",
-      "caption": "Frenchie"
-    }
-  ]
+    "title":  "Sanctuary Rocks Gallery",
+    "subtitle":  "Captured moments. Unforgettable nights. This is Sanctuary Rocks.",
+    "photos":  [
+                   {
+                       "src":  "/images/gallery/Angelo_The Rhinestone Road Warrior.png",
+                       "alt":  "Angelo - The Rhinestone Road Warrior",
+                       "caption":  "Angelo — The Rhinestone Road Warrior"
+                   },
+                   {
+                       "src":  "/images/gallery/Frenchies-Photo.jpg",
+                       "alt":  "Frenchie at Sanctuary Rocks",
+                       "caption":  "Frenchie"
+                   },
+                   {
+                       "src":  "/images/gallery/GlitterJung_Disco Dumpster.png",
+                       "alt":  "GlitterJung - Disco Dumpster",
+                       "caption":  "GlitterJung — Disco Dumpster"
+                   },
+                   {
+                       "src":  "/images/gallery/Glitter_Gothy_Rainbow Thunder Daddy.png",
+                       "alt":  "Gothy - Rainbow Thunder Daddy",
+                       "caption":  "Gothy — Rainbow Thunder Daddy"
+                   },
+                   {
+                       "src":  "/images/gallery/LegzNashty_Till Death or Drama.png",
+                       "alt":  "LegzNashty - Till Death or Drama",
+                       "caption":  "LegzNashty — Till Death or Drama"
+                   },
+                   {
+                       "src":  "/images/gallery/Lucy_Glitterfied Fairy Titmother.png",
+                       "alt":  "Lucy - Glitterfied Fairy Titmother",
+                       "caption":  "Lucy — Glitterfied Fairy Titmother"
+                   },
+                   {
+                       "src":  "/images/gallery/Mando_Glitterfied_Hot Dog Fairy.png",
+                       "alt":  "Mando - Glitterfied Hot Dog Fairy",
+                       "caption":  "Mando — Glitterfied Hot Dog Fairy"
+                   },
+                   {
+                       "src":  "/images/gallery/Moose_Glitterfied_This Is Why Wonka Had Rules.png",
+                       "alt":  "Moose - This Is Why Wonka Had Rules",
+                       "caption":  "Moose — This Is Why Wonka Had Rules"
+                   },
+                   {
+                       "src":  "/images/gallery/Y_Glitterfied_Satan’s Prom King.jpg",
+                       "alt":  "Y - Satan’s Prom King",
+                       "caption":  "Y — Satan’s Prom King"
+                   }
+               ]
 }
