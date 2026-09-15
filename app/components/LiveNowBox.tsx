@@ -46,9 +46,9 @@ export default function LiveNowBox() {
 
     if (!audio) return;
 
-    audio.volume = volume;
-    audio.muted = isMuted || volume === 0;
-  }, [isMuted, volume]);
+    audio.volume = 0.8;
+    audio.muted = false;
+  }, []);
 
   useEffect(() => {
     async function loadLiveNow() {
@@ -94,23 +94,49 @@ export default function LiveNowBox() {
       await audio.play();
       setIsPlaying(true);
     } catch {
-      window.open(
-        liveNow.streamUrl || RADIO_STREAM_URL,
-        "_blank",
-        "noreferrer",
-      );
+      window.open(RADIO_STREAM_URL, "_blank", "noreferrer");
     }
   }
 
   function handleMuteClick() {
-    setIsMuted((current) => !current);
+    const audio = audioRef.current;
+
+    if (!audio) {
+      setIsMuted((current) => !current);
+      return;
+    }
+
+    const nextMuted = !audio.muted;
+
+    audio.muted = nextMuted;
+    setIsMuted(nextMuted);
   }
 
   function handleVolumeChange(event: ChangeEvent<HTMLInputElement>) {
     const nextVolume = Number(event.target.value);
+    const audio = audioRef.current;
 
     setVolume(nextVolume);
-    setIsMuted(nextVolume === 0);
+
+    if (!audio) {
+      setIsMuted(nextVolume === 0);
+      return;
+    }
+
+    audio.volume = nextVolume;
+
+    if (nextVolume > 0) {
+      audio.muted = false;
+      setIsMuted(false);
+      return;
+    }
+
+    audio.muted = true;
+    setIsMuted(true);
+  }
+
+  function handleAudioError() {
+    console.error("Radio player error:", audioRef.current?.error);
   }
 
   const isAudioMuted = isMuted || volume === 0;
@@ -147,11 +173,9 @@ export default function LiveNowBox() {
             preload="none"
             onPause={() => setIsPlaying(false)}
             onPlay={() => setIsPlaying(true)}
+            onError={handleAudioError}
           >
-            <source
-              src={liveNow.streamUrl || RADIO_STREAM_URL}
-              type="audio/mpeg"
-            />
+            <source src="/api/radio-stream" type="audio/mpeg" />
             Your browser does not support the audio player.
           </audio>
 
