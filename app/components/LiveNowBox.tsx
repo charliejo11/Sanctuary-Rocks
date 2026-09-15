@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { type ChangeEvent, useEffect, useRef, useState } from "react";
 
 type LiveNowData = {
   isLive: boolean;
@@ -11,12 +11,14 @@ type LiveNowData = {
   updatedAt: string;
 };
 
+const RADIO_STREAM_URL = "/api/radio-stream";
+
 const fallbackLiveNow: LiveNowData = {
   isLive: false,
   djName: "Sanctuary Rocks",
   currentSong: "Checking the live feed...",
   eventTitle: "",
-  streamUrl: "http://sor.digistream.info:10206/",
+  streamUrl: RADIO_STREAM_URL,
   updatedAt: "",
 };
 
@@ -35,12 +37,23 @@ function normalizeLiveNow(data: Partial<LiveNowData>): LiveNowData {
 export default function LiveNowBox() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [volume, setVolume] = useState(0.8);
   const [liveNow, setLiveNow] = useState<LiveNowData>(fallbackLiveNow);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+
+    if (!audio) return;
+
+    audio.volume = volume;
+    audio.muted = isMuted || volume === 0;
+  }, [isMuted, volume]);
 
   useEffect(() => {
     async function loadLiveNow() {
       try {
-        const response = await fetch("/api/live-now", {
+        const response = await fetch("/api/now-playing", {
           cache: "no-store",
         });
 
@@ -81,9 +94,27 @@ export default function LiveNowBox() {
       await audio.play();
       setIsPlaying(true);
     } catch {
-      window.open("/api/stream", "_blank", "noreferrer");
+      window.open(
+        liveNow.streamUrl || RADIO_STREAM_URL,
+        "_blank",
+        "noreferrer",
+      );
     }
   }
+
+  function handleMuteClick() {
+    setIsMuted((current) => !current);
+  }
+
+  function handleVolumeChange(event: ChangeEvent<HTMLInputElement>) {
+    const nextVolume = Number(event.target.value);
+
+    setVolume(nextVolume);
+    setIsMuted(nextVolume === 0);
+  }
+
+  const isAudioMuted = isMuted || volume === 0;
+  const volumePercent = Math.round(volume * 100);
 
   return (
     <section className="live-now-wrap">
@@ -117,7 +148,10 @@ export default function LiveNowBox() {
             onPause={() => setIsPlaying(false)}
             onPlay={() => setIsPlaying(true)}
           >
-            <source src="/api/stream" type="audio/mpeg" />
+            <source
+              src={liveNow.streamUrl || RADIO_STREAM_URL}
+              type="audio/mpeg"
+            />
             Your browser does not support the audio player.
           </audio>
 
@@ -133,6 +167,32 @@ export default function LiveNowBox() {
           <a href="/events" className="mp3-lineup-button">
             Full Lineup
           </a>
+        </div>
+
+        <div className="mp3-volume-controls">
+          <button
+            type="button"
+            className="mp3-mute-button"
+            onClick={handleMuteClick}
+            aria-pressed={isAudioMuted}
+            aria-label={isAudioMuted ? "Unmute stream" : "Mute stream"}
+          >
+            {isAudioMuted ? "Sound" : "Mute"}
+          </button>
+
+          <label className="mp3-volume-slider">
+            <span>Volume</span>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={volume}
+              onChange={handleVolumeChange}
+              aria-label="Stream volume"
+              aria-valuetext={`${volumePercent}%`}
+            />
+          </label>
         </div>
       </div>
     </section>
