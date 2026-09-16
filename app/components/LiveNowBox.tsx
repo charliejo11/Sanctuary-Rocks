@@ -39,6 +39,7 @@ function normalizeLiveNow(data: Partial<LiveNowData>): LiveNowData {
 export default function LiveNowBox() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fallbackAttemptedRef = useRef(false);
+  const fallbackPromiseRef = useRef<Promise<void> | null>(null);
   const wantsPlaybackRef = useRef(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -55,24 +56,38 @@ export default function LiveNowBox() {
   }, []);
 
   async function switchToRawStream(audio: HTMLAudioElement, shouldPlay: boolean) {
+    if (fallbackPromiseRef.current) {
+      await fallbackPromiseRef.current;
+      return;
+    }
+
     if (fallbackAttemptedRef.current) return;
 
     fallbackAttemptedRef.current = true;
-    console.warn("Radio proxy failed; trying raw station stream fallback.");
+    fallbackPromiseRef.current = (async () => {
+      console.warn("Radio proxy failed; trying raw station stream fallback.");
 
-    audio.src = RAW_RADIO_STREAM_URL;
-    audio.load();
-    audio.volume = volume;
-    audio.muted = isMuted || volume === 0;
+      audio.pause();
+      audio.src = RAW_RADIO_STREAM_URL;
+      audio.load();
+      audio.volume = volume;
+      audio.muted = isMuted || volume === 0;
 
-    if (!shouldPlay) return;
+      if (!shouldPlay) return;
+
+      try {
+        await audio.play();
+        setIsPlaying(true);
+      } catch (error) {
+        console.error("Raw radio stream fallback failed:", error);
+        window.open(RAW_RADIO_PLAYLIST_URL, "_blank", "noreferrer");
+      }
+    })();
 
     try {
-      await audio.play();
-      setIsPlaying(true);
-    } catch (error) {
-      console.error("Raw radio stream fallback failed:", error);
-      window.open(RAW_RADIO_PLAYLIST_URL, "_blank", "noreferrer");
+      await fallbackPromiseRef.current;
+    } finally {
+      fallbackPromiseRef.current = null;
     }
   }
 
@@ -122,6 +137,11 @@ export default function LiveNowBox() {
       await audio.play();
       setIsPlaying(true);
     } catch (error) {
+      if (fallbackPromiseRef.current) {
+        await fallbackPromiseRef.current;
+        return;
+      }
+
       console.error("Radio play failed:", error);
       await switchToRawStream(audio, true);
     }
@@ -170,8 +190,9 @@ export default function LiveNowBox() {
     console.error("Radio player error:", audio?.error);
 
     if (!audio) return;
+    if (!wantsPlaybackRef.current || fallbackAttemptedRef.current) return;
 
-    void switchToRawStream(audio, wantsPlaybackRef.current);
+    void switchToRawStream(audio, true);
   }
 
   const isAudioMuted = isMuted || volume === 0;
