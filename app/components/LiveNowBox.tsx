@@ -12,6 +12,7 @@ type LiveNowData = {
 };
 
 const RADIO_STREAM_URL = "/api/radio-stream";
+const RAW_RADIO_STREAM_URL = "http://sor.digistream.info:10206/";
 
 const fallbackLiveNow: LiveNowData = {
   isLive: false,
@@ -36,6 +37,8 @@ function normalizeLiveNow(data: Partial<LiveNowData>): LiveNowData {
 
 export default function LiveNowBox() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const fallbackAttemptedRef = useRef(false);
+  const wantsPlaybackRef = useRef(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(0.8);
@@ -49,6 +52,28 @@ export default function LiveNowBox() {
     audio.volume = 0.8;
     audio.muted = false;
   }, []);
+
+  async function switchToRawStream(audio: HTMLAudioElement, shouldPlay: boolean) {
+    if (fallbackAttemptedRef.current) return;
+
+    fallbackAttemptedRef.current = true;
+    console.warn("Radio proxy failed; trying raw station stream fallback.");
+
+    audio.src = RAW_RADIO_STREAM_URL;
+    audio.load();
+    audio.volume = volume;
+    audio.muted = isMuted || volume === 0;
+
+    if (!shouldPlay) return;
+
+    try {
+      await audio.play();
+      setIsPlaying(true);
+    } catch (error) {
+      console.error("Raw radio stream fallback failed:", error);
+      window.open(RAW_RADIO_STREAM_URL, "_blank", "noreferrer");
+    }
+  }
 
   useEffect(() => {
     async function loadLiveNow() {
@@ -86,15 +111,18 @@ export default function LiveNowBox() {
 
     try {
       if (isPlaying) {
+        wantsPlaybackRef.current = false;
         audio.pause();
         setIsPlaying(false);
         return;
       }
 
+      wantsPlaybackRef.current = true;
       await audio.play();
       setIsPlaying(true);
-    } catch {
-      window.open(RADIO_STREAM_URL, "_blank", "noreferrer");
+    } catch (error) {
+      console.error("Radio play failed:", error);
+      await switchToRawStream(audio, true);
     }
   }
 
@@ -136,7 +164,13 @@ export default function LiveNowBox() {
   }
 
   function handleAudioError() {
-    console.error("Radio player error:", audioRef.current?.error);
+    const audio = audioRef.current;
+
+    console.error("Radio player error:", audio?.error);
+
+    if (!audio) return;
+
+    void switchToRawStream(audio, wantsPlaybackRef.current);
   }
 
   const isAudioMuted = isMuted || volume === 0;
