@@ -12,7 +12,8 @@ type LiveNowData = {
 };
 
 const RADIO_STREAM_URL = "/api/radio-stream";
-const RAW_RADIO_STREAM_URL = "http://sor.digistream.info:10206/";
+const RAW_RADIO_STREAM_URL = "http://sor.digistream.info:10206/;";
+const RAW_RADIO_PLAYLIST_URL = "http://sor.digistream.info:10206/listen.pls";
 
 const fallbackLiveNow: LiveNowData = {
   isLive: false,
@@ -71,7 +72,7 @@ export default function LiveNowBox() {
       setIsPlaying(true);
     } catch (error) {
       console.error("Raw radio stream fallback failed:", error);
-      window.open(RAW_RADIO_STREAM_URL, "_blank", "noreferrer");
+      window.open(RAW_RADIO_PLAYLIST_URL, "_blank", "noreferrer");
     }
   }
 

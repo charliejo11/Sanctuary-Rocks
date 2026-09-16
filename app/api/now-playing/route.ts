@@ -24,6 +24,31 @@ function cleanText(value: unknown, fallback: string) {
   return value.trim() || fallback;
 }
 
+function decodeHtmlText(value: string) {
+  return value
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function extractStatusValue(html: string, label: string) {
+  const escapedLabel = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = new RegExp(
+    `${escapedLabel}:\\s*</font>\\s*</td>\\s*<td[^>]*>\\s*<font[^>]*>\\s*<b>([\\s\\S]*?)</b>`,
+    "i",
+  );
+
+  const match = html.match(pattern);
+
+  return match?.[1] ? decodeHtmlText(match[1]) : "";
+}
+
 function decodeIcsText(value: string) {
   return value
     .replace(/\\,/g, ",")
@@ -166,11 +191,12 @@ async function getCurrentCalendarEvent() {
   return events.find((event) => now >= event.start && now <= event.end) ?? null;
 }
 
-async function getCurrentSong() {
-  const response = await fetch(`${STREAM_BASE_URL}/status-json.xsl`, {
+async function getStreamStatus() {
+  const response = await fetch(`${STREAM_BASE_URL}/`, {
     cache: "no-store",
     headers: {
-      Accept: "application/json,text/plain,*/*",
+      Accept: "text/html,text/plain,*/*",
+      "User-Agent": "Sanctuary Rocks Web Player",
     },
   });
 
@@ -178,16 +204,14 @@ async function getCurrentSong() {
     throw new Error(`Stream status failed: ${response.status}`);
   }
 
-  const data = await response.json();
+  const html = await response.text();
+  const currentSong = extractStatusValue(html, "Current Song");
+  const streamTitle = extractStatusValue(html, "Stream Title");
 
-  const source = Array.isArray(data?.icestats?.source)
-    ? data.icestats.source[0]
-    : data?.icestats?.source;
-
-  return cleanText(
-    source?.title ?? source?.yp_currently_playing,
-    "Sanctuary Rocks Radio",
-  );
+  return {
+    currentSong: cleanText(currentSong, "Sanctuary Rocks Radio"),
+    streamTitle: cleanText(streamTitle, "Sanctuary Rocks"),
+  };
 }
 
 export async function GET() {
@@ -209,9 +233,14 @@ export async function GET() {
   }
 
   try {
-    currentSong = await getCurrentSong();
+    const streamStatus = await getStreamStatus();
+    currentSong = streamStatus.currentSong;
+
+    if (!isLive) {
+      djName = streamStatus.streamTitle;
+    }
   } catch (error) {
-    console.error("Stream current song error:", error);
+    console.error("Stream status error:", error);
     currentSong = "Sanctuary Rocks Radio";
   }
 
