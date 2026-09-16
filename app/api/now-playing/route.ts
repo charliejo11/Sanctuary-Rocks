@@ -193,7 +193,7 @@ async function getCurrentSong() {
 export async function GET() {
   let eventTitle = "";
   let djName = "Sanctuary Rocks";
-  let currentSong = "Loading current track...";
+  let currentSong = "Sanctuary Rocks Radio";
   let isLive = false;
 
   try {
@@ -212,10 +212,10 @@ export async function GET() {
     currentSong = await getCurrentSong();
   } catch (error) {
     console.error("Stream current song error:", error);
-    currentSong = "Unable to load current track";
+    currentSong = "Sanctuary Rocks Radio";
   }
 
-const result: LiveNowResponse = {
+  const result: LiveNowResponse = {
     isLive,
     djName,
     djImage: getDjImage(djName),
