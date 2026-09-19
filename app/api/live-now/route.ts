@@ -12,7 +12,7 @@ export const runtime = "nodejs";
 const STREAM_BASE_URL = "http://sor.digistream.info:10206";
 const STREAM_HOST = "sor.digistream.info";
 const STREAM_PORT = 10206;
-const CALENDAR_EMAIL = "chellzbellz01@gmail.com";
+const CALENDAR_EMAIL = "ba33d2d221fc80a1a2bf0d55439608ea1f7896d48077388fd77f36dbc622a70e@group.calendar.google.com";
 
 type LiveNowResponse = {
   isLive: boolean;
