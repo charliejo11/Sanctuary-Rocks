@@ -1,4 +1,4 @@
-import ContactPhoto from "./ContactPhoto";
+﻿import ContactPhoto from "./ContactPhoto";
 import { loadManagers, loadOwners } from "../data/crew";
 import { normalizeForMatch } from "../data/crewTypes";
 
@@ -7,7 +7,7 @@ import { normalizeForMatch } from "../data/crewTypes";
 export const dynamic = "force-dynamic";
 
 const TELEPORT_URL = "http://maps.secondlife.com/secondlife/Rhage/160/106/24";
-const LINKTREE_URL = "https://linktr.ee/SanctuaryRocks?subscribe";
+const GRIDSTER_URL = "https://gridster.elfavina89.workers.dev";
 const DISCORD_URL = "https://discord.gg/239QyWDW4";
 const DJ_APPLICATION_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLSf9Rgq2ulADGGgFUFG0ZUit3TxNgC5JtTQAQxbcOGo3jBJDHA/viewform";
@@ -34,8 +34,7 @@ const MANAGER_FRAMES: Box[] = [
 // on those would show mostly hair. Nudge the crop toward the face for the
 // ones that need it, keyed by normalized name.
 const OBJECT_POSITION_OVERRIDES: Record<string, string> = {
-  jamye: "center 22%",
-  iggy: "center 20%",
+  "troya gm": "center 5%",
 };
 
 function FramedPhoto({ box, name, image }: { box: Box; name: string; image: string }) {
@@ -103,16 +102,15 @@ export default function ContactPage() {
         aria-label="Apply to become a Sanctuary Rocks host"
         className="contact-hotspot"
         style={{ left: "62.5%", top: "51.4%", width: "22%", height: "2.6%" }}
-      />
-
-      <a
-        href={LINKTREE_URL}
+      />      <a
+        href={GRIDSTER_URL}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Open the Sanctuary Rocks Linktree"
+        aria-label="Visit Gridster"
         className="contact-hotspot"
         style={{ left: "13%", top: "86.8%", width: "34.5%", height: "7.4%" }}
       />
+
 
       <a
         href={DISCORD_URL}
@@ -125,3 +123,8 @@ export default function ContactPage() {
     </main>
   );
 }
+
+
+
+
+
