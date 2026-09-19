@@ -9,9 +9,7 @@ export const dynamic = "force-dynamic";
 const TELEPORT_URL = "http://maps.secondlife.com/secondlife/Rhage/160/106/24";
 const GRIDSTER_URL = "https://gridster.elfavina89.workers.dev";
 const DISCORD_URL = "https://discord.gg/239QyWDW4";
-const DJ_APPLICATION_URL =
-  "https://docs.google.com/forms/d/e/1FAIpQLSf9Rgq2ulADGGgFUFG0ZUit3TxNgC5JtTQAQxbcOGo3jBJDHA/viewform";
-const HOST_APPLICATION_URL = DJ_APPLICATION_URL;
+const VIP_APPLICATION_URL = "https://discord.gg/GdsJeQDnc";
 
 type Box = { left: number; top: number; width: number; height: number };
 
@@ -85,23 +83,13 @@ export default function ContactPage() {
         className="contact-hotspot"
         style={{ left: "36%", top: "23.2%", width: "31.5%", height: "5%" }}
       />
-
       <a
-        href={DJ_APPLICATION_URL}
+        href={VIP_APPLICATION_URL}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Apply to become a Sanctuary Rocks DJ"
+        aria-label="Apply to work at Sanctuary Rocks through the VIP Discord"
         className="contact-hotspot"
-        style={{ left: "14%", top: "51.4%", width: "21%", height: "2.6%" }}
-      />
-
-      <a
-        href={HOST_APPLICATION_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Apply to become a Sanctuary Rocks host"
-        className="contact-hotspot"
-        style={{ left: "62.5%", top: "51.4%", width: "22%", height: "2.6%" }}
+        style={{ left: "14%", top: "51.4%", width: "34%", height: "4%" }}
       />      <a
         href={GRIDSTER_URL}
         target="_blank"
@@ -123,6 +111,7 @@ export default function ContactPage() {
     </main>
   );
 }
+
 
 
 
