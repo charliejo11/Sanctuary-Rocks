@@ -5,11 +5,11 @@
 
 .home-poster-player {
   position: absolute !important;
-  top: 53% !important;
+  top: 51% !important;
   left: 50% !important;
   z-index: 100 !important;
 
-  width: min(720px, 82vw) !important;
+  width: min(420px, 82vw) !important;
   height: auto !important;
 
   margin: 0 !important;
@@ -261,7 +261,7 @@
 /* Tablet */
 @media (max-width: 900px) {
   .home-poster-player {
-    top: 53% !important;
+    top: 51% !important;
     width: min(480px, 84vw) !important;
   }
 }
@@ -269,7 +269,7 @@
 /* Phone */
 @media (max-width: 560px) {
   .home-poster-player {
-    top: 53% !important;
+    top: 51% !important;
     width: min(340px, 90vw) !important;
   }
 
@@ -301,7 +301,7 @@
 
 
 
-.sanctuary-main-page .home-poster-player { top: 53% !important; left: 50% !important; transform: translate(-50%, -50%) !important; }
+.sanctuary-main-page .home-poster-player { top: 51% !important; left: 50% !important; transform: translate(-50%, -50%) !important; }
 
 
 
@@ -340,8 +340,8 @@
 /* Final player alignment */
 @media (min-width: 561px) and (max-width: 900px) {
   .sanctuary-main-page .home-poster-player {
-    top: 53% !important;
-    width: min(620px, 84vw) !important;
+    top: 51% !important;
+    width: min(420px, 84vw) !important;
   }
 }
 .home-poster-player .mp3-controls {
@@ -351,6 +351,9 @@
 .home-poster-player .mp3-play-button {
   margin-top: 0 !important;
 }
+
+
+
 
 
 
