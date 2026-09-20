@@ -21,6 +21,7 @@ type CrewOverride = Partial<Pick<CrewMember, "name" | "role" | "bio" | "quote">>
 // the default role, and the default bio above - so new photos "just work"
 // the moment they're dropped into the folder, no code change required.
 const DJ_OVERRIDES: Record<string, CrewOverride> = {
+  "DJ_Frenchie_Fry.jpg": { name: "DJ Frenchie" },
   "JIMMY_PROFILE_JUL25.png": { name: "DJ Jimmy" },
 };
 const HOST_OVERRIDES: Record<string, CrewOverride> = {
@@ -56,4 +57,5 @@ export function loadSponsors(): SponsorEntry[] {
 // lookups (e.g. contact-info overrides) off the file on disk rather than
 // the roster's cleaned display name.
 export { listImageFiles };
+
 

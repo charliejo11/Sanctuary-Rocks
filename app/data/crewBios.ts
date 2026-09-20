@@ -593,6 +593,13 @@ export const CREW_BIOS: CrewBioEntry[] = [
     image: "/images/hosts/Bebe.png.jpg",
     bio: "I'm a fun-loving party girl who lives for heavy metal, late-night gaming, and questionable party decisions. I love loud music, bold fashion, creative art, and getting stoned outta my gourd. When I'm online, you'll usually find me laughing with friends, chasing good vibes, and proving I can rock huge boots and a curious mind at the same time.",
   },
+  {
+    id: "dj-frenchie",
+    name: "DJ Frenchie",
+    role: "DJ",
+    image: "/images/djs/DJ_Frenchie_Fry.jpg",
+    bio: "SL Hall of Fame Honorary DJ, inducted November 2015. High-energy and fun-loving rock, metal and industrial DJ. DJing since 2008 in Second Life.",
+  },
 ];
 
 const BIO_ENTRY_BY_NORMALIZED_NAME = new Map(
@@ -606,6 +613,7 @@ const BIO_ENTRY_BY_NORMALIZED_NAME = new Map(
 export function findBioEntry(name: string): CrewBioEntry | undefined {
   return BIO_ENTRY_BY_NORMALIZED_NAME.get(normalizeForMatch(name));
 }
+
 
 
 
