@@ -566,10 +566,10 @@ export const CREW_BIOS: CrewBioEntry[] = [
     bio: "Metalcore/Deathcore Dealer | Professional “BLEGH” Enthusiast\n\nIf your speakers aren’t crying, I’m not trying.\n\n• I specialize in:\n• Illegal levels of bass\n• Breakdowns that make avatars reconsider their life choices\n• Randomly yelling “BLEGH” at emotionally appropriate moments",
   },
   {
-    id: "host-mori",
+    id: "dj-mori",
     name: "Mori",
-    role: "Host",
-    image: "/images/hosts/Mori.png",
+    role: "DJ",
+    image: "/images/djs/Mori.png",
     bio: "My name is Mori Moonchild. I'm a 35-year-old stay-at-home mother of two and the owner and creator of Insatiably Dead in Second Life. I've been in Second Life for 21 years. I've been DJing for about three and a half years, and I'm now beginning my DJ career at Kabila Succubus Lounge. I'm also into horror collecting, specifically Good Guy dolls, and photography.",
   },
   {
@@ -606,6 +606,7 @@ const BIO_ENTRY_BY_NORMALIZED_NAME = new Map(
 export function findBioEntry(name: string): CrewBioEntry | undefined {
   return BIO_ENTRY_BY_NORMALIZED_NAME.get(normalizeForMatch(name));
 }
+
 
 
 
