@@ -585,7 +585,15 @@ export const CREW_BIOS: CrewBioEntry[] = [
     role: "Host",
     image: "/images/hosts/Verita.png",
     bio: "Hello there! I am an Upper Michigan girl who loves to host and loves all kinds of rock and music that fuel my soul. When I am rocking out in the club, I love shopping and taking photos and edited photos. My heart is full with my furry baby, blending my interests into a tapestry of creativity, having fun, and hanging out with my friends and family.",
-  },];
+  },
+  {
+    id: "host-bebe",
+    name: "Bebe",
+    role: "Host",
+    image: "/images/hosts/Bebe.png.jpg",
+    bio: "I'm a fun-loving party girl who lives for heavy metal, late-night gaming, and questionable party decisions. I love loud music, bold fashion, creative art, and getting stoned outta my gourd. When I'm online, you'll usually find me laughing with friends, chasing good vibes, and proving I can rock huge boots and a curious mind at the same time.",
+  },
+];
 
 const BIO_ENTRY_BY_NORMALIZED_NAME = new Map(
   CREW_BIOS.map((entry) => [normalizeForMatch(entry.name), entry]),
@@ -598,5 +606,7 @@ const BIO_ENTRY_BY_NORMALIZED_NAME = new Map(
 export function findBioEntry(name: string): CrewBioEntry | undefined {
   return BIO_ENTRY_BY_NORMALIZED_NAME.get(normalizeForMatch(name));
 }
+
+
 
 
