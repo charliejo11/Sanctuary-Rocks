@@ -1,6 +1,6 @@
 {
-  "month": "September 2026",
-  "headline": "September Events",
+  "month": "Sep – Nov 2026",
+  "headline": "Upcoming Events",
   "events": [
     {
       "date": "September 2-9",
@@ -28,6 +28,26 @@
       "dj": "DJ Raevyn",
       "host": "Host Imogen",
       "description": ""
+    },
+    {
+      "date": "September 30",
+      "day": "Wednesday",
+      "time": "6pm SLT",
+      "title": "MAN - ON - PAUSE!",
+      "dj": "DJ Frenchie",
+      "host": "Host Teaghen",
+      "description": "Celebrating the Women of Rock & Metal!",
+      "badge": "women-of-rock"
+    },
+    {
+      "date": "November 5",
+      "day": "Thursday",
+      "time": "10am SLT",
+      "title": "2000s Throwback",
+      "dj": "DJ Daan",
+      "host": "Host Imogen",
+      "description": "2000s Throwback Special Set",
+      "badge": "2000s-throwback"
     }
   ]
 }

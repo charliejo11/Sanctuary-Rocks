@@ -9036,3 +9036,256 @@ button.crew-card:focus-visible {
 /* NEW GALLERY PHOTO ALIGNMENT */
 .gallery-template-slot--1 { left: 11.3% !important; top: 40% !important; width: 19.4% !important; height: 12.5% !important; }
 .gallery-template-slot--1 img { width: 100% !important; height: 100% !important; object-fit: cover !important; object-position: center 35% !important; }
+
+/* =========================================================
+   EVENTS PAGE - READABLE FONT OVERRIDE
+   ========================================================= */
+
+.events-template-month {
+  font-family: "Arial Black", Arial, Helvetica, sans-serif;
+  font-size: clamp(14px, 1.22cqw, 21px);
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  line-height: 1.1;
+}
+
+.events-template-date span {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: clamp(8px, 0.68cqw, 12px);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+.events-template-date strong {
+  font-family: "Arial Black", Arial, Helvetica, sans-serif;
+  font-size: clamp(27px, 2.7cqw, 45px);
+  font-weight: 900;
+  line-height: 0.9;
+}
+
+.events-template-date em {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: clamp(10px, 1cqw, 17px);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+.events-template-copy h2 {
+  font-family: "Arial Black", Arial, Helvetica, sans-serif;
+  font-size: clamp(16px, 1.5cqw, 25px);
+  font-weight: 900;
+  letter-spacing: 0.015em;
+  line-height: 1.05;
+  color: #fff4e9;
+}
+
+.events-template-meta {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: clamp(9px, 0.78cqw, 13px);
+  font-weight: 800;
+  letter-spacing: 0.025em;
+  line-height: 1.2;
+  color: #ff823a;
+}
+
+.events-template-description {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: clamp(9px, 0.76cqw, 13px);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.25;
+  color: #eee6dc;
+}
+
+.events-template-badge span {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: clamp(7px, 0.56cqw, 10px);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+}
+
+
+/* =========================================================
+   EVENTS PAGE - ALIGNMENT TWEAKS
+   ========================================================= */
+
+.events-template-event {
+  height: 10%;
+}
+
+.events-template-date {
+  inset: 6% auto 6% 0.35%;
+  width: 11.6%;
+  display: grid;
+  grid-template-rows: auto auto auto;
+  align-content: center;
+  justify-items: center;
+  gap: 0;
+  text-align: center;
+}
+
+.events-template-date span {
+  max-width: 92%;
+  font-size: clamp(7px, 0.62cqw, 11px);
+  line-height: 1;
+  margin: 0 0 2px;
+}
+
+.events-template-date strong {
+  font-size: clamp(24px, 2.45cqw, 40px);
+  line-height: 0.82;
+  margin: 0;
+}
+
+.events-template-date em {
+  font-size: clamp(9px, 0.88cqw, 15px);
+  line-height: 1;
+  margin: 2px 0 0;
+}
+
+.events-template-copy {
+  top: 10%;
+  left: 15%;
+  width: 69.5%;
+  height: 80%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.events-template-copy h2 {
+  margin: 0 0 2px;
+  line-height: 1.02;
+}
+
+.events-template-meta {
+  margin: 1px 0 0;
+  gap: 0.12rem 0.55rem;
+  line-height: 1.12;
+}
+
+.events-template-description {
+  margin: 2px 0 0;
+  line-height: 1.18;
+}
+
+.events-template-badge {
+  top: 16%;
+  height: 68%;
+}
+
+.events-template-badge span {
+  max-width: 88%;
+  line-height: 1.05;
+}
+
+
+/* =========================================================
+   EVENTS PAGE - FINAL ALIGNMENT CLEANUP
+   ========================================================= */
+
+.events-template-event {
+  height: 9.55%;
+}
+
+/* DATE PLATE */
+.events-template-date {
+  inset: 3% auto 3% 0.2%;
+  width: 11.25%;
+  height: 94%;
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 1px;
+  padding: 3px 2px;
+}
+
+.events-template-date span {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+
+  font-size: clamp(7px, 0.56cqw, 10px);
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.events-template-date strong {
+  margin: 0;
+
+  font-size: clamp(23px, 2.25cqw, 37px);
+  line-height: 0.88;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.events-template-date em {
+  width: 100%;
+  margin: 1px 0 0;
+
+  font-size: clamp(7px, 0.68cqw, 11px);
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* MAIN EVENT COPY */
+.events-template-copy {
+  top: 7%;
+  left: 15%;
+  width: 70%;
+  height: 86%;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.events-template-copy h2 {
+  margin: 0 0 3px;
+  font-size: clamp(16px, 1.48cqw, 25px);
+  line-height: 1;
+}
+
+.events-template-meta {
+  margin: 0;
+  font-size: clamp(8px, 0.72cqw, 12px);
+  line-height: 1.15;
+}
+
+.events-template-description {
+  margin: 3px 0 0;
+  font-size: clamp(8px, 0.69cqw, 12px);
+  line-height: 1.18;
+}
+
+/* RIGHT-SIDE EVENT BADGE */
+.events-template-badge {
+  top: 10%;
+  right: 3.2%;
+  width: 7.4%;
+  height: 80%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.events-template-badge span {
+  width: 90%;
+  max-width: 90%;
+
+  font-size: clamp(6px, 0.48cqw, 8px);
+  line-height: 1.05;
+  text-align: center;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
