@@ -1,4 +1,4 @@
-import fs from "node:fs";
+﻿import fs from "node:fs";
 import path from "node:path";
 import { normalizeForMatch } from "../data/crewTypes";
 
@@ -19,7 +19,7 @@ export type RosterEntry = {
 const IMAGE_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".webp", ".gif"]);
 
 // Filenames that are placeholder/fallback art, not a real crew member.
-const EXCLUDED_FILES = new Set(["default-dj.png"]);
+const EXCLUDED_FILES = new Set(["default-dj.png", "Sanctuary Rocks DJ.png"]);
 
 function stripAllExtensions(filename: string): string {
   let base = filename;
@@ -106,3 +106,4 @@ export function loadRoster(
 // canonical definition lives in crewTypes.ts because it's a plain string
 // with no Node dependency, so client components can import it too.
 export { FALLBACK_LOGO } from "../data/crewTypes";
+

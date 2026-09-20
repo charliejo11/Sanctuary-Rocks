@@ -1,4 +1,4 @@
-import { normalizeForMatch } from "./crewTypes";
+﻿import { normalizeForMatch } from "./crewTypes";
 
 // Bio-only lookup for the Meet the Crew page's click-to-expand modal. This
 // is deliberately NOT the source of truth for who's on the crew, their
@@ -49,14 +49,14 @@ export const CREW_BIOS: CrewBioEntry[] = [
     name: "DJ Bratty",
     role: "DJ",
     image: "/images/djs/DJ%20Bratty.png.jpg",
-    bio: "Hiya! I'm DJ BrattyBunny 🐰🎧\n\nI'm 37 years young and the DJ Manager at Sanctuary Rocks! Music is my absolute favorite thing in the world, and I love bringing people together through great tunes and good vibes.\n\nOutside of music, I love hanging out with my amazing friends, being a little wild, laughing way too much, and making memories. I'm kind, sweet, a little sassy, and definitely have a bratty side—but all in good fun! 💖\n\nCome say hi, request a song, or just hang out. Let's make some awesome memories and keep the music going! 🎶💕",
+    bio: "Hiya! I'm DJ BrattyBunny ðŸ°ðŸŽ§\n\nI'm 37 years young and the DJ Manager at Sanctuary Rocks! Music is my absolute favorite thing in the world, and I love bringing people together through great tunes and good vibes.\n\nOutside of music, I love hanging out with my amazing friends, being a little wild, laughing way too much, and making memories. I'm kind, sweet, a little sassy, and definitely have a bratty sideâ€”but all in good fun! ðŸ’–\n\nCome say hi, request a song, or just hang out. Let's make some awesome memories and keep the music going! ðŸŽ¶ðŸ’•",
   },
   {
     id: "dj-calamity",
     name: "DJ Calamity",
     role: "DJ",
     image: "/images/djs/DJ%20Calamity.png.jpg",
-    bio: "Hello there everyone! Just who am I exactly? A Québécois (French Canadian), a gentleman, a musician. Sax player in RL, music has always been a part of me. From classical to metal, it's the same difference. I'm also an engineer so I tend to be a perfectionist... a tiny bit. I'm a sponge to knowledge, I love to learn anything on everything and discover the world that's around us. Funny, weird, a bit ADD, a bit OCD - that's me too. When I'm not spinning those metal songs, you might find me scripting here and there the stuff that my wife builds on SL, or playing some engineering games, always while discovering new songs to share. You see, music is not what I do, it's what I am.",
+    bio: "Hello there everyone! Just who am I exactly? A QuÃ©bÃ©cois (French Canadian), a gentleman, a musician. Sax player in RL, music has always been a part of me. From classical to metal, it's the same difference. I'm also an engineer so I tend to be a perfectionist... a tiny bit. I'm a sponge to knowledge, I love to learn anything on everything and discover the world that's around us. Funny, weird, a bit ADD, a bit OCD - that's me too. When I'm not spinning those metal songs, you might find me scripting here and there the stuff that my wife builds on SL, or playing some engineering games, always while discovering new songs to share. You see, music is not what I do, it's what I am.",
   },
   {
     id: "dj-charliejo",
@@ -77,7 +77,7 @@ export const CREW_BIOS: CrewBioEntry[] = [
     name: "DJ Corbyn",
     role: "DJ",
     image: "/images/djs/DJ%20Corbyn.png.jpg",
-    bio: "DJ Corbyn Weymann brings the ultimate Rock and Metal experience straight to the heart of Second Life. For Corbyn, it's always about the music first—everything else is just a bonus. Driven by a pure passion for heavy riffs and anthemic beats, his mission is to make sure every single person at his gig feels the energy radiating from the decks.\n\nAs a proud resident DJ at Sanctuary Rocks, Corbyn is honored to spin for the undisputed best Rock and Metal venue in SL. Off the stage, this cheeky Brit brings quick-witted banter and a massive personality to the crowd. He loves connecting with music lovers from every corner of the globe. Come for the metal, stay for the laughs!",
+    bio: "DJ Corbyn Weymann brings the ultimate Rock and Metal experience straight to the heart of Second Life. For Corbyn, it's always about the music firstâ€”everything else is just a bonus. Driven by a pure passion for heavy riffs and anthemic beats, his mission is to make sure every single person at his gig feels the energy radiating from the decks.\n\nAs a proud resident DJ at Sanctuary Rocks, Corbyn is honored to spin for the undisputed best Rock and Metal venue in SL. Off the stage, this cheeky Brit brings quick-witted banter and a massive personality to the crowd. He loves connecting with music lovers from every corner of the globe. Come for the metal, stay for the laughs!",
   },
   {
     id: "dj-eros",
@@ -98,7 +98,7 @@ export const CREW_BIOS: CrewBioEntry[] = [
     name: "DJ Iggy",
     role: "DJ",
     image: "/images/djs/DJ%20Iggy_.png.jpg",
-    bio: "Well hello!! I am a Canadian, smart mouthed, sassy at times, and a complete brat in nature. Fast and hard is the way I like to play - something that will give you a heartbeat and make you all sweaty inside n outside. When I'm not here in my element, I am usually being nosey somewhere - exploring the unknown is a good way to say it. I enjoy spontaneous things and I love to chatter to people about anything that pops in my head, no matter where it goes - fun, eventful, and crazyness. I'm fun, crazy, and I love to laugh and make people laugh. Music is my drug!!\n\nMy best saying: \"I'd rather regret the risks that didn't work out than the chances I didn't take at all.\"\n\n— Iggy",
+    bio: "Well hello!! I am a Canadian, smart mouthed, sassy at times, and a complete brat in nature. Fast and hard is the way I like to play - something that will give you a heartbeat and make you all sweaty inside n outside. When I'm not here in my element, I am usually being nosey somewhere - exploring the unknown is a good way to say it. I enjoy spontaneous things and I love to chatter to people about anything that pops in my head, no matter where it goes - fun, eventful, and crazyness. I'm fun, crazy, and I love to laugh and make people laugh. Music is my drug!!\n\nMy best saying: \"I'd rather regret the risks that didn't work out than the chances I didn't take at all.\"\n\nâ€” Iggy",
   },
   {
     id: "dj-jayme",
@@ -112,7 +112,7 @@ export const CREW_BIOS: CrewBioEntry[] = [
     name: "Amira",
     role: "DJ",
     image: "/images/djs/Amira.png.jpg",
-    bio: "Amira Farshore—also known as DJ Amira, The Vixen—is a proud member of the Sanctuary Rocks family. She is also the owner of Roja's and Hellforged and co-owner of Blackwood Systems™. With a passion for powerful music, unforgettable energy, and bringing people together, she creates a place where everyone can escape, have fun, and enjoy the moment.\n\nFierce, loyal, playful, and always unapologetically herself, Amira believes music should be felt—not merely heard. Whether she is rocking the stream, supporting her friends, or getting the crowd moving, The Vixen brings her heart, fire, and attitude to everything she does.\n\nTurn it up, let go, and come rock the Sanctuary with DJ Amira—The Vixen!",
+    bio: "Amira Farshoreâ€”also known as DJ Amira, The Vixenâ€”is a proud member of the Sanctuary Rocks family. She is also the owner of Roja's and Hellforged and co-owner of Blackwood Systemsâ„¢. With a passion for powerful music, unforgettable energy, and bringing people together, she creates a place where everyone can escape, have fun, and enjoy the moment.\n\nFierce, loyal, playful, and always unapologetically herself, Amira believes music should be feltâ€”not merely heard. Whether she is rocking the stream, supporting her friends, or getting the crowd moving, The Vixen brings her heart, fire, and attitude to everything she does.\n\nTurn it up, let go, and come rock the Sanctuary with DJ Amiraâ€”The Vixen!",
   },
   {
     id: "dj-caro",
@@ -140,7 +140,7 @@ export const CREW_BIOS: CrewBioEntry[] = [
     name: "Logan",
     role: "DJ",
     image: "/images/djs/Logan.png.jpg",
-    bio: "I've been DJing for over 10 years now, and I still enjoy every minute of it. I'm a born-and-raised Texan and have called Texas home my entire life.\n\nBefore I ever stepped behind the virtual decks, I was a musician. I was fortunate enough to meet and spend time with many incredible artists in the Metal scene before life took me in one of the most unexpected directions imaginable—I became a firefighter. I've been doing that for more years than I care to admit, and they say the fire gets in your blood. They're absolutely right.\n\nI'm a true music junkie who enjoys just about every genre, but Metal was one of the first styles of music I discovered on my own, and it remains a huge part of who I am.\n\nWhen I'm not spinning tunes or saying something completely ridiculous on the mic, you'll usually find me creating new pieces for my shop, Mythworks LTD, or working on my novel, which I hope to release in the not-too-distant future. If I could just convince my brain that editing is as much fun as writing, I'd probably be finished by now.\n\nOh, and I have ADHD and proudly advocate for the neurodivergent community. If that means I occasionally go off on a tangent... well, now you know why.\n\nSee you at Sanctuary!",
+    bio: "I've been DJing for over 10 years now, and I still enjoy every minute of it. I'm a born-and-raised Texan and have called Texas home my entire life.\n\nBefore I ever stepped behind the virtual decks, I was a musician. I was fortunate enough to meet and spend time with many incredible artists in the Metal scene before life took me in one of the most unexpected directions imaginableâ€”I became a firefighter. I've been doing that for more years than I care to admit, and they say the fire gets in your blood. They're absolutely right.\n\nI'm a true music junkie who enjoys just about every genre, but Metal was one of the first styles of music I discovered on my own, and it remains a huge part of who I am.\n\nWhen I'm not spinning tunes or saying something completely ridiculous on the mic, you'll usually find me creating new pieces for my shop, Mythworks LTD, or working on my novel, which I hope to release in the not-too-distant future. If I could just convince my brain that editing is as much fun as writing, I'd probably be finished by now.\n\nOh, and I have ADHD and proudly advocate for the neurodivergent community. If that means I occasionally go off on a tangent... well, now you know why.\n\nSee you at Sanctuary!",
   },
   {
     id: "dj-kaya",
@@ -161,7 +161,7 @@ export const CREW_BIOS: CrewBioEntry[] = [
     name: "DJ Lucky",
     role: "DJ",
     image: "/images/djs/DJ%20Lucky_.png.jpg",
-    bio: "Hello I am DJ Lucky!! My mission is simple: play it fast, play it loud, and live life at absolute max volume. Equal parts basshead and absolute nerd. When I'm not sharing my love for music, I'm getting lost in anime, diving into comics, or leveling up in video games. Life's too short for slow tempos—let's rage.",
+    bio: "Hello I am DJ Lucky!! My mission is simple: play it fast, play it loud, and live life at absolute max volume. Equal parts basshead and absolute nerd. When I'm not sharing my love for music, I'm getting lost in anime, diving into comics, or leveling up in video games. Life's too short for slow temposâ€”let's rage.",
   },
   {
     id: "dj-magas",
@@ -182,7 +182,7 @@ export const CREW_BIOS: CrewBioEntry[] = [
     name: "DJ Trelk",
     role: "DJ",
     image: "/images/djs/DJ%20Trelk.png.png",
-    bio: "Trelk Moonwall\n\nI'm someone who loves all kinds of music—from country and classic rock to post-hardcore and metal. Music is a big part of my life, and I'm always up for discovering something new. I enjoy great conversations, laughing, and having a good time with people. At the same time, I also have a quieter side and appreciate relaxing nights in, especially if they involve gaming. I value authenticity, humor, and enjoying the moment.",
+    bio: "Trelk Moonwall\n\nI'm someone who loves all kinds of musicâ€”from country and classic rock to post-hardcore and metal. Music is a big part of my life, and I'm always up for discovering something new. I enjoy great conversations, laughing, and having a good time with people. At the same time, I also have a quieter side and appreciate relaxing nights in, especially if they involve gaming. I value authenticity, humor, and enjoying the moment.",
   },
   {
     id: "dj-vandon",
@@ -241,7 +241,7 @@ export const CREW_BIOS: CrewBioEntry[] = [
     name: "Peacy.Graves",
     role: "DJ",
     image: "/images/djs/Peacy.Graves.png.jpg",
-    bio: "Hi there!\n\nI'm a woman from Germany and a DJ with a soft spot for bass ^^ My passion is metal and rock. I love animals and own five Maine Coon cats; they love music too and curl up around me, purring, while I play my sets. I have a great sense of humor and a strong sense of justice, and I love working in a team with people from diverse backgrounds. Many people love my \"quirky\" accent and my rolling \"r\"s—haha.\n\nI'm proud to be part of Sanctuary Rocks.",
+    bio: "Hi there!\n\nI'm a woman from Germany and a DJ with a soft spot for bass ^^ My passion is metal and rock. I love animals and own five Maine Coon cats; they love music too and curl up around me, purring, while I play my sets. I have a great sense of humor and a strong sense of justice, and I love working in a team with people from diverse backgrounds. Many people love my \"quirky\" accent and my rolling \"r\"sâ€”haha.\n\nI'm proud to be part of Sanctuary Rocks.",
   },
   {
     id: "dj-wylls",
@@ -266,10 +266,10 @@ export const CREW_BIOS: CrewBioEntry[] = [
     // Was filed under Hosts (host-molokai) with an outdated bio and photo -
     // moved here since Molokai has DJ'd (not hosted) since 2016 per their
     // own updated bio below, and their photo now lives in public/images/djs.
-    id: "dj-molokai",
-    name: "Molokai",
+    id: "dj-moloaki",
+    name: "Moloaki",
     role: "DJ",
-    image: "/images/djs/Molokai.jpg",
+    image: "/images/djs/Moloaki.png",
     bio: "I have always worked in my 15 years in SL, beginning when I was 3 months old as a stripper until Hurricane Sandy shut that club down. I was a host until 2016 when I became a country dj. Didn't like country much but lasted in that genre for 2 years. Hopped from rock club to rock club with some of them closing because of new owners. I rather like classic rock and the guitar rifts found in tunes like \"Smoke on the Water\" and \"California Hotel\". My musical tastes center around Hawaiian music, Jawaiian and jangalang styles. Given how obscure that is for the rest of the world, I just DJ without the love for hard rock and metal. My fans know I like cover requests the most.",
   },
   {
@@ -291,14 +291,14 @@ export const CREW_BIOS: CrewBioEntry[] = [
     name: "Sativa",
     role: "DJ",
     image: "/images/djs/Sativa.png.png",
-    bio: "I'm a quirky old soul with a spirited personality, a passion for DJing, and a deep sassy voice made for memorable announcements. I love making people laugh, catching them off guard, and creating those special moments that make everyone stop and do a double take. I feed off the energy in the room, so can devour your mood and spit it out with music.\n\nWhen I'm not behind the DJ booth, I'm usually shopping for, planning, and choreographing shows in Second Life. I enjoy stepping outside the box, colouring beyond the lines, and creating experiences that are anything but ordinary. With me, there is rarely a dull moment.\n\nAlthough I may be quiet at times, I'm always paying attention. I'm proudly old-school, adaptable, and always willing to learn something new—because, as they say, resistance is futile.\n\nIn real life, I work from home around the clock and manage what can only be described as a small zoo filled with dogs, cats, and rats. I'm a huge animal lover, a lifelong insomniac, and someone with a colourful vocabulary that makes a sailor sound like a care bear.",
+    bio: "I'm a quirky old soul with a spirited personality, a passion for DJing, and a deep sassy voice made for memorable announcements. I love making people laugh, catching them off guard, and creating those special moments that make everyone stop and do a double take. I feed off the energy in the room, so can devour your mood and spit it out with music.\n\nWhen I'm not behind the DJ booth, I'm usually shopping for, planning, and choreographing shows in Second Life. I enjoy stepping outside the box, colouring beyond the lines, and creating experiences that are anything but ordinary. With me, there is rarely a dull moment.\n\nAlthough I may be quiet at times, I'm always paying attention. I'm proudly old-school, adaptable, and always willing to learn something newâ€”because, as they say, resistance is futile.\n\nIn real life, I work from home around the clock and manage what can only be described as a small zoo filled with dogs, cats, and rats. I'm a huge animal lover, a lifelong insomniac, and someone with a colourful vocabulary that makes a sailor sound like a care bear.",
   },
   {
     id: "dj-shann",
     name: "Shann",
     role: "DJ",
     image: "/images/djs/Shann.png.png",
-    bio: "As a retired United States Coast Guard Rescue Swimmer, dedication, teamwork, and serving others have always been at the heart of who I am. That same passion now lives on through music.\n\nWhen I'm behind the decks, my goal is simple—to bring people together through the power of music. Whether I'm playing for newcomers discovering Sanctuary Rocks for the first time or entertaining our amazing VIPs, I strive to create an atmosphere where everyone feels welcome, included, and connected.\n\nMusic has always been more than just sound to me; it's a universal language that unites people from all walks of life. Every set I play is about building energy, creating memories, and keeping the good vibes flowing. I believe rhythm has the power to bring souls together as one, regardless of where we come from.",
+    bio: "As a retired United States Coast Guard Rescue Swimmer, dedication, teamwork, and serving others have always been at the heart of who I am. That same passion now lives on through music.\n\nWhen I'm behind the decks, my goal is simpleâ€”to bring people together through the power of music. Whether I'm playing for newcomers discovering Sanctuary Rocks for the first time or entertaining our amazing VIPs, I strive to create an atmosphere where everyone feels welcome, included, and connected.\n\nMusic has always been more than just sound to me; it's a universal language that unites people from all walks of life. Every set I play is about building energy, creating memories, and keeping the good vibes flowing. I believe rhythm has the power to bring souls together as one, regardless of where we come from.",
   },
   {
     // Bio image (public/images/Bios/DJ Tweek Bio.png.png) is cropped and
@@ -309,7 +309,7 @@ export const CREW_BIOS: CrewBioEntry[] = [
     name: "DJ Tweek",
     role: "DJ",
     image: "/images/djs/DJ%20Tweek.png.jpg",
-    bio: "the recognition; I do it for the love of the music and the feeling it creates when the right song hits at the right moment.\n\nI love bringing people together through music, whether that's filling a dance floor, sparking a singalong, or introducing someone to a track they didn't know they needed. My sets are built around rock and metal at heart, but if it fits the vibe and keeps the energy flowing, you'll hear it. Every crowd is different, and that's what makes every set its own experience.\n\nIf you've spent any time around me, you'll know I don't take life too seriously. I'm cheeky, I love a laugh, and I'm always up for a bit of banter. Life's too short not to have fun, and I try to bring that same energy every time I jump behind the decks.\n\nFor me, DJing has never been about pressing play—it's about creating memories, sharing the music I love, and giving people a few hours where nothing else matters except good tunes and good company.\n\nSo if you're looking for good vibes, loud music, and someone who's just as happy singing along with the crowd as he is behind the decks, you've found the right DJ. Come say hi, throw me a request, and let's make it a night to remember.",
+    bio: "the recognition; I do it for the love of the music and the feeling it creates when the right song hits at the right moment.\n\nI love bringing people together through music, whether that's filling a dance floor, sparking a singalong, or introducing someone to a track they didn't know they needed. My sets are built around rock and metal at heart, but if it fits the vibe and keeps the energy flowing, you'll hear it. Every crowd is different, and that's what makes every set its own experience.\n\nIf you've spent any time around me, you'll know I don't take life too seriously. I'm cheeky, I love a laugh, and I'm always up for a bit of banter. Life's too short not to have fun, and I try to bring that same energy every time I jump behind the decks.\n\nFor me, DJing has never been about pressing playâ€”it's about creating memories, sharing the music I love, and giving people a few hours where nothing else matters except good tunes and good company.\n\nSo if you're looking for good vibes, loud music, and someone who's just as happy singing along with the crowd as he is behind the decks, you've found the right DJ. Come say hi, throw me a request, and let's make it a night to remember.",
   },
 
   // ---- Hosts (public/images/hosts) ----
@@ -318,7 +318,7 @@ export const CREW_BIOS: CrewBioEntry[] = [
     name: "Betsy",
     role: "Host",
     image: "/images/hosts/Betsy.png.jpg",
-    bio: "I'm a fun loving party girl who lives for heavy metal, late-night gaming, and questionable party decisions. I love loud music, bold fashion, creative art, and gettin' stoned outta my gourd. When I'm online you'll usually find me laughing with friends, chasing good vibes, and proving I can rock huge boots and a curious mind at the same time. 🤘",
+    bio: "I'm a fun loving party girl who lives for heavy metal, late-night gaming, and questionable party decisions. I love loud music, bold fashion, creative art, and gettin' stoned outta my gourd. When I'm online you'll usually find me laughing with friends, chasing good vibes, and proving I can rock huge boots and a curious mind at the same time. ðŸ¤˜",
   },
   {
     id: "host-dante",
@@ -339,7 +339,7 @@ export const CREW_BIOS: CrewBioEntry[] = [
     name: "Irish Beauty",
     role: "Host",
     image: "/images/hosts/Irish_Beauty.png.png",
-    bio: "🍀 I'm your Fiery Red Headed Hostess with the Mostess, the Celtic Lass with a ton of Sass!!! I am also a Feisty Brat as some would say, but I am always here for you whenever you need me. I love to have fun and make people laugh, especially the DJ's when they are on VO. I love working at Sanctuary Rocks! It has been my home and family for years. No place I would rather host for. 🍀\n\nRock on Bitches!!!! 🤘🤘🤘",
+    bio: "ðŸ€ I'm your Fiery Red Headed Hostess with the Mostess, the Celtic Lass with a ton of Sass!!! I am also a Feisty Brat as some would say, but I am always here for you whenever you need me. I love to have fun and make people laugh, especially the DJ's when they are on VO. I love working at Sanctuary Rocks! It has been my home and family for years. No place I would rather host for. ðŸ€\n\nRock on Bitches!!!! ðŸ¤˜ðŸ¤˜ðŸ¤˜",
   },
   {
     id: "host-justi",
@@ -360,7 +360,7 @@ export const CREW_BIOS: CrewBioEntry[] = [
     name: "Mistine",
     role: "Host",
     image: "/images/hosts/Mistine.png.jpg",
-    bio: "I like my video games tactical, my books terrifying, and my coffee strong. A fun-loving country girl at heart, I am a caring, fiercely loyal friend who consciously keeps my circle small. When I'm not rescuing or doting on critters big and small, my world revolves around exploring vast RPG worlds, dominating shooter lobbies, and reading horror until sunrise—matched only by the high-energy joy of hosting crowds at my favorite rock/metal club. I also have a serious weakness for bargain hunting and freebie shopping; luckily, great deals and pizza keep me alive!",
+    bio: "I like my video games tactical, my books terrifying, and my coffee strong. A fun-loving country girl at heart, I am a caring, fiercely loyal friend who consciously keeps my circle small. When I'm not rescuing or doting on critters big and small, my world revolves around exploring vast RPG worlds, dominating shooter lobbies, and reading horror until sunriseâ€”matched only by the high-energy joy of hosting crowds at my favorite rock/metal club. I also have a serious weakness for bargain hunting and freebie shopping; luckily, great deals and pizza keep me alive!",
   },
   {
     id: "host-nawti",
@@ -388,7 +388,7 @@ export const CREW_BIOS: CrewBioEntry[] = [
     name: "Rita",
     role: "Host",
     image: "/images/hosts/Rita.png",
-    bio: "Hey rockstars! I'm Rita, Senior Staff member here at Sanctuary Rocks. In-world, I divide my time between the high-energy live music scene and my creative passions. My goal is to ensure our community always enjoys a welcoming and vibrant experience. When the music stops, I switch gears to avatar styling for my brand, SLAY, or dedicate myself to our breeding sanctuary, where my daughter and I passionately take care of KittyCats breedables. Always up for a chat, a great rock playlist, and supporting the team! 🎧✨🐾",
+    bio: "Hey rockstars! I'm Rita, Senior Staff member here at Sanctuary Rocks. In-world, I divide my time between the high-energy live music scene and my creative passions. My goal is to ensure our community always enjoys a welcoming and vibrant experience. When the music stops, I switch gears to avatar styling for my brand, SLAY, or dedicate myself to our breeding sanctuary, where my daughter and I passionately take care of KittyCats breedables. Always up for a chat, a great rock playlist, and supporting the team! ðŸŽ§âœ¨ðŸ¾",
   },
   {
     id: "host-shari",
@@ -402,7 +402,7 @@ export const CREW_BIOS: CrewBioEntry[] = [
     name: "Skeeter",
     role: "Host",
     image: "/images/hosts/Skeeter.png.jpg",
-    bio: "\"A loyal friend who is 100% down to headbang to heavy metal, provided the air conditioning is set to a crisp 62°F. Basically, a great companion, unless it's July and we're outside.\" Catch me in the mosh pit or hiding indoors until October.",
+    bio: "\"A loyal friend who is 100% down to headbang to heavy metal, provided the air conditioning is set to a crisp 62Â°F. Basically, a great companion, unless it's July and we're outside.\" Catch me in the mosh pit or hiding indoors until October.",
   },
   {
     id: "host-troya",
@@ -423,7 +423,7 @@ export const CREW_BIOS: CrewBioEntry[] = [
     name: "Bre",
     role: "Host",
     image: "/images/hosts/Bre.png.png",
-    bio: "When she's not hosting at SR, you'll likely find the camera behind her, expanding her ever-growing breedable collection, or spending quality time with her wife, Lisa. Family means everything to Bre, and it's at the heart of everything she does.\n\nFeeling lucky? There's a good chance she's off at one of the many gaming sims, chasing that next big jackpot—though knowing Bre, the laughs usually come faster than the winnings!\n\nHer goofy, unpredictable personality keeps everyone on their toes. With a quick wit, infectious laugh, and a talent for cracking herself up just as much as everyone around her, you never quite know what to expect when Bre is hosting... and that's exactly what makes her so much fun to be around.",
+    bio: "When she's not hosting at SR, you'll likely find the camera behind her, expanding her ever-growing breedable collection, or spending quality time with her wife, Lisa. Family means everything to Bre, and it's at the heart of everything she does.\n\nFeeling lucky? There's a good chance she's off at one of the many gaming sims, chasing that next big jackpotâ€”though knowing Bre, the laughs usually come faster than the winnings!\n\nHer goofy, unpredictable personality keeps everyone on their toes. With a quick wit, infectious laugh, and a talent for cracking herself up just as much as everyone around her, you never quite know what to expect when Bre is hosting... and that's exactly what makes her so much fun to be around.",
   },
   {
     id: "host-cats",
@@ -437,7 +437,7 @@ export const CREW_BIOS: CrewBioEntry[] = [
     name: "Essa",
     role: "Host",
     image: "/images/hosts/Essa.png.png",
-    bio: "Southern California born and bred, I'm mischievous with a dash of brat, a little wild with a kinky streak, and always up for a good time that never seems to end. Beneath that playful side is someone who is fiercely loyal, honest, and wears her heart on her sleeve—once you've earned my heart, you have it for life, and I'll stand by you through thick and thin. Music is woven into my soul, and while I love all genres, nothing hits me quite like metal. When I'm hosting, I thrive on feeding that energy back to the crowd, dancing on stage and sharing the incredible connection that music creates. Creativity is another passion of mine, whether I'm writing poetry and short stories, crafting something new, or getting lost in a great book or movie. My little Chihuahua, Xoomer, has been my faithful sidekick through everything, and my two cats are just as spoiled and loved. I choose to look for the bright side in every situation and live each day as though it could be my last, making sure I never let life's adventures—or the people who matter most—pass me by.",
+    bio: "Southern California born and bred, I'm mischievous with a dash of brat, a little wild with a kinky streak, and always up for a good time that never seems to end. Beneath that playful side is someone who is fiercely loyal, honest, and wears her heart on her sleeveâ€”once you've earned my heart, you have it for life, and I'll stand by you through thick and thin. Music is woven into my soul, and while I love all genres, nothing hits me quite like metal. When I'm hosting, I thrive on feeding that energy back to the crowd, dancing on stage and sharing the incredible connection that music creates. Creativity is another passion of mine, whether I'm writing poetry and short stories, crafting something new, or getting lost in a great book or movie. My little Chihuahua, Xoomer, has been my faithful sidekick through everything, and my two cats are just as spoiled and loved. I choose to look for the bright side in every situation and live each day as though it could be my last, making sure I never let life's adventuresâ€”or the people who matter mostâ€”pass me by.",
   },
   {
     id: "host-lisa",
@@ -479,7 +479,7 @@ export const CREW_BIOS: CrewBioEntry[] = [
     name: "Scar",
     role: "Host",
     image: "/images/hosts/Scar.png.png",
-    bio: "With more than 20 years of combined hosting experience, I have built a passion for bringing people together and creating an atmosphere where everyone feels welcome, valued, and included. I believe that great hosting is about more than just keeping the conversation going—it's about genuinely caring for the people around you, making new friends, and ensuring every guest has an unforgettable experience.\n\nMy goal is to create a fun, friendly, and positive environment where laughter, great conversations, and amazing music come together. I take pride in interacting with our guests, making everyone feel like part of the family, and keeping the energy high from the moment they arrive until the very last song.\n\nWhether I'm welcoming newcomers or catching up with familiar faces, I'm dedicated to making every event entertaining, engaging, and filled with lasting memories.",
+    bio: "With more than 20 years of combined hosting experience, I have built a passion for bringing people together and creating an atmosphere where everyone feels welcome, valued, and included. I believe that great hosting is about more than just keeping the conversation goingâ€”it's about genuinely caring for the people around you, making new friends, and ensuring every guest has an unforgettable experience.\n\nMy goal is to create a fun, friendly, and positive environment where laughter, great conversations, and amazing music come together. I take pride in interacting with our guests, making everyone feel like part of the family, and keeping the energy high from the moment they arrive until the very last song.\n\nWhether I'm welcoming newcomers or catching up with familiar faces, I'm dedicated to making every event entertaining, engaging, and filled with lasting memories.",
   },
   {
     id: "host-tifani",
@@ -500,7 +500,7 @@ export const CREW_BIOS: CrewBioEntry[] = [
     name: "Mocha",
     role: "Host",
     image: "/images/hosts/Mocha.png.jpg",
-    bio: "Hey, I'm Mocha. Music has always been more than background noise to me—it's where I feel most alive. Music is my escape, sarcasm is my favorite language, and laughter is something I never run out of. I enjoy meeting new people, making real connections, and turning ordinary nights into unforgettable memories. Whether we're talking music, sharing a drink, or just causing a little harmless chaos, you'll usually find me right where the energy is. Life's too short for fake vibes... so if you're looking for good company and a great night, come say hi.",
+    bio: "Hey, I'm Mocha. Music has always been more than background noise to meâ€”it's where I feel most alive. Music is my escape, sarcasm is my favorite language, and laughter is something I never run out of. I enjoy meeting new people, making real connections, and turning ordinary nights into unforgettable memories. Whether we're talking music, sharing a drink, or just causing a little harmless chaos, you'll usually find me right where the energy is. Life's too short for fake vibes... so if you're looking for good company and a great night, come say hi.",
   },
   {
     id: "host-tilly",
@@ -514,9 +514,78 @@ export const CREW_BIOS: CrewBioEntry[] = [
     name: "Fanny FooFoo",
     role: "Host",
     image: "/images/hosts/Fanny%20FooFoo.png.jpg",
-    bio: "Hi, I'm Fanny FooFoo—hostess at Sanctuary Rocks, where the music is loud, the drinks are questionable, and bad decisions make the best stories.\n\nI'm the kind of gal who can welcome you to the club, start a dance party, accidentally enable your shopping addiction, and convince you that buying just one more outfit is practically self-care.\n\nWhen I'm not causing perfectly acceptable levels of mayhem at Sanctuary Rocks, you'll find me DJing somewhere in Second Life, making YouTube videos about Second Life tips, tricks, news, and all the wonderfully weird things this virtual world has to offer. If I'm not filming or spinning tunes, I'm probably designing clothes, exploring the grid, collecting new friends like they're rare achievements, or wandering off on another adventure because... ooh, shiny!\n\nI'm outgoing, adventurous, slightly over-caffeinated, and firmly believe laughter should be mandatory. I love meeting new people, making connections, and proving that life is way more fun when you don't take yourself too seriously.\n\nLife's too short for boring avatars and silent dance floors. So grab a drink, crank the volume to eleven, and if you here a random cry of \"WHAT COULD POSSIBLY GO WRONG?\"... yeah, that's probably me.\n\nI don't just bring the party... I bring the Foo!",
+    bio: "Hi, I'm Fanny FooFooâ€”hostess at Sanctuary Rocks, where the music is loud, the drinks are questionable, and bad decisions make the best stories.\n\nI'm the kind of gal who can welcome you to the club, start a dance party, accidentally enable your shopping addiction, and convince you that buying just one more outfit is practically self-care.\n\nWhen I'm not causing perfectly acceptable levels of mayhem at Sanctuary Rocks, you'll find me DJing somewhere in Second Life, making YouTube videos about Second Life tips, tricks, news, and all the wonderfully weird things this virtual world has to offer. If I'm not filming or spinning tunes, I'm probably designing clothes, exploring the grid, collecting new friends like they're rare achievements, or wandering off on another adventure because... ooh, shiny!\n\nI'm outgoing, adventurous, slightly over-caffeinated, and firmly believe laughter should be mandatory. I love meeting new people, making connections, and proving that life is way more fun when you don't take yourself too seriously.\n\nLife's too short for boring avatars and silent dance floors. So grab a drink, crank the volume to eleven, and if you here a random cry of \"WHAT COULD POSSIBLY GO WRONG?\"... yeah, that's probably me.\n\nI don't just bring the party... I bring the Foo!",
   },
-];
+  {
+    id: "dj-aki",
+    name: "DJ Aki",
+    role: "DJ",
+    image: "/images/djs/DJ%20Aki.png",
+    bio: "",
+  },
+  {
+    id: "dj-cain",
+    name: "DJ Cain",
+    role: "DJ",
+    image: "/images/djs/DJ%20Cain.png",
+    bio: "Likes Metal, Rock, Industrial, Trance, EBM, EDM, Techno, House, Psychedelic mixes and genres!",
+  },
+  {
+    id: "dj-ferrea",
+    name: "DJ Ferrea",
+    role: "DJ",
+    image: "/images/djs/DJ%20Ferrea.png",
+    bio: "",
+  },
+  {
+    id: "dj-kevin",
+    name: "DJ Kevin",
+    role: "DJ",
+    image: "/images/djs/DJ%20Kevin.png",
+    bio: "A DJ from the Midwestern USA who likes to play rock and metal.",
+  },
+  {
+    id: "dj-knux",
+    name: "DJ Knux",
+    role: "DJ",
+    image: "/images/djs/DJ_Knux.png",
+    bio: "",
+  },
+  {
+    id: "dj-jimmy",
+    name: "DJ Jimmy",
+    role: "DJ",
+    image: "/images/djs/JIMMY_PROFILE_JUL25.png",
+    bio: "",
+  },
+  {
+    id: "dj-richbo",
+    name: "Richbo",
+    role: "DJ",
+    image: "/images/djs/Richbo.png",
+    bio: "Metalcore/Deathcore Dealer | Professional “BLEGH” Enthusiast\n\nIf your speakers aren’t crying, I’m not trying.\n\n• I specialize in:\n• Illegal levels of bass\n• Breakdowns that make avatars reconsider their life choices\n• Randomly yelling “BLEGH” at emotionally appropriate moments",
+  },
+  {
+    id: "host-mori",
+    name: "Mori",
+    role: "Host",
+    image: "/images/hosts/Mori.png",
+    bio: "My name is Mori Moonchild. I'm a 35-year-old stay-at-home mother of two and the owner and creator of Insatiably Dead in Second Life. I've been in Second Life for 21 years. I've been DJing for about three and a half years, and I'm now beginning my DJ career at Kabila Succubus Lounge. I'm also into horror collecting, specifically Good Guy dolls, and photography.",
+  },
+  {
+    id: "host-tea",
+    name: "Tea",
+    role: "Host",
+    image: "/images/hosts/Tea_Host.png",
+    bio: "CM Manager Teaghen — manager and hostess, coffee addict, and dog momma.",
+  },
+  {
+    id: "host-verita",
+    name: "Verita",
+    role: "Host",
+    image: "/images/hosts/Verita.png",
+    bio: "Hello there! I am an Upper Michigan girl who loves to host and loves all kinds of rock and music that fuel my soul. When I am rocking out in the club, I love shopping and taking photos and edited photos. My heart is full with my furry baby, blending my interests into a tapestry of creativity, having fun, and hanging out with my friends and family.",
+  },];
 
 const BIO_ENTRY_BY_NORMALIZED_NAME = new Map(
   CREW_BIOS.map((entry) => [normalizeForMatch(entry.name), entry]),
@@ -529,3 +598,5 @@ const BIO_ENTRY_BY_NORMALIZED_NAME = new Map(
 export function findBioEntry(name: string): CrewBioEntry | undefined {
   return BIO_ENTRY_BY_NORMALIZED_NAME.get(normalizeForMatch(name));
 }
+
+
