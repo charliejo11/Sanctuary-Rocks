@@ -600,6 +600,13 @@ export const CREW_BIOS: CrewBioEntry[] = [
     image: "/images/djs/DJ_Frenchie_Fry.jpg",
     bio: "SL Hall of Fame Honorary DJ, inducted November 2015. High-energy and fun-loving rock, metal and industrial DJ. DJing since 2008 in Second Life.",
   },
+  {
+    id: "host-lila",
+    name: "Lila",
+    role: "Host",
+    image: "/images/hosts/Lila.png",
+    bio: "CRITICAL ERROR: Brain.exe not found.",
+  },
 ];
 
 const BIO_ENTRY_BY_NORMALIZED_NAME = new Map(
@@ -613,6 +620,7 @@ const BIO_ENTRY_BY_NORMALIZED_NAME = new Map(
 export function findBioEntry(name: string): CrewBioEntry | undefined {
   return BIO_ENTRY_BY_NORMALIZED_NAME.get(normalizeForMatch(name));
 }
+
 
 
 
