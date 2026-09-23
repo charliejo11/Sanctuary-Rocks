@@ -352,6 +352,34 @@
   margin-top: 0 !important;
 }
 
+/* =========================================================================
+   HELLFORGED SERPENT PLAYER FOOTPRINT
+
+   The skull/snake shell is a 4:3 plate, so the player needs more width than
+   the old rectangular box to keep the DJ / ARTIST / SONG panel legible.
+   Everything else about the hero overlay (position, centering, pointer-events)
+   is untouched. All inner styling lives in SanctuaryPlayer.module.css.
+   ========================================================================= */
+
+.sanctuary-main-page .home-poster-player,
+.home-poster-player {
+  width: min(620px, 88vw) !important;
+}
+
+@media (max-width: 900px) {
+  .sanctuary-main-page .home-poster-player,
+  .home-poster-player {
+    width: min(540px, 90vw) !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .sanctuary-main-page .home-poster-player,
+  .home-poster-player {
+    width: min(440px, 94vw) !important;
+  }
+}
+
 
 
 

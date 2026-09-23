@@ -1,4 +1,4 @@
-﻿import LiveNowBox from "./components/LiveNowBox";
+﻿import SanctuaryPlayer from "./components/SanctuaryPlayer";
 
 export default function Home() {
   return (
@@ -40,7 +40,7 @@ export default function Home() {
         />
 
         <div className="home-poster-player">
-          <LiveNowBox />
+          <SanctuaryPlayer />
         </div>
       </section>
     </main>

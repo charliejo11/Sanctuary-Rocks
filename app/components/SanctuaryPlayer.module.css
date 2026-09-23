@@ -1,0 +1,567 @@
+/* =============================================================================
+   SANCTUARY ROCKS — "Hellforged Serpent" stream player skin
+
+   Scoped CSS Module. Class names are hashed at build time, so nothing here
+   collides with the legacy `.live-mp3-player` / `.mp3-*` rules still living in
+   globals.css + player-fix.css.
+
+   The artwork is decorative only (`pointer-events: none`, empty alt). Every
+   control on top of it is a real HTML element: the real <input type="range">
+   sits exactly over the painted slider track and the real mute <button> sits
+   exactly over the painted speaker, so the skin reads as one object without
+   any image-only fakes.
+
+   ---------------------------------------------------------------------------
+   TUNING — all artwork-dependent geometry is in the ARTWORK ZONES block below,
+   expressed as a % of the 1448 x 1086 PNG. If the art is ever re-cut, adjust
+   those numbers and nothing else.
+   ---------------------------------------------------------------------------
+   ========================================================================== */
+
+.player {
+  /* --- palette (from globals.css :root) --- */
+  --sr-ember: #ff6a1c;
+  --sr-ember-hot: #ffb04a;
+  --sr-blood: #87171b;
+  --sr-bone: #f2ede4;
+  --sr-ash: rgba(215, 208, 196, 0.66);
+
+  /* ======================= ARTWORK ZONES ================================= */
+  /* Black centre panel interior: x 282-1180, y 528-756 of 1448 x 1086 */
+  --sr-panel-left: 19.4%;
+  --sr-panel-right: 18.5%;
+  --sr-panel-top: 48.4%;
+  /* Text stops above the painted control strip (which starts at y ~680). */
+  --sr-panel-bottom: 38.2%;
+
+  /* Empty black pocket, lower-left of the panel: x 282-790, y 678-760 */
+  --sr-pocket-left: 19.4%;
+  --sr-pocket-bottom: 30.2%;
+  --sr-pocket-max-width: 34%;
+
+  /* Painted slider track: x 840-1088, vertical centre y 727 */
+  --sr-slider-left: 58%;
+  --sr-slider-right: 24.9%;
+  --sr-slider-center-y: 66.9%;
+
+  /* Painted speaker medallion: centre (1192, 723), diameter ~98px */
+  --sr-mute-left: 78.9%;
+  --sr-mute-top: 62.1%;
+  --sr-mute-size: 6.8%;
+
+  --sr-art-aspect: 1448 / 1086;
+  /* ======================================================================== */
+
+  position: relative;
+  width: 100%;
+  margin: 0;
+
+  /* Drives every cqi size below, so the whole skin scales with the artwork
+     instead of snapping between breakpoints. */
+  container-type: inline-size;
+
+  /* The hero wrapper (.home-poster-player) is pointer-events: none so it does
+     not eat clicks on the poster behind it. Re-enable for the player itself. */
+  pointer-events: auto;
+
+  font-family: var(--font-body, Arial, Helvetica, sans-serif);
+  line-height: 1;
+}
+
+/* ---------------------------------------------------------------- artwork -- */
+
+.art {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: var(--sr-art-aspect);
+  user-select: none;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+/* Rendered instead of .art if the PNG is missing or fails to load, so the
+   player is never left as a broken image in production. */
+.artFallback {
+  width: 100%;
+  aspect-ratio: var(--sr-art-aspect);
+  border: 1px solid rgba(255, 108, 31, 0.5);
+  border-radius: 14px;
+  background:
+    radial-gradient(ellipse at 50% 18%, rgba(255, 106, 28, 0.2), transparent 62%),
+    linear-gradient(180deg, #17100d 0%, #070505 58%, #100a08 100%);
+  box-shadow:
+    0 0 34px rgba(255, 86, 18, 0.18),
+    inset 0 1px 0 rgba(255, 229, 198, 0.14);
+  pointer-events: none;
+}
+
+/* Locked to the artwork's own box via aspect-ratio rather than `inset: 0`, so
+   every % below stays keyed to the art even when the responsive layout adds a
+   control bar underneath and makes .player taller than the image. */
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  aspect-ratio: var(--sr-art-aspect);
+  pointer-events: none; /* children opt back in individually */
+}
+
+/* --------------------------------------------------- DJ / ARTIST / SONG --- */
+
+/* Direct child of .player (not .overlay) so it can drop out of the artwork and
+   into normal flow on narrow screens. On desktop .player is exactly as tall as
+   the image — .meta and .footer are both absolute — so these percentages are
+   keyed to the art. */
+.meta {
+  position: absolute;
+  top: var(--sr-panel-top);
+  right: var(--sr-panel-right);
+  bottom: var(--sr-panel-bottom);
+  left: var(--sr-panel-left);
+
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-content: center;
+  align-items: baseline;
+  column-gap: 2.2cqi;
+  row-gap: 0.5cqi;
+
+  margin: 0;
+  pointer-events: auto;
+}
+
+.rowLabel {
+  margin: 0;
+  color: var(--sr-ash);
+  font-size: 1.75cqi;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.rowValue {
+  display: flex;
+  align-items: center;
+  gap: 1.4cqi;
+
+  margin: 0;
+  min-width: 0;
+
+  color: var(--sr-bone);
+  font-size: 2.5cqi;
+  font-weight: 700;
+  line-height: 1.1;
+  text-shadow:
+    0 0 1.4cqi rgba(255, 106, 28, 0.35),
+    0 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+/* The value itself truncates; the flex row around it holds the live dot. */
+.rowText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.valueDj .rowText {
+  color: var(--sr-ember-hot);
+  font-family: var(--font-display, Impact, Haettenschweiler, sans-serif);
+  font-size: 3.1cqi;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.liveDot {
+  width: 1.4cqi;
+  height: 1.4cqi;
+  flex: none;
+  border-radius: 50%;
+  background: #4a4340;
+}
+
+.liveDotOn {
+  background: var(--sr-ember);
+  box-shadow: 0 0 1.4cqi rgba(255, 106, 28, 0.95);
+  animation: srPulse 1.9s ease-in-out infinite;
+}
+
+@keyframes srPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* ------------------------------------------------------- play + equalizer -- */
+
+/* Lives in the empty black pocket at the lower left of the centre panel. */
+.footer {
+  position: absolute;
+  bottom: var(--sr-pocket-bottom);
+  left: var(--sr-pocket-left);
+  max-width: var(--sr-pocket-max-width);
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  pointer-events: auto;
+}
+
+.playButton {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+
+  min-height: 5.2cqi;
+  padding: 0 2.8cqi;
+
+  border: 1px solid rgba(255, 176, 74, 0.85);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 110, 28, 0.98), rgba(116, 22, 16, 0.96));
+  box-shadow:
+    0 0 2.4cqi rgba(255, 86, 18, 0.45),
+    inset 0 1px 0 rgba(255, 229, 198, 0.32),
+    inset 0 -0.8cqi 1.4cqi rgba(0, 0, 0, 0.42);
+
+  color: var(--sr-bone);
+  font-family: inherit;
+  font-size: 2cqi;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+
+  transition:
+    box-shadow 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
+}
+
+/* Inside .overlay so it is keyed to the art: it sits beside the play button in
+   the pocket on desktop, and centres in the panel once the text moves out. */
+.equalizer {
+  position: absolute;
+  bottom: 31.6%;
+  left: 43%;
+
+  display: flex;
+  align-items: flex-end;
+  gap: 0.6cqi;
+  height: 3cqi;
+}
+
+.equalizer span {
+  width: 0.7cqi;
+  height: 32%;
+  border-radius: 0.35cqi;
+  background: linear-gradient(180deg, var(--sr-ember-hot), var(--sr-blood));
+  transform-origin: bottom;
+}
+
+.equalizerActive span {
+  animation: srBars 900ms ease-in-out infinite;
+}
+
+.equalizerActive span:nth-child(2) {
+  animation-delay: 140ms;
+}
+.equalizerActive span:nth-child(3) {
+  animation-delay: 280ms;
+}
+.equalizerActive span:nth-child(4) {
+  animation-delay: 420ms;
+}
+.equalizerActive span:nth-child(5) {
+  animation-delay: 560ms;
+}
+
+@keyframes srBars {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(2.9);
+  }
+}
+
+/* --------------------------------------------------------------- volume --- */
+
+/* Sits directly on top of the painted speaker medallion. */
+.muteButton {
+  appearance: none;
+  position: absolute;
+  top: var(--sr-mute-top);
+  left: var(--sr-mute-left);
+  width: var(--sr-mute-size);
+  aspect-ratio: 1;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+
+  border: 1px solid rgba(255, 176, 74, 0.75);
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 30%, #3a2018, #120907 70%);
+  box-shadow:
+    0 0 1.8cqi rgba(255, 86, 18, 0.5),
+    inset 0 1px 0 rgba(255, 229, 198, 0.18);
+
+  color: var(--sr-ember);
+  cursor: pointer;
+  pointer-events: auto;
+
+  transition:
+    box-shadow 180ms ease,
+    color 180ms ease;
+}
+
+.muteButton svg {
+  width: 54%;
+  height: 54%;
+  fill: currentColor;
+}
+
+.muteButtonOn {
+  color: var(--sr-ash);
+  box-shadow:
+    0 0 1.2cqi rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(255, 229, 198, 0.12);
+}
+
+/* Sits directly on top of the painted slider track. */
+.volumeSlider {
+  -webkit-appearance: none;
+  appearance: none;
+  position: absolute;
+  top: var(--sr-slider-center-y);
+  right: var(--sr-slider-right);
+  left: var(--sr-slider-left);
+
+  height: 2.2cqi;
+  margin: 0;
+  transform: translateY(-50%);
+
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--sr-ember-hot) 0%,
+    var(--sr-ember) calc(var(--sr-vol) * 1%),
+    rgba(12, 6, 4, 0.92) calc(var(--sr-vol) * 1%),
+    rgba(12, 6, 4, 0.92) 100%
+  );
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.75),
+    0 0 1.6cqi rgba(255, 86, 18, 0.45);
+
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.volumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 3.4cqi;
+  height: 3.4cqi;
+  border: 1px solid rgba(255, 200, 130, 0.95);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff1e0, #ff6a1c 58%, #7a1a0e);
+  box-shadow: 0 0 1.8cqi rgba(255, 106, 28, 0.9);
+  cursor: pointer;
+}
+
+.volumeSlider::-moz-range-thumb {
+  width: 3.4cqi;
+  height: 3.4cqi;
+  border: 1px solid rgba(255, 200, 130, 0.95);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff1e0, #ff6a1c 58%, #7a1a0e);
+  box-shadow: 0 0 1.8cqi rgba(255, 106, 28, 0.9);
+  cursor: pointer;
+}
+
+/* ---------------------------------------------------------- shared states -- */
+
+.playButton:hover,
+.muteButton:hover {
+  color: #fff;
+  box-shadow:
+    0 0 3cqi rgba(255, 86, 18, 0.65),
+    inset 0 1px 0 rgba(255, 229, 198, 0.3);
+  transform: translateY(-1px);
+}
+
+.playButton:active,
+.muteButton:active {
+  transform: translateY(1px);
+}
+
+.playButton:focus-visible,
+.muteButton:focus-visible,
+.volumeSlider:focus-visible {
+  outline: 2px solid var(--sr-ember-hot);
+  outline-offset: 3px;
+}
+
+/* Playback failure notice — sits directly under the play button, so it never
+   displaces the artwork on the rare occasion the stream refuses to start. */
+.error {
+  margin: 0.5em 0 0;
+  color: #ff9c6b;
+  font-size: 1.8cqi;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+/* The stream itself: no native chrome, but a real, fully functional element. */
+.audio {
+  display: none;
+}
+
+/* On-air state is carried by an ember dot; this keeps it available to screen
+   readers without adding a visible line to the cramped panel. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ============================================================== responsive ==
+   Below 520px the black panel is only ~230px wide, which would truncate song
+   titles to a few characters. So the metadata block and the play control leave
+   the artwork and stack underneath it in a matching ember-edged plate, at fixed
+   px sizes that stay legible and tappable. Volume stays welded to the painted
+   controls — growing them slightly — so the artwork never shows a control that
+   isn't real. Same markup, same behaviour, nothing hidden.
+   ========================================================================== */
+
+@container (max-width: 519px) {
+  /* Both .meta and .footer return to normal flow, so .player grows to fit them
+     and the artwork keeps its own box via .overlay's aspect-ratio. */
+  .meta,
+  .footer {
+    position: static;
+    inset: auto;
+    max-width: none;
+  }
+
+  .meta {
+    grid-template-columns: max-content minmax(0, 1fr);
+    column-gap: 10px;
+    row-gap: 4px;
+
+    margin-top: -4%;
+    padding: 10px 14px;
+
+    border: 1px solid rgba(255, 108, 31, 0.45);
+    border-radius: 10px;
+    background: linear-gradient(180deg, rgba(14, 9, 7, 0.97), rgba(3, 2, 2, 0.98));
+    box-shadow:
+      0 0 22px rgba(255, 86, 18, 0.16),
+      inset 0 1px 0 rgba(255, 176, 74, 0.14);
+  }
+
+  .rowLabel {
+    font-size: 9px;
+    letter-spacing: 0.16em;
+  }
+
+  .rowValue {
+    gap: 7px;
+    font-size: 13px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95);
+  }
+
+  .valueDj .rowText {
+    font-size: 17px;
+  }
+
+  .liveDot {
+    width: 7px;
+    height: 7px;
+  }
+
+  .footer {
+    align-items: center;
+    margin-top: 8px;
+  }
+
+  .error {
+    font-size: 11px;
+    text-align: center;
+  }
+
+  .playButton {
+    width: 100%;
+    max-width: 280px;
+    min-height: 42px;
+    padding: 0 18px;
+    font-size: 11px;
+  }
+
+  /* Centred in the now-empty panel, where it stands in for the track text. */
+  .equalizer {
+    top: 56%;
+    right: auto;
+    bottom: auto;
+    left: 50%;
+    height: 30px;
+    gap: 5px;
+    transform: translate(-50%, -50%);
+  }
+
+  .equalizer span {
+    width: 5px;
+    border-radius: 3px;
+  }
+
+  /* Grown past the painted medallion/track so both stay comfortably tappable. */
+  .muteButton {
+    top: 60%;
+    left: 77.3%;
+    width: 10%;
+  }
+
+  .volumeSlider {
+    left: 53%;
+    height: 8px;
+  }
+
+  .volumeSlider::-webkit-slider-thumb {
+    width: 18px;
+    height: 18px;
+  }
+
+  .volumeSlider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .liveDotOn,
+  .equalizerActive span {
+    animation: none;
+  }
+
+  .playButton,
+  .muteButton {
+    transition: none;
+  }
+}
