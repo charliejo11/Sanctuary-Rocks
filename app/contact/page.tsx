@@ -1,78 +1,70 @@
-﻿import ContactPhoto from "./ContactPhoto";
-import { loadManagers, loadOwners } from "../data/crew";
-import { normalizeForMatch } from "../data/crewTypes";
+﻿import ContactCrewCard, { type StaffSlot } from "./ContactCrewCard";
+import { generalManagers, owners } from "./staffData";
 
-// Force a fresh render on every request so newly added owner/manager photos
-// show up without a rebuild.
-export const dynamic = "force-dynamic";
+const TELEPORT_URL =
+  "http://maps.secondlife.com/secondlife/Rhage/160/106/24";
 
-const TELEPORT_URL = "http://maps.secondlife.com/secondlife/Rhage/160/106/24";
-const GRIDSTER_URL = "https://gridster.elfavina89.workers.dev";
-const DISCORD_URL = "https://discord.gg/239QyWDW4";
-const VIP_APPLICATION_URL = "https://discord.gg/GdsJeQDnc";
+const GRIDSTER_URL =
+  "https://gridster.elfavina89.workers.dev";
 
-type Box = { left: number; top: number; width: number; height: number };
+const DISCORD_URL =
+  "https://discord.gg/239QyWDW4";
 
-// Percentages measured directly against contact_hero.png.png (1024x1536),
-// matching the three OWNER frames and two GENERAL MANAGER frames baked
-// into the artwork, left-to-right.
-const OWNER_FRAMES: Box[] = [
-  { left: 13, top: 61, width: 19, height: 7.8 },
-  { left: 40, top: 61, width: 20, height: 7.8 },
-  { left: 67.5, top: 61, width: 19.5, height: 7.8 },
+const VIP_APPLICATION_URL =
+  "https://discord.gg/GdsJeQDnc";
+
+// Inner photo opening of each metal frame baked into contact_hero.png.png,
+// measured directly off the artwork (percent of the 1024 x 1536 image) so
+// every staff photo sits flush inside its frame instead of floating over
+// it. If the hero art is ever redrawn, these are the only numbers that
+// need to be re-measured and updated.
+const OWNER_SLOTS: StaffSlot[] = [
+  { left: 13.48, top: 60.81, width: 18.26, height: 7.68 },
+  { left: 40.53, top: 60.81, width: 18.55, height: 7.68 },
+  { left: 68.36, top: 60.81, width: 18.36, height: 7.68 },
 ];
 
-const MANAGER_FRAMES: Box[] = [
-  { left: 23.5, top: 74, width: 23, height: 5.5 },
-  { left: 53.5, top: 74, width: 23, height: 5.5 },
+const MANAGER_SLOTS: StaffSlot[] = [
+  { left: 25.88, top: 73.7, width: 18.85, height: 5.99 },
+  { left: 54.49, top: 73.7, width: 18.75, height: 5.99 },
 ];
 
-// The manager/owner frames are much wider than they are tall, while a few
-// of the current photos are tall vertical portraits - a plain center crop
-// on those would show mostly hair. Nudge the crop toward the face for the
-// ones that need it, keyed by normalized name.
-const OBJECT_POSITION_OVERRIDES: Record<string, string> = {
-  "troya gm": "center 5%",
-};
-
-function FramedPhoto({ box, name, image }: { box: Box; name: string; image: string }) {
-  return (
-    <div
-      className="contact-photo"
-      style={{
-        left: `${box.left}%`,
-        top: `${box.top}%`,
-        width: `${box.width}%`,
-        height: `${box.height}%`,
-      }}
-    >
-      <ContactPhoto
-        src={image}
-        alt={name}
-        objectPosition={OBJECT_POSITION_OVERRIDES[normalizeForMatch(name)]}
-      />
-    </div>
-  );
+// Chooses which baked-in frame(s) a group of staff fills: a single person
+// is centered in the middle frame, two take the outer two, and so on.
+function pickSlots(slots: StaffSlot[], count: number): StaffSlot[] {
+  if (count <= 0) return [];
+  if (slots.length === 3 && count === 1) return [slots[1]];
+  if (slots.length === 3 && count === 2) return [slots[0], slots[2]];
+  return slots.slice(0, count);
 }
 
-export default function ContactPage() {
-  const owners = loadOwners().slice(0, OWNER_FRAMES.length);
-  const managers = loadManagers().slice(0, MANAGER_FRAMES.length);
+const ownerSlots = pickSlots(OWNER_SLOTS, owners.length);
+const managerSlots = pickSlots(MANAGER_SLOTS, generalManagers.length);
 
+export default function ContactPage() {
   return (
     <main className="contact-template">
+
       <img
         src="/images/hero/contact_hero.png.png"
-        alt="Contact Sanctuary Rocks - questions, or ready to join the crew?"
+        alt="Contact Sanctuary Rocks"
         className="contact-template-image"
       />
 
-      {owners.map((owner, index) => (
-        <FramedPhoto key={owner.image} box={OWNER_FRAMES[index]} name={owner.name} image={owner.image} />
+      {owners.map((member, index) => (
+        <ContactCrewCard
+          key={member.name}
+          member={member}
+          slot={ownerSlots[index]}
+        />
       ))}
 
-      {managers.map((manager, index) => (
-        <FramedPhoto key={manager.image} box={MANAGER_FRAMES[index]} name={manager.name} image={manager.image} />
+      {generalManagers.map((member, index) => (
+        <ContactCrewCard
+          key={member.name}
+          member={member}
+          slot={managerSlots[index]}
+        />
       ))}
 
       <a
@@ -81,24 +73,41 @@ export default function ContactPage() {
         rel="noopener noreferrer"
         aria-label="Teleport to Sanctuary Rocks in Second Life"
         className="contact-hotspot"
-        style={{ left: "36%", top: "23.2%", width: "31.5%", height: "5%" }}
+        style={{
+          left: "36%",
+          top: "23.2%",
+          width: "31.5%",
+          height: "5%",
+        }}
       />
+
       <a
         href={VIP_APPLICATION_URL}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Apply to work at Sanctuary Rocks through the VIP Discord"
+        aria-label="Apply to work at Sanctuary Rocks"
         className="contact-hotspot"
-        style={{ left: "14%", top: "51.4%", width: "34%", height: "4%" }}
-      />      <a
+        style={{
+          left: "14%",
+          top: "51.4%",
+          width: "34%",
+          height: "4%",
+        }}
+      />
+
+      <a
         href={GRIDSTER_URL}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Visit Gridster"
         className="contact-hotspot"
-        style={{ left: "13%", top: "86.8%", width: "34.5%", height: "7.4%" }}
+        style={{
+          left: "13%",
+          top: "86.8%",
+          width: "34.5%",
+          height: "7.4%",
+        }}
       />
-
 
       <a
         href={DISCORD_URL}
@@ -106,14 +115,14 @@ export default function ContactPage() {
         rel="noopener noreferrer"
         aria-label="Join the Sanctuary Rocks Discord"
         className="contact-hotspot"
-        style={{ left: "52.5%", top: "86.8%", width: "34.5%", height: "7.4%" }}
+        style={{
+          left: "52.5%",
+          top: "86.8%",
+          width: "34.5%",
+          height: "7.4%",
+        }}
       />
+
     </main>
   );
 }
-
-
-
-
-
-
