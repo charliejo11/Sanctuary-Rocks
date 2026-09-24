@@ -3,22 +3,8 @@
    SANCTUARY HOMEPAGE PLAYER ONLY
    ========================================= */
 
-.home-poster-player {
-  position: absolute !important;
-  top: 51% !important;
-  left: 50% !important;
-  z-index: 100 !important;
-
-  width: min(420px, 82vw) !important;
-  height: auto !important;
-
-  margin: 0 !important;
-  padding: 0 !important;
-
-  transform: translate(-50%, -50%) !important;
-
-  pointer-events: none !important;
-}
+/* Wrapper position/size for the homepage player now lives in globals.css
+   (.home-poster-player), next to the hero it is placed on. */
 
 .home-poster-player .live-now-wrap {
   position: static !important;
@@ -258,21 +244,8 @@
   text-overflow: ellipsis;
 }
 
-/* Tablet */
-@media (max-width: 900px) {
-  .home-poster-player {
-    top: 51% !important;
-    width: min(480px, 84vw) !important;
-  }
-}
-
 /* Phone */
 @media (max-width: 560px) {
-  .home-poster-player {
-    top: 51% !important;
-    width: min(340px, 90vw) !important;
-  }
-
   .home-poster-player .live-mp3-player {
     grid-template-columns: minmax(0, 1fr) 94px !important;
   }
@@ -297,16 +270,6 @@
   }
 }
 
-
-
-
-
-.sanctuary-main-page .home-poster-player { top: 51% !important; left: 50% !important; transform: translate(-50%, -50%) !important; }
-
-
-
-
-
 /* ===== FINAL GRIDSTER CLICK AREA ===== */
 
 /* Old artwork buttons no longer exist — prevent them stealing clicks */
@@ -316,13 +279,13 @@
   pointer-events: none !important;
 }
 
-/* Cover the actual purple GRIDSTER panel */
+/* Cover the purple GRIDSTER panel in the lower right of the hero art. */
 .home-poster-hotspot--gridster {
   position: absolute !important;
-  right: 7% !important;
-  bottom: 6% !important;
-  width: 21% !important;
-  height: 13% !important;
+  right: 9.3% !important;
+  bottom: 5% !important;
+  width: 18% !important;
+  height: 10.4% !important;
 
   display: block !important;
   z-index: 500 !important;
@@ -334,16 +297,6 @@
   cursor: pointer !important;
 }
 
-
-
-
-/* Final player alignment */
-@media (min-width: 561px) and (max-width: 900px) {
-  .sanctuary-main-page .home-poster-player {
-    top: 51% !important;
-    width: min(420px, 84vw) !important;
-  }
-}
 .home-poster-player .mp3-controls {
   align-self: center !important;
   justify-content: center !important;
@@ -351,37 +304,3 @@
 .home-poster-player .mp3-play-button {
   margin-top: 0 !important;
 }
-
-/* =========================================================================
-   HELLFORGED SERPENT PLAYER FOOTPRINT
-
-   The skull/snake shell is a 4:3 plate, so the player needs more width than
-   the old rectangular box to keep the DJ / ARTIST / SONG panel legible.
-   Everything else about the hero overlay (position, centering, pointer-events)
-   is untouched. All inner styling lives in SanctuaryPlayer.module.css.
-   ========================================================================= */
-
-.sanctuary-main-page .home-poster-player,
-.home-poster-player {
-  width: min(620px, 88vw) !important;
-}
-
-@media (max-width: 900px) {
-  .sanctuary-main-page .home-poster-player,
-  .home-poster-player {
-    width: min(540px, 90vw) !important;
-  }
-}
-
-@media (max-width: 560px) {
-  .sanctuary-main-page .home-poster-player,
-  .home-poster-player {
-    width: min(440px, 94vw) !important;
-  }
-}
-
-
-
-
-
-

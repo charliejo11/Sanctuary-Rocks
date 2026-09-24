@@ -135,7 +135,7 @@
 .rowLabel {
   margin: 0;
   color: var(--sr-ash);
-  font-size: 1.75cqi;
+  font-size: max(7px, 1.75cqi);
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -151,7 +151,7 @@
   min-width: 0;
 
   color: var(--sr-bone);
-  font-size: 2.5cqi;
+  font-size: max(10px, 2.5cqi);
   font-weight: 700;
   line-height: 1.1;
   text-shadow:
@@ -170,7 +170,7 @@
 .valueDj .rowText {
   color: var(--sr-ember-hot);
   font-family: var(--font-display, Impact, Haettenschweiler, sans-serif);
-  font-size: 3.1cqi;
+  font-size: max(11px, 3.1cqi);
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -235,7 +235,7 @@
 
   color: var(--sr-bone);
   font-family: inherit;
-  font-size: 2cqi;
+  font-size: max(8px, 2cqi);
   font-weight: 900;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -443,15 +443,17 @@
 }
 
 /* ============================================================== responsive ==
-   Below 520px the black panel is only ~230px wide, which would truncate song
-   titles to a few characters. So the metadata block and the play control leave
+   Below 340px the black panel is only ~210px wide, which would truncate song
+   titles to a few characters. (Between 340px and 520px - the size the player
+   is drawn at inside the homepage hero - the max() floors on the text above
+   keep it legible without leaving the artwork.) So the metadata block and the play control leave
    the artwork and stack underneath it in a matching ember-edged plate, at fixed
    px sizes that stay legible and tappable. Volume stays welded to the painted
    controls — growing them slightly — so the artwork never shows a control that
    isn't real. Same markup, same behaviour, nothing hidden.
    ========================================================================== */
 
-@container (max-width: 519px) {
+@container (max-width: 339px) {
   /* Both .meta and .footer return to normal flow, so .player grows to fit them
      and the artwork keeps its own box via .overlay's aspect-ratio. */
   .meta,

@@ -380,7 +380,6 @@ a {
 .home-poster-art {
   position: relative;
   width: 100%;
-  min-height: 100vh;
   margin: 0;
   line-height: 0;
   background: #000;
@@ -394,15 +393,16 @@ a {
   background: #050202;
 }
 
+/* The whole hero is always shown at its native 3:2 ratio - full width,
+   natural height, never cropped or stretched - because the player, the
+   Featured Artists strip and the Gridster hotspot are all placed against
+   frames painted into it. */
 .home-poster-image {
   display: block;
   width: 100%;
   max-width: none;
-  min-height: 100vh;
   height: auto;
   margin: 0;
-  object-fit: cover;
-  object-position: top center;
 }
 
 .sanctuary-art {
@@ -649,88 +649,429 @@ a {
   height: 7.6%;
 }
 
-/* Live stream player overlay: compact, centered, and positioned above
-   the "FEATURED ARTISTS" section (anchored at 68%). Sits clear of the
-   road, logo, bands, and hero artwork. Percentage-based so it tracks
-   the poster's scale at every viewport width. */
+/* =========================================================================
+   HOMEPAGE HERO STAGE: PLAYER + FEATURED ARTISTS
+
+   "sanctuary home hero.png" (1536 x 1024) has two empty areas painted in:
+   the gap under "HARD ROCK - HEAVY METAL - ALWAYS LOUD" (y ~425-700) for the
+   player, and the long chained strip of frames (x ~148-1386, y ~712-832)
+   for the artists. All percentages below are measured against that image.
+
+   Wide screens (>= 1320px): both are laid over those painted areas. Below
+   that the player (26.5% of the hero) would drop under the 340px width its
+   in-art layout needs.
+   Narrower screens: the painted areas get too small to hold readable text,
+   so the hero shows whole and both drop into normal flow directly under
+   it, player first.
+   ========================================================================= */
+
+.home-hero-stage {
+  position: relative;
+  width: 100%;
+}
+
 .home-poster-player {
-  position: absolute;
-  top: 60%;
-  left: 50%;
+  position: relative;
   z-index: 6;
-  width: min(280px, 48%);
-  transform: translateX(-50%);
-  margin-bottom: 24px;
+  width: min(560px, calc(100% - 32px));
+  margin: 22px auto 0;
   pointer-events: none;
 }
 
-.home-poster-player .live-now-wrap {
-  position: static;
-  width: 100%;
-  min-height: 0;
-  margin: 0;
-}
-
-.home-poster-player .live-mp3-player {
-  width: 100%;
-  margin: 0 auto;
-  transform: rotate(-1.7deg);
-}
-
-@media (max-width: 900px) {
+/* Phones: 336px keeps the player in its stacked phone layout (the skin
+   switches at a 339px container width), which moves DJ / artist / song
+   under the artwork at a legible, fixed size. */
+@media (max-width: 560px) {
   .home-poster-player {
-    top: 60%;
-    width: min(280px, 52%);
+    width: min(336px, calc(100% - 32px));
+    margin-top: 16px;
   }
+}
+
+@media (min-width: 1320px) {
+  /* The player is sized by the height of the gap, not the width: its 4:3
+     skull shell is much taller than the painted frame, so 26.5% of the
+     hero width is the largest it can be while its skull stays below the
+     headline and its bottom spikes stay above the artists strip. */
+  .home-poster-player {
+    position: absolute;
+    top: 41.2%;
+    left: 50%;
+    width: 26.5%;
+    margin: 0;
+    transform: translateX(-50%);
+  }
+}
+
+/* ---------------------------------------------------------- Featured Artists */
+
+.featured-artists {
+  --fa-card-w: 172px;
+  --fa-card-h: 62px;
+  --fa-gap: 14px;
+  --fa-rivet: 5px;
+
+  position: relative;
+  z-index: 5;
+  margin: 26px 0 0;
+  padding: 0 0 34px;
+  line-height: normal;
+}
+
+.featured-artists-title {
+  margin: 0 auto 14px;
+  color: #ff5a1e;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow:
+    0 1px 0 #000,
+    0 0 10px rgba(255, 70, 15, 0.55);
+}
+
+.featured-artists-title span {
+  color: #c8200c;
+  font-size: 0.7em;
+  vertical-align: 0.12em;
+}
+
+.featured-artists-viewport {
+  overflow: hidden;
+  /* Cards fade out at both ends instead of being chopped off. */
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 5%, #000 95%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 5%, #000 95%, transparent 100%);
+}
+
+/* Two identical sets side by side; sliding by exactly -50% lands the second
+   set where the first began, so the loop has no visible seam. Each set
+   carries its own trailing gap (padding-right) so both halves are equal. */
+.featured-artists-track {
+  display: flex;
+  width: max-content;
+  animation: featuredArtistsSlide 110s linear infinite;
+  will-change: transform;
+}
+
+.featured-artists-viewport:hover .featured-artists-track,
+.featured-artists-viewport:focus-within .featured-artists-track {
+  animation-play-state: paused;
+}
+
+@keyframes featuredArtistsSlide {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.featured-artists-set {
+  display: flex;
+  gap: var(--fa-gap);
+  margin: 0;
+  padding: 0 var(--fa-gap) 0 0;
+  list-style: none;
+}
+
+/* Small bolted steel plaque, same treatment as the Contact page nameplates
+   so the two pages read as one set. */
+.featured-artist-card {
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--fa-card-w);
+  height: var(--fa-card-h);
+  padding: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+
+  border: 1px solid #52110a;
+  border-radius: 2px;
+  background:
+    repeating-linear-gradient(112deg, rgba(255, 235, 220, 0.03) 0 1px, transparent 1px 6px),
+    repeating-linear-gradient(-24deg, rgba(0, 0, 0, 0.28) 0 1px, transparent 1px 9px),
+    radial-gradient(55% 95% at 84% 115%, rgba(150, 34, 8, 0.45), transparent 70%),
+    radial-gradient(45% 80% at 12% 115%, rgba(120, 28, 6, 0.34), transparent 70%),
+    linear-gradient(180deg, rgba(255, 240, 230, 0.07) 0%, transparent 38%),
+    linear-gradient(180deg, #24201d 0%, #141110 52%, #070505 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 225, 205, 0.12),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.9),
+    inset 0 0 0 2px rgba(0, 0, 0, 0.55),
+    inset 0 0 0 3px rgba(150, 30, 10, 0.3),
+    inset 0 -7px 10px -7px rgba(255, 86, 22, 0.4),
+    0 0 0 1px rgba(0, 0, 0, 0.85),
+    0 3px 8px rgba(0, 0, 0, 0.85);
+}
+
+.featured-artist-card::before {
+  --bolt: radial-gradient(
+    circle at 38% 32%,
+    #efe0d2 0%,
+    #9a8676 18%,
+    #4a3a31 46%,
+    #1c120d 64%,
+    rgba(90, 24, 8, 0.8) 70%,
+    transparent 76%
+  );
+  --inset: calc(var(--fa-rivet) * 0.7);
+
+  content: "";
+  position: absolute;
+  z-index: 2; /* bolts sit on top of the cover's corners */
+  inset: 0;
+  pointer-events: none;
+  background:
+    var(--bolt) left var(--inset) top var(--inset) / var(--fa-rivet) var(--fa-rivet) no-repeat,
+    var(--bolt) right var(--inset) top var(--inset) / var(--fa-rivet) var(--fa-rivet) no-repeat,
+    var(--bolt) left var(--inset) bottom var(--inset) / var(--fa-rivet) var(--fa-rivet) no-repeat,
+    var(--bolt) right var(--inset) bottom var(--inset) / var(--fa-rivet) var(--fa-rivet) no-repeat;
+}
+
+/* Cover artwork: fills the steel frame edge to edge inside a thin border of
+   metal, clipped by it, and moves with the card because it is part of it.
+   These are drawn placeholders (no text, no image files) standing in for
+   real artist photos; eight scenes cycle across the 25 cards and the
+   nth-child hue/brightness shifts keep neighbours from looking alike. To
+   use real photos later, give the cover a background-image with
+   background-size: cover. */
+.featured-artist-cover {
+  --frame: calc(var(--fa-rivet) + 2px);
+
+  position: absolute;
+  inset: var(--frame);
+  z-index: 1;
+  display: block;
+  overflow: hidden;
+  border-radius: 1px;
+  background-color: #0b0605;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.9),
+    0 0 0 2px rgba(120, 26, 8, 0.45);
+}
+
+/* Shared "photo" finish over every scene: vignette, scanline grain and a
+   hot rim along the bottom, so the drawn scenes read as printed artwork. */
+.featured-artist-cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.18) 0 1px, transparent 1px 3px),
+    radial-gradient(120% 140% at 50% 45%, transparent 45%, rgba(0, 0, 0, 0.78) 100%),
+    linear-gradient(0deg, rgba(255, 80, 20, 0.22) 0%, transparent 18%);
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.85);
+}
+
+/* 1 - blood moon over a jagged ridge */
+.featured-artist-card:nth-child(8n + 1) .featured-artist-cover {
+  background:
+    linear-gradient(170deg, transparent 58%, #050303 59%),
+    linear-gradient(196deg, transparent 62%, #0a0504 63%),
+    radial-gradient(circle at 70% 36%, #ffb07a 0 3%, #e0361a 9%, #8e130b 15%, transparent 16%),
+    radial-gradient(circle at 70% 36%, rgba(255, 70, 20, 0.45), transparent 38%),
+    linear-gradient(180deg, #2a0707 0%, #4d0d08 55%, #120404 100%);
+}
+
+/* 2 - ember storm */
+.featured-artist-card:nth-child(8n + 2) .featured-artist-cover {
+  background:
+    radial-gradient(circle at 12% 30%, #ffc36b 0 1px, transparent 2px),
+    radial-gradient(circle at 28% 72%, #ff8a3a 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 46% 18%, #ffd08a 0 1px, transparent 2px),
+    radial-gradient(circle at 63% 58%, #ff6d24 0 1.5px, transparent 3px),
+    radial-gradient(circle at 81% 26%, #ffb04a 0 1px, transparent 2px),
+    radial-gradient(circle at 90% 78%, #ff7a2c 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 37% 44%, #ffa04a 0 1px, transparent 2px),
+    radial-gradient(70% 90% at 50% 120%, rgba(255, 90, 20, 0.75), transparent 70%),
+    linear-gradient(180deg, #060303 0%, #1d0605 60%, #3c0b06 100%);
+}
+
+/* 3 - cracked lava */
+.featured-artist-card:nth-child(8n + 3) .featured-artist-cover {
+  background:
+    linear-gradient(28deg, transparent 47%, rgba(255, 120, 30, 0.9) 48.5%, transparent 50%),
+    linear-gradient(-38deg, transparent 58%, rgba(255, 90, 20, 0.85) 59.2%, transparent 60.5%),
+    linear-gradient(104deg, transparent 30%, rgba(255, 150, 50, 0.8) 31%, transparent 32.2%),
+    linear-gradient(-72deg, transparent 72%, rgba(255, 80, 20, 0.8) 73%, transparent 74.2%),
+    radial-gradient(60% 80% at 40% 60%, rgba(160, 30, 6, 0.55), transparent 70%),
+    linear-gradient(135deg, #140807 0%, #070404 50%, #1a0806 100%);
+}
+
+/* 4 - gothic cathedral window */
+.featured-artist-card:nth-child(8n + 4) .featured-artist-cover {
+  background:
+    repeating-linear-gradient(90deg, transparent 0 11%, rgba(0, 0, 0, 0.85) 11% 13%),
+    radial-gradient(34% 110% at 50% 100%, #ff9a4a 0%, #d12a0e 38%, #5e0b07 70%, transparent 72%),
+    linear-gradient(180deg, #0b0404 0%, #1b0505 100%);
+}
+
+/* 5 - drifting smoke */
+.featured-artist-card:nth-child(8n + 5) .featured-artist-cover {
+  background:
+    radial-gradient(40% 55% at 22% 40%, rgba(190, 170, 160, 0.32), transparent 70%),
+    radial-gradient(35% 60% at 60% 62%, rgba(150, 130, 125, 0.28), transparent 70%),
+    radial-gradient(30% 45% at 84% 30%, rgba(210, 190, 180, 0.22), transparent 70%),
+    radial-gradient(80% 70% at 50% 110%, rgba(170, 28, 10, 0.7), transparent 70%),
+    linear-gradient(180deg, #120909 0%, #2a0908 100%);
+}
+
+/* 6 - stage lights */
+.featured-artist-card:nth-child(8n + 6) .featured-artist-cover {
+  background:
+    conic-gradient(from 150deg at 50% -10%, transparent 0deg, rgba(255, 120, 40, 0.5) 6deg, transparent 12deg, transparent 22deg, rgba(255, 70, 20, 0.45) 28deg, transparent 34deg, transparent 44deg, rgba(255, 150, 60, 0.4) 50deg, transparent 56deg),
+    radial-gradient(70% 45% at 50% 100%, rgba(0, 0, 0, 0.95), transparent 70%),
+    linear-gradient(180deg, #1a0504 0%, #090303 100%);
+}
+
+/* 7 - iron grate over fire */
+.featured-artist-card:nth-child(8n + 7) .featured-artist-cover {
+  background:
+    repeating-linear-gradient(45deg, rgba(20, 16, 14, 0.95) 0 3px, transparent 3px 11px),
+    repeating-linear-gradient(-45deg, rgba(20, 16, 14, 0.95) 0 3px, transparent 3px 11px),
+    radial-gradient(60% 90% at 50% 70%, #ff8a3a 0%, #c9260c 45%, #3a0806 100%);
+}
+
+/* 8 - scorched rings */
+.featured-artist-card:nth-child(8n + 8) .featured-artist-cover {
+  background:
+    radial-gradient(circle at 50% 50%, #ffcf8a 0 2%, transparent 3%),
+    repeating-radial-gradient(circle at 50% 50%, rgba(255, 90, 20, 0.55) 0 1.5px, transparent 1.5px 9px),
+    radial-gradient(circle at 50% 50%, #5a0d08 0%, #1b0605 55%, #070303 100%);
+}
+
+/* Per-card variation so repeats of a scene don't match. */
+.featured-artist-card:nth-child(3n + 2) .featured-artist-cover {
+  filter: hue-rotate(-12deg) brightness(1.08);
+}
+
+.featured-artist-card:nth-child(3n) .featured-artist-cover {
+  filter: hue-rotate(10deg) saturate(0.85);
+}
+
+.featured-artist-card:nth-child(5n + 3) .featured-artist-cover {
+  background-position: 30% 0;
+}
+
+.featured-artist-card:nth-child(4n) .featured-artist-cover {
+  transform: scaleX(-1);
+}
+
+/* Real cover art: same inner opening as the placeholders (so the steel
+   frame and bolts stay visible around it), but none of the placeholder
+   treatment - no drawn scene, no tint, no mirroring (which would flip the
+   painted band names) and no scanline/vignette layer over the artwork. The
+   <img> fills the opening with object-fit: cover, clipped by the cover's
+   overflow: hidden. */
+.featured-artists .featured-artist-card .featured-artist-cover.featured-artist-cover--photo {
+  background: #0b0605;
+  filter: none;
+  transform: none;
+}
+
+.featured-artist-cover--photo::after {
+  content: none;
+}
+
+.featured-artist-cover--photo img {
+  display: block;
 }
 
 @media (max-width: 560px) {
-  .home-poster-player {
-    top: 56%;
-    width: min(240px, 54%);
+  .featured-artists {
+    --fa-card-w: 138px;
+    --fa-card-h: 52px;
+    --fa-gap: 10px;
+    --fa-rivet: 4px;
   }
 
-  .home-poster-player .live-mp3-player {
-    padding: 12px;
-    transform: none;
-  }
-
-  .home-poster-player .mp3-screen {
-    padding: 11px 10px 12px;
-  }
-
-  .home-poster-player .mp3-screen h2 {
-    margin-top: 5px;
-    font-size: 1.2rem;
-  }
-
-  .home-poster-player .mp3-track {
-    margin-top: 8px;
-    padding: 7px 8px;
-  }
-
-  .home-poster-player .mini-equalizer {
-    margin-top: 7px;
-    height: 14px;
-  }
-
-  .home-poster-player .mp3-controls {
-    margin-top: 10px;
-    margin-left: 0;
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .home-poster-player .mp3-play-button,
-  .home-poster-player .mp3-lineup-button {
-    min-height: 32px;
-    font-size: 0.5rem;
+  .featured-artists-title {
+    font-size: 19px;
   }
 }
 
-@media (max-width: 380px) {
-  .home-poster-player {
-    top: 54%;
-    width: min(220px, 56%);
+/* Wide screens: the section sits inside the painted strip of frames. The
+   heading becomes a plaque at the strip's left end and the cards slide
+   through the rest. Everything is sized in cqw of the strip, so it scales
+   with the hero. */
+@media (min-width: 1320px) {
+  .featured-artists {
+    --fa-card-w: 14.2cqw;
+    --fa-card-h: 7.4cqw;
+    --fa-gap: 1.1cqw;
+    --fa-rivet: 0.5cqw;
+
+    position: absolute;
+    top: 69.9%;
+    left: 9.9%;
+    width: 80.4%;
+    height: 11.3%;
+    margin: 0;
+    padding: 0;
+
+    display: flex;
+    align-items: center;
+    gap: 1.1cqw;
+
+    container-type: inline-size;
+  }
+
+  .featured-artists-title {
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2cqw;
+    width: 12cqw;
+    height: var(--fa-card-h);
+    margin: 0;
+    box-sizing: border-box;
+
+    border: 1px solid #6a150b;
+    border-radius: 2px;
+    background:
+      radial-gradient(90% 120% at 50% 120%, rgba(190, 40, 10, 0.45), transparent 70%),
+      linear-gradient(180deg, #1d1715 0%, #0b0807 100%);
+    box-shadow:
+      inset 0 0 0 2px rgba(0, 0, 0, 0.6),
+      inset 0 0 0 3px rgba(190, 40, 12, 0.4),
+      0 0 12px rgba(230, 60, 12, 0.35);
+
+    font-size: 1.55cqw;
+    line-height: 1;
+  }
+
+  .featured-artists-viewport {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* No auto-motion: the row becomes a normal horizontal scroller and the
+     duplicate set used for looping is dropped. */
+  .featured-artists-track {
+    animation: none;
+  }
+
+  .featured-artists-viewport {
+    overflow-x: auto;
+  }
+
+  .featured-artists-set[aria-hidden="true"] {
+    display: none;
   }
 }
 
