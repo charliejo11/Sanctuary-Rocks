@@ -146,8 +146,8 @@ export const CREW_BIOS: CrewBioEntry[] = [
     id: "dj-kaya",
     name: "DJ Kaya",
     role: "DJ",
-    image: "/images/djs/DJ%20Kaya.png.jpg",
-    bio: "Sanctuary Rocks SR DJ - Kaya.Osbourne\n\nHello! I'm DJ Kaya, a Brazilian music lover - specially metal and rock, and I'm DJ in Second Life since 2012. Music has always been my favorite way to express myself and connect people through great experiences. Between sets, I enjoy discovering new sounds, living out great stories, and savoring life's little moments. I'm friendly, dedicated, and naturally shy, but I believe a smile, a good conversation, and the right music can transform any atmosphere. To me, every performance is an opportunity to create unforgettable memories and share the incredible energy that music conveys.",
+    image: "/images/djs/DJ_Kaya.png",
+    bio: "Hello! I'm DJ Kaya, a Brazilian music lover. Music has always been my favorite way to express myself and connect people through great experiences. I work in SL as DJ and also as Host (before as known as Promoter) in Second Life since 2012 and I worked at various clubs. My main genres now are rock and metal, but before I used to play various musical styles at the places I worked. I enjoy discovering new sounds, living out great stories, and savoring life's little moments. I'm friendly, dedicated, and naturally shy, but I believe a smile, a good conversation, and the right music can transform any atmosphere. To me, every set is an opportunity to create unforgettable memories and share the incredible energy that music conveys.",
   },
   {
     id: "dj-krankee",
