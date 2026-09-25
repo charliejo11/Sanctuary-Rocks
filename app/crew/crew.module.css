@@ -1,0 +1,883 @@
+/* =============================================================================
+   Crew page: dragons, forged black metal and molten red/orange, matching the
+   Contact page. All text is HTML; the artwork in /public/images/crew and
+   /public/images/shared is transparent decoration.
+
+   Geometry measured off the artwork:
+   - crew-member-card-frame.webp 1085 x 1432: photo window 16.9..83.2% x
+     12.4..53.1%, nameplate 19.3..80.7% x 55.6..62.4%, role tag
+     29.3..70.8% x 64.9..69.5%, lower panel 12.9..87.2% x 71.9..90.6%
+   - crew-section-title-plate.webp 1600 x 387: plate 14..86% x 28..70%
+   - role-tag-plate.webp 1600 x 458: plate 14..86% x 27..61%
+   - about-crew-panel-frame.webp 1600 x 861: border slices 203 184 169 185
+   - crew-dragon-crest.webp 617 x 1536: medallion centred at 31% down,
+     71% of the crest's width
+   ========================================================================== */
+
+.page {
+  --black: #050505;
+  --black-2: #090909;
+  --iron: #111111;
+  --iron-2: #191919;
+  --red: #c91515;
+  --red-hi: #ef2218;
+  --ember: #ff5a16;
+  --ember-hi: #ff8a22;
+  --bone: #f0ece7;
+  --ash: #a9a6a3;
+
+  --display: var(--font-contact-display), "Cinzel", Georgia, serif;
+  --label: var(--font-contact-label), "Oswald", "Arial Narrow", sans-serif;
+  --body: var(--font-contact-body), "Roboto Condensed", "Arial Narrow", sans-serif;
+
+  --wrap: min(1500px, calc(100% - 64px));
+  --molten: linear-gradient(180deg, #ffb347 0%, var(--ember) 38%, var(--red-hi) 68%, #8e0c0c 100%);
+  --chrome: linear-gradient(180deg, #ffffff 0%, #d9d6d2 32%, #8d8884 52%, #e8e4df 70%, #6d6864 100%);
+
+  position: relative;
+  overflow-x: clip;
+  color: var(--bone);
+  font-family: var(--body);
+  line-height: 1.5;
+  background:
+    radial-gradient(ellipse 70% 40% at 50% 0%, rgba(201, 21, 21, 0.24), transparent 70%),
+    radial-gradient(ellipse 45% 30% at 0% 40%, rgba(255, 90, 22, 0.08), transparent 70%),
+    radial-gradient(ellipse 45% 30% at 100% 65%, rgba(255, 90, 22, 0.08), transparent 70%),
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.012) 0 2px, transparent 2px 9px),
+    repeating-linear-gradient(25deg, rgba(0, 0, 0, 0.25) 0 1px, transparent 1px 13px),
+    linear-gradient(180deg, var(--black-2), var(--black) 40%, #070606);
+}
+
+/* This page has its own sticky dragon navigation. */
+:global(body):has(.page) {
+  padding-top: 0;
+  background: var(--black, #050505);
+}
+
+/* ------------------------------------------------------------------- hero */
+
+.hero {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: calc(156px + clamp(520px, 38vw, 680px));
+  padding: 165px 0 clamp(2.5rem, 4vw, 3.5rem);
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse 40% 55% at 50% 52%, rgba(5, 5, 5, 0.9), transparent 80%),
+    radial-gradient(ellipse 60% 70% at 50% 100%, rgba(239, 34, 24, 0.3), transparent 70%),
+    radial-gradient(ellipse 28% 55% at 12% 55%, rgba(255, 90, 22, 0.24), transparent 70%),
+    radial-gradient(ellipse 28% 55% at 88% 55%, rgba(255, 90, 22, 0.24), transparent 70%);
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 0;
+  height: 18%;
+  background: linear-gradient(180deg, transparent, var(--black-2));
+  pointer-events: none;
+}
+
+.heroBanner {
+  position: absolute;
+  top: 128px;
+  z-index: -1;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+  filter: drop-shadow(0 0 28px rgba(239, 34, 24, 0.35)) drop-shadow(0 20px 30px rgba(0, 0, 0, 0.7));
+}
+
+.heroBannerLeft {
+  left: clamp(-40px, 1vw, 40px);
+  width: clamp(200px, 23vw, 430px);
+}
+
+.heroBannerRight {
+  right: clamp(-20px, 2vw, 60px);
+  width: clamp(160px, 18.5vw, 345px);
+}
+
+.heroEmbers {
+  position: absolute;
+  right: 0;
+  bottom: -4%;
+  left: 0;
+  z-index: -1;
+  width: 100%;
+  height: 40%;
+  object-fit: cover;
+  opacity: 0.4;
+  mix-blend-mode: screen;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 45%);
+  mask-image: linear-gradient(180deg, transparent, #000 45%);
+  pointer-events: none;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: min(900px, calc(100% - 2rem));
+  text-align: center;
+}
+
+.heroBrand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  color: var(--bone);
+  font-family: var(--label);
+  font-size: clamp(0.85rem, 1.1vw, 1.1rem);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+}
+
+.heroBrand img {
+  width: clamp(96px, 9vw, 140px);
+  height: auto;
+  margin-bottom: 0.4rem;
+  filter: drop-shadow(0 0 16px rgba(255, 90, 22, 0.45));
+}
+
+.heroTitle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0.8rem 0 0;
+  font-family: var(--display);
+  line-height: 0.9;
+  text-transform: uppercase;
+}
+
+.heroMeet {
+  background: var(--chrome);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-size: clamp(3rem, 7.4vw, 7.6rem);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.9)) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 22px rgba(239, 34, 24, 0.35));
+}
+
+.heroCrew {
+  background: var(--molten);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-size: clamp(4rem, 11vw, 11.5rem);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  filter: drop-shadow(0 0 18px rgba(239, 34, 24, 0.6)) drop-shadow(0 4px 4px rgba(0, 0, 0, 0.9));
+}
+
+/* dragon-banner-frame.webp: plate at 16..84% x 26..69%. */
+.heroPlate {
+  position: relative;
+  width: clamp(320px, 38vw, 600px);
+  margin-top: clamp(0.6rem, 1.4vw, 1.2rem);
+}
+
+.heroPlate img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.7));
+}
+
+.heroPlate p {
+  position: absolute;
+  top: 26%;
+  right: 16%;
+  left: 16%;
+  height: 43%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  color: var(--bone);
+  font-family: var(--label);
+  font-size: clamp(0.85rem, 1.35vw, 1.35rem);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+  text-transform: uppercase;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+.heroText {
+  margin: clamp(0.6rem, 1.2vw, 1rem) 0 0;
+  color: var(--bone);
+  font-size: clamp(1.1rem, 1.5vw, 1.5rem);
+  line-height: 1.4;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
+}
+
+.divider {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  margin: clamp(-1.5rem, -1.5vw, -0.5rem) 0 0;
+  pointer-events: none;
+}
+
+.divider img {
+  display: block;
+  width: min(760px, 80%);
+  height: auto;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.7));
+}
+
+/* -------------------------------------------------------- roster sections */
+
+.roster {
+  width: var(--wrap);
+  margin: clamp(2rem, 4vw, 3.5rem) auto 0;
+}
+
+.sectionHead {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: -0.4rem;
+}
+
+/* Spiky dragon divider running behind the title plate. */
+.headDivider {
+  position: absolute;
+  top: 8%;
+  left: 50%;
+  width: min(900px, 100%);
+  height: auto;
+  transform: translateX(-50%);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.titlePlate,
+.subPlate {
+  position: relative;
+  z-index: 1;
+}
+
+.titlePlate {
+  width: clamp(260px, 26vw, 420px);
+}
+
+.subPlate {
+  width: clamp(280px, 30vw, 480px);
+  margin-top: -0.6rem;
+}
+
+.titlePlate img,
+.subPlate img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.titleText,
+.subText {
+  position: absolute;
+  right: 14%;
+  left: 14%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em;
+  margin: 0;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.titleText {
+  top: 28%;
+  height: 42%;
+  background: var(--molten);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-family: var(--display);
+  font-size: clamp(1.7rem, 2.6vw, 2.6rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  filter: drop-shadow(0 0 10px rgba(239, 34, 24, 0.5));
+}
+
+.titleText span {
+  font-size: 0.5em;
+}
+
+.subText {
+  top: 27%;
+  height: 34%;
+  color: var(--bone);
+  font-family: var(--label);
+  font-size: clamp(0.7rem, 0.95vw, 0.95rem);
+  letter-spacing: 0.12em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+/* Dark forged panel that holds the cards, with a dragon ornament at each
+   corner. */
+.rosterPanel {
+  position: relative;
+  padding: clamp(2rem, 3vw, 3rem) clamp(1rem, 2.2vw, 2.2rem);
+  border: 1px solid rgba(255, 90, 22, 0.28);
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 0%, rgba(239, 34, 24, 0.12), transparent 70%),
+    linear-gradient(180deg, rgba(20, 12, 11, 0.92), rgba(8, 6, 6, 0.95));
+  box-shadow:
+    inset 0 0 0 4px #0a0706,
+    inset 0 0 0 5px rgba(239, 34, 24, 0.25),
+    inset 0 0 40px rgba(0, 0, 0, 0.8),
+    0 24px 50px rgba(0, 0, 0, 0.6);
+}
+
+.corner {
+  position: absolute;
+  z-index: 2;
+  width: clamp(56px, 6vw, 96px);
+  height: auto;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.7));
+}
+
+.corner_tl { top: -14px; left: -14px; }
+.corner_tr { top: -14px; right: -14px; transform: scaleX(-1); }
+.corner_bl { bottom: -14px; left: -14px; transform: scaleY(-1); }
+.corner_br { right: -14px; bottom: -14px; transform: scale(-1); }
+
+/* Flex rather than grid so a part-filled last row sits centred. */
+.grid {
+  --card-w: clamp(170px, 15.5vw, 236px);
+
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(1rem, 1.6vw, 1.6rem) clamp(0.8rem, 1.4vw, 1.4rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cardItem {
+  flex: 0 0 var(--card-w);
+  min-width: 0;
+}
+
+.card {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1085 / 1432;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  container-type: inline-size;
+  transition: transform 300ms ease;
+}
+
+.cardPhoto {
+  position: absolute;
+  top: 12.4%;
+  left: 16.9%;
+  width: 66.3%;
+  height: 40.8%;
+  overflow: hidden;
+  background: #0b0707;
+}
+
+.cardPhoto img {
+  object-fit: cover;
+  object-position: center 22%;
+  transition: transform 450ms ease, filter 450ms ease;
+}
+
+.cardFrame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.7));
+  transition: filter 300ms ease;
+}
+
+.cardName,
+.cardRole,
+.cardLine {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  text-align: center;
+}
+
+.cardName {
+  top: 55.6%;
+  right: 20%;
+  left: 20%;
+  height: 6.8%;
+  color: var(--bone);
+  font-family: var(--label);
+  font-size: 7.4cqw;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-transform: uppercase;
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.95), 0 0 8px rgba(239, 34, 24, 0.3);
+  white-space: nowrap;
+}
+
+.cardRole {
+  top: 64.9%;
+  right: 30%;
+  left: 30%;
+  height: 4.6%;
+  color: var(--ember-hi);
+  font-family: var(--label);
+  font-size: 4.4cqw;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.cardLine {
+  top: 72.6%;
+  right: 15%;
+  left: 15%;
+  height: 17%;
+  color: #d9d3cc;
+  font-size: 5.4cqw;
+  font-style: italic;
+  line-height: 1.3;
+}
+
+.card:hover,
+.card:focus-visible {
+  transform: translateY(-4px);
+  outline: none;
+}
+
+.card:hover .cardPhoto img,
+.card:focus-visible .cardPhoto img {
+  transform: scale(1.05);
+  filter: brightness(1.08);
+}
+
+.card:hover .cardFrame,
+.card:focus-visible .cardFrame {
+  filter: drop-shadow(0 0 14px rgba(255, 90, 22, 0.6)) drop-shadow(0 12px 18px rgba(0, 0, 0, 0.7));
+}
+
+/* ----------------------------------------------------------- about panel */
+
+.about {
+  width: var(--wrap);
+  margin: clamp(3rem, 5vw, 4.5rem) auto 0;
+}
+
+/* about-crew-panel-frame.webp stretched around the content. */
+.aboutPanel {
+  --fw-t: 70px;
+  --fw-r: 64px;
+  --fw-b: 58px;
+  --fw-l: 64px;
+
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.6fr) minmax(0, 0.45fr);
+  align-items: center;
+  gap: clamp(1rem, 2vw, 2rem);
+  border-style: solid;
+  border-width: var(--fw-t) var(--fw-r) var(--fw-b) var(--fw-l);
+  border-image: url("/images/crew/about/about-crew-panel-frame.webp") 203 184 169 185 round;
+  background:
+    radial-gradient(ellipse 40% 80% at 18% 60%, rgba(255, 90, 22, 0.16), transparent 70%),
+    linear-gradient(180deg, #120b0a, #080606);
+  background-clip: padding-box;
+  filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.7));
+}
+
+.aboutDragon {
+  display: block;
+  width: 118%;
+  height: auto;
+  margin: -12% 0 -6% -14%;
+  pointer-events: none;
+}
+
+.aboutBody {
+  padding-block: 0.6rem;
+}
+
+.aboutTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0;
+  background: var(--molten);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-family: var(--display);
+  font-size: clamp(1.7rem, 2.6vw, 2.6rem);
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  line-height: 1.05;
+  text-transform: uppercase;
+  filter: drop-shadow(0 0 10px rgba(239, 34, 24, 0.4));
+}
+
+.aboutTitle span {
+  font-size: 0.5em;
+}
+
+.aboutText {
+  max-width: 44rem;
+  margin: 0.9rem 0 0;
+  color: var(--bone);
+  font-size: clamp(1.02rem, 1.15vw, 1.18rem);
+  line-height: 1.6;
+}
+
+.highlights {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1.4rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.highlights li {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.highlightIcon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border: 1px solid rgba(255, 90, 22, 0.55);
+  border-radius: 50%;
+  background: radial-gradient(circle, #2c0707, #0c0303);
+  color: var(--red-hi);
+  box-shadow: 0 0 12px rgba(239, 34, 24, 0.35);
+}
+
+.highlightIcon svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.highlights strong {
+  display: block;
+  color: var(--red-hi);
+  font-family: var(--label);
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.highlights small {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--ash);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.aboutCrest {
+  position: relative;
+  justify-self: center;
+  width: min(100%, 150px);
+}
+
+.aboutCrest img:first-child {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.7));
+}
+
+/* The real logo set into the crest's medallion. */
+.crestLogo {
+  position: absolute;
+  top: 16.5%;
+  left: 12%;
+  width: 76%;
+  height: auto;
+  border-radius: 50%;
+  background: radial-gradient(circle, #0b0505 60%, rgba(11, 5, 5, 0.9) 68%, transparent 71%);
+}
+
+/* ---------------------------------------------------------- bottom slogan */
+
+.slogan {
+  position: relative;
+  margin-top: clamp(3rem, 5vw, 4.5rem);
+  padding: clamp(2.5rem, 5vw, 4rem) 0 clamp(2.5rem, 4vw, 3.5rem);
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse 50% 70% at 50% 100%, rgba(239, 34, 24, 0.24), transparent 70%),
+    linear-gradient(180deg, transparent, rgba(12, 6, 5, 0.9) 35%);
+}
+
+.embersLow {
+  position: absolute;
+  right: 0;
+  bottom: -10%;
+  left: 0;
+  z-index: -1;
+  width: 100%;
+  height: 60%;
+  object-fit: cover;
+  opacity: 0.35;
+  mix-blend-mode: screen;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 50%);
+  mask-image: linear-gradient(180deg, transparent, #000 50%);
+  pointer-events: none;
+}
+
+.bottomDragon {
+  position: absolute;
+  bottom: 0;
+  z-index: -1;
+  width: clamp(220px, 26vw, 470px);
+  height: auto;
+  pointer-events: none;
+  filter: drop-shadow(0 0 24px rgba(239, 34, 24, 0.3));
+}
+
+.bottomDragonLeft { left: clamp(-60px, -2vw, 0px); }
+.bottomDragonRight { right: clamp(-60px, -2vw, 0px); }
+
+.sloganContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(900px, calc(100% - 2rem));
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* bottom-slogan-banner.webp: plate at about 12..88% x 43..79%. */
+.sloganBanner {
+  position: relative;
+  width: min(820px, 100%);
+  container-type: inline-size;
+}
+
+.sloganBanner img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 12px 22px rgba(0, 0, 0, 0.75));
+}
+
+.sloganMain {
+  position: absolute;
+  top: 44%;
+  right: 13%;
+  left: 13%;
+  height: 34%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  background: var(--chrome);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-family: var(--display);
+  font-size: 2.9cqw;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.9));
+}
+
+.sloganSub {
+  margin: 1rem 0 0;
+  background: var(--molten);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-family: var(--label);
+  font-size: clamp(1.1rem, 1.9vw, 1.8rem);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  filter: drop-shadow(0 0 10px rgba(239, 34, 24, 0.45));
+}
+
+.sloganSmall {
+  margin: 0.4rem 0 0;
+  color: var(--bone);
+  font-family: var(--label);
+  font-size: clamp(0.85rem, 1.1vw, 1.05rem);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.discord {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1.4rem;
+  color: var(--bone);
+  font-family: var(--label);
+  font-size: 1rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: color 250ms ease, transform 250ms ease;
+}
+
+.discord img {
+  width: 58px;
+  height: auto;
+  filter: drop-shadow(0 0 10px rgba(239, 34, 24, 0.45));
+  transition: filter 250ms ease;
+}
+
+.discord:hover,
+.discord:focus-visible {
+  color: var(--ember-hi);
+  transform: translateY(-2px);
+  outline: none;
+}
+
+.discord:hover img,
+.discord:focus-visible img {
+  filter: drop-shadow(0 0 16px rgba(255, 90, 22, 0.8));
+}
+
+.sloganChain {
+  width: min(560px, 80%);
+  height: auto;
+  margin-top: 1.2rem;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+/* ------------------------------------------------------------- responsive */
+
+@media (max-width: 1100px) {
+  .aboutPanel {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.6fr);
+  }
+
+  .aboutCrest {
+    display: none;
+  }
+
+  .highlights {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.7rem;
+  }
+}
+
+@media (max-width: 760px) {
+  .page {
+    --wrap: calc(100% - 24px);
+  }
+
+  .hero {
+    min-height: 0;
+    padding-top: 140px;
+  }
+
+  .heroBanner {
+    top: 110px;
+    opacity: 0.45;
+  }
+
+  .heroBannerLeft { left: -40px; width: 42vw; }
+  .heroBannerRight { right: -30px; width: 34vw; }
+
+  .rosterPanel {
+    padding: 1.6rem 0.7rem;
+  }
+
+  .grid {
+    --card-w: calc((100% - 0.6rem) / 2);
+    gap: 0.9rem 0.6rem;
+  }
+
+  .aboutPanel {
+    --fw-t: 46px;
+    --fw-r: 40px;
+    --fw-b: 38px;
+    --fw-l: 40px;
+    grid-template-columns: minmax(0, 1fr);
+    text-align: center;
+  }
+
+  .aboutDragon {
+    width: 70%;
+    margin: -2rem auto -1rem;
+  }
+
+  .aboutTitle {
+    justify-content: center;
+  }
+
+  .highlights li {
+    justify-content: center;
+    text-align: left;
+  }
+
+  .bottomDragon {
+    width: 42vw;
+    opacity: 0.55;
+  }
+
+  .sloganMain {
+    font-size: 4.6cqw;
+    white-space: normal;
+  }
+
+  .aboutTitle span {
+    display: none;
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .cardPhoto img,
+  .cardFrame,
+  .discord {
+    transition: none;
+  }
+}

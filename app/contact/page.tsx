@@ -236,7 +236,7 @@ export default function ContactPage() {
         <img className={styles.footerEmbers} src={`${IMG}/overlays/ember-overlay.webp`} alt="" aria-hidden="true" loading="lazy" />
         <div className={`${styles.wrap} ${styles.footerInner}`}>
           <a className={styles.footerLogo} href={sanctuaryContent.logo.homeHref} aria-label={sanctuaryContent.logo.ariaLabel}>
-            <img src="/images/contact/nav/sanctuary-rocks-logo.webp" alt="" width={480} height={480} loading="lazy" />
+            <img src="/images/brand/sanctuary-rocks-logo-transparent.webp" alt="" width={640} height={640} loading="lazy" />
           </a>
           <div className={styles.footerText}>
             <p className={styles.footerLine}>{sanctuaryContent.footer.description}</p>

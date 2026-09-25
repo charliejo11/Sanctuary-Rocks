@@ -1,0 +1,64 @@
+/* Sitewide dragon cursor (see DragonCursor.tsx). */
+
+/* Added to <html> only while the dragon cursor is running: hide the system
+   arrow everywhere except text fields, which keep their normal I-beam. */
+:global(html).active,
+:global(html).active *,
+:global(html).active *::before,
+:global(html).active *::after {
+  cursor: none !important;
+}
+
+:global(html).active :is(input, textarea, select, [contenteditable=""], [contenteditable="true"]) {
+  cursor: auto !important;
+}
+
+.cursorRoot {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.flames {
+  position: absolute;
+  inset: 0;
+}
+
+.head {
+  position: fixed;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  transform-origin: 14% 53%;
+  will-change: transform;
+  transition: opacity 150ms ease;
+}
+
+.head img {
+  display: block;
+  transform-origin: 14% 53%;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 5px rgba(255, 90, 22, 0.45));
+  transition: filter 180ms ease;
+}
+
+.shown {
+  opacity: 1;
+}
+
+/* Over links and buttons the dragon glows hotter. */
+.hover img {
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 9px rgba(255, 138, 34, 0.95)) brightness(1.15);
+}
+
+.flame {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle at 45% 45%, #fff6c8 0%, #ffd13a 22%, #ff8a22 45%, rgba(239, 34, 24, 0.85) 68%, rgba(201, 21, 21, 0) 100%);
+  mix-blend-mode: screen;
+  filter: blur(0.4px);
+  will-change: transform, opacity;
+}

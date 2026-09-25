@@ -36,7 +36,7 @@ export default function DragonNav({ links, pathname }: { links: NavLink[]; pathn
         <img className={`${styles.cap} ${styles.capRight}`} src="/images/contact/nav/dragon-nav-cap-right.webp" alt="" aria-hidden="true" />
 
         <a className={styles.logo} href={sanctuaryContent.logo.homeHref} aria-label={sanctuaryContent.logo.ariaLabel}>
-          <img src="/images/contact/nav/sanctuary-rocks-logo.webp" alt="" width={480} height={480} />
+          <img src="/images/brand/sanctuary-rocks-logo-transparent.webp" alt="" width={640} height={640} />
         </a>
 
         <nav className={styles.nav} aria-label="Main navigation">

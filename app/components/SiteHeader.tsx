@@ -13,12 +13,14 @@ const navLinks = [
   { href: "/contact", label: "Contact" },
 ];
 
+// Redesigned pages that use the forged-metal dragon navigation; every other
+// page keeps this header exactly as it was.
+const DRAGON_NAV_PAGES = new Set(["/contact", "/crew"]);
+
 export default function SiteHeader() {
   const pathname = usePathname();
 
-  // The Contact page uses the forged-metal dragon navigation; every other
-  // page keeps this header exactly as it was.
-  if (pathname === "/contact") return <DragonNav links={navLinks} pathname={pathname} />;
+  if (DRAGON_NAV_PAGES.has(pathname)) return <DragonNav links={navLinks} pathname={pathname} />;
 
   return (
     <header className="site-header site-header--visible">

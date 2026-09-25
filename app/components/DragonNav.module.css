@@ -113,7 +113,8 @@
   transition: transform 300ms ease, filter 300ms ease;
 }
 
-/* sanctuary-rocks-logo.webp is the club logo with its black square made
+/* sanctuary-rocks-logo-transparent.webp is the official logo
+   (public/images/brand/sanctuary-rocks-logo.png) with its black square made
    transparent, so only the badge and lettering sit over the bar. */
 .logo img {
   display: block;

@@ -17,7 +17,7 @@ export const sanctuaryContent = {
 
   logo: {
     // Safe to edit: official logo artwork path in the public folder.
-    imageSrc: "/images/hero/SRslogo_aug26.png",
+    imageSrc: "/images/brand/sanctuary-rocks-logo.png",
     // Safe to edit: where the logo links. "/" means homepage.
     homeHref: "/",
     // Safe to edit: accessibility label for screen readers.
