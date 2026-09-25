@@ -1,213 +1,96 @@
-"use client";
-
-import { useEffect, useState } from "react";
+import type { Metadata } from "next";
+import ForgedFooter from "../components/ForgedFooter";
+import { oswald, robotoCondensed } from "../contact/fonts";
 import galleryData from "../data/gallery.json";
+import { distressed } from "./fonts";
+import GalleryGrid, { type GalleryPhoto } from "./GalleryGrid";
+import styles from "./gallery.module.css";
 
-type GalleryPhoto = {
-  src: string;
-  alt: string;
-  caption: string;
-};
-
-type GalleryData = {
-  title: string;
-  subtitle: string;
-  photos: GalleryPhoto[];
-};
+type GalleryData = { title: string; subtitle: string; photos: GalleryPhoto[] };
 
 const data = galleryData as GalleryData;
+const ART = "/images/gallery/art";
 
-function GalleryImage({
-  photo,
-  index,
-}: {
-  photo: GalleryPhoto;
-  index: number;
-}) {
-  const [imageFailed, setImageFailed] = useState(false);
+export const metadata: Metadata = {
+  title: "Gallery | Sanctuary Rocks",
+  description: "Captured moments. Unforgettable nights. This is Sanctuary Rocks.",
+};
 
-  if (imageFailed) {
-    return (
-      <span className="gallery-template-placeholder">
-        <strong>{String(index + 1).padStart(2, "0")}</strong>
-        <em>{photo.caption}</em>
-      </span>
-    );
-  }
-
-  return (
-    <img
-      src={photo.src}
-      alt={photo.alt}
-      onError={() => {
-        setImageFailed(true);
-      }}
-    />
-  );
-}
-
-const BOARD_SLOT_COUNT = 15;
-
+// Gallery: cinematic dragon artwork top and bottom, a chain divider, and every
+// photo from app/data/gallery.json in a photo-first grid with numbered pages.
 export default function GalleryPage() {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const activePhoto = activeIndex === null ? null : data.photos[activeIndex];
-  const overflowPhotos = data.photos.slice(BOARD_SLOT_COUNT);
-
-  const closeLightbox = () => {
-    setActiveIndex(null);
-  };
-
-  const showPrevious = () => {
-    setActiveIndex((current) => {
-      if (current === null) return current;
-      return (current - 1 + data.photos.length) % data.photos.length;
-    });
-  };
-
-  const showNext = () => {
-    setActiveIndex((current) => {
-      if (current === null) return current;
-      return (current + 1) % data.photos.length;
-    });
-  };
-
-  useEffect(() => {
-    if (activeIndex === null) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") closeLightbox();
-      if (event.key === "ArrowLeft") showPrevious();
-      if (event.key === "ArrowRight") showNext();
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [activeIndex]);
-
   return (
-    <main className="gallery-page">
-      <section className="gallery-template-shell" aria-labelledby="gallery-title">
-        <div className="gallery-template-board">
-          <img
-            className="gallery-template-image"
-            src="/images/hero/Gallery photos.png"
-            alt=""
-            aria-hidden="true"
-          />
-
-          <header className="gallery-template-mobile-header">
-            <p>SANCTUARY ROCKS</p>
-            <h1>{data.title}</h1>
-            <span>{data.subtitle}</span>
-          </header>
-
-          <div className="gallery-template-heading">
-            <h1 id="gallery-title">{data.title}</h1>
-            <p>{data.subtitle}</p>
-          </div>
-
-          <div className="gallery-template-grid" aria-label="Gallery photos">
-            {data.photos.slice(0, BOARD_SLOT_COUNT).map((photo, index) => (
-              <button
-                className={`gallery-template-slot gallery-template-slot--${index + 1}`}
-                key={`${photo.src}-${index}`}
-                type="button"
-                onClick={() => {
-                  setActiveIndex(index);
-                }}
-                aria-label={`Open ${photo.caption}`}
-              >
-                <GalleryImage photo={photo} index={index} />
-                <span className="gallery-template-caption">{photo.caption}</span>
-              </button>
-            ))}
-          </div>
+    <main className={`${styles.page} ${distressed.variable} ${oswald.variable} ${robotoCondensed.variable}`}>
+      {/* ---------------------------------------------------------------- hero */}
+      <section className={styles.hero} aria-labelledby="gallery-title">
+        <img
+          className={styles.art}
+          src={`${ART}/gallery-hero-art-1916.webp`}
+          srcSet={`${ART}/gallery-hero-art-960.webp 960w, ${ART}/gallery-hero-art-1916.webp 1916w`}
+          sizes="100vw"
+          alt=""
+          aria-hidden="true"
+          width={1916}
+          height={821}
+          fetchPriority="high"
+        />
+        <div className={styles.heroContent}>
+          <img className={styles.logo} src="/images/brand/sanctuary-rocks-logo-transparent.webp" alt="Sanctuary Rocks" width={640} height={640} />
+          <h1 id="gallery-title" className={styles.title}>
+            Gallery
+          </h1>
+          <p className={styles.tagline}>
+            <span className={styles.rule} aria-hidden="true" />
+            <span>
+              Captured moments. Unforgettable nights.
+              <br />
+              This is Sanctuary Rocks.
+            </span>
+            <span className={styles.rule} aria-hidden="true" />
+          </p>
         </div>
-
-        {overflowPhotos.length > 0 ? (
-          <div className="gallery-overflow" aria-label="More gallery photos">
-            <h2 className="gallery-overflow-heading">More Photos</h2>
-            <div className="gallery-overflow-scroll">
-              {overflowPhotos.map((photo, overflowIndex) => {
-                const index = BOARD_SLOT_COUNT + overflowIndex;
-                return (
-                  <button
-                    className="gallery-overflow-item"
-                    key={`${photo.src}-${index}`}
-                    type="button"
-                    onClick={() => {
-                      setActiveIndex(index);
-                    }}
-                    aria-label={`Open ${photo.caption}`}
-                  >
-                    <GalleryImage photo={photo} index={index} />
-                    <span className="gallery-template-caption">{photo.caption}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        ) : null}
       </section>
 
-      {activePhoto ? (
-        <div
-          className="gallery-lightbox"
-          role="dialog"
-          aria-modal="true"
-          aria-label={activePhoto.caption}
-        >
-          <button
-            className="gallery-lightbox-backdrop"
-            type="button"
-            aria-label="Close gallery image"
-            onClick={closeLightbox}
-          />
+      {/* ------------------------------------------------ chain / metal divider */}
+      <div className={styles.divider} aria-hidden="true">
+        <span className={`${styles.chainRun} ${styles.chainLeft}`} />
+        <span className={styles.ornament} />
+        <span className={`${styles.chainRun} ${styles.chainRight}`} />
+      </div>
 
-          <div className="gallery-lightbox-panel">
-            <button
-              className="gallery-lightbox-close"
-              type="button"
-              onClick={closeLightbox}
-              aria-label="Close gallery image"
-            >
-              Close
-            </button>
+      {/* ------------------------------------------------------------- photos */}
+      <section className={styles.photos} aria-label="Gallery photos">
+        <GalleryGrid photos={data.photos} />
+      </section>
 
-            {data.photos.length > 1 ? (
-              <button
-                className="gallery-lightbox-nav gallery-lightbox-nav--prev"
-                type="button"
-                onClick={showPrevious}
-                aria-label="Previous gallery image"
-              >
-                Prev
-              </button>
-            ) : null}
-
-            <figure>
-              <div className="gallery-lightbox-image">
-                <GalleryImage photo={activePhoto} index={activeIndex ?? 0} />
-              </div>
-              <figcaption>{activePhoto.caption}</figcaption>
-            </figure>
-
-            {data.photos.length > 1 ? (
-              <button
-                className="gallery-lightbox-nav gallery-lightbox-nav--next"
-                type="button"
-                onClick={showNext}
-                aria-label="Next gallery image"
-              >
-                Next
-              </button>
-            ) : null}
-          </div>
+      {/* --------------------------------------------------------- bottom art */}
+      <section className={styles.closing} aria-labelledby="gallery-closing">
+        <img
+          className={styles.art}
+          src={`${ART}/gallery-footer-art-1916.webp`}
+          srcSet={`${ART}/gallery-footer-art-960.webp 960w, ${ART}/gallery-footer-art-1916.webp 1916w`}
+          sizes="100vw"
+          alt=""
+          aria-hidden="true"
+          width={1916}
+          height={821}
+          loading="lazy"
+        />
+        <div className={styles.closingContent}>
+          <h2 id="gallery-closing" className={styles.closingLine}>
+            Loud music. Good people.
+            <br />
+            No attitudes.
+          </h2>
+          <p className={styles.closingSmall}>
+            <span className={styles.rule} aria-hidden="true" />
+            This is Sanctuary Rocks
+            <span className={styles.rule} aria-hidden="true" />
+          </p>
         </div>
-      ) : null}
+      </section>
+
+      <ForgedFooter />
     </main>
   );
 }

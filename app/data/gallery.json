@@ -5,47 +5,65 @@
     {
       "src": "/images/gallery/Angelo_The Rhinestone Road Warrior.png",
       "alt": "Angelo - The Rhinestone Road Warrior",
-      "caption": "Angelo - The Rhinestone Road Warrior"
+      "caption": "Angelo - The Rhinestone Road Warrior",
+      "width": 1195,
+      "height": 896
     },
     {
       "src": "/images/gallery/Frenchies-Photo.jpg",
       "alt": "Frenchies - Got Frys",
-      "caption": "Frenchies-Got Frys"
+      "caption": "Frenchies-Got Frys",
+      "width": 1196,
+      "height": 896
     },
     {
       "src": "/images/gallery/GlitterJung_Disco Dumpster.png",
       "alt": "GlitterJung - Disco Dumpster",
-      "caption": "GlitterJung - Disco Dumpster"
+      "caption": "GlitterJung - Disco Dumpster",
+      "width": 1195,
+      "height": 896
     },
     {
       "src": "/images/gallery/Glitter_Gothy_Rainbow Thunder Daddy.png",
       "alt": "Gothy - Rainbow Thunder Daddy",
-      "caption": "Gothy - Rainbow Thunder Daddy"
+      "caption": "Gothy - Rainbow Thunder Daddy",
+      "width": 1448,
+      "height": 1086
     },
     {
       "src": "/images/gallery/LegzNashty_Till Death or Drama.png",
       "alt": "LegzNashty - Till Death or Drama",
-      "caption": "LegzNashty - Till Death or Drama"
+      "caption": "LegzNashty - Till Death or Drama",
+      "width": 1448,
+      "height": 1086
     },
     {
       "src": "/images/gallery/Lucy_Glitterfied Fairy Titmother.png",
       "alt": "Lucy - Glitterfied Fairy Titmother",
-      "caption": "Lucy - Glitterfied Fairy Titmother"
+      "caption": "Lucy - Glitterfied Fairy Titmother",
+      "width": 1024,
+      "height": 1024
     },
     {
       "src": "/images/gallery/Mando_Glitterfied_Hot Dog Fairy.png",
       "alt": "Mando - Glitterfied Hot Dog Fairy",
-      "caption": "Mando - Glitterfied Hot Dog Fairy"
+      "caption": "Mando - Glitterfied Hot Dog Fairy",
+      "width": 1024,
+      "height": 512
     },
     {
       "src": "/images/gallery/Moose_Glitterfied_This Is Why Wonka Had Rules.png",
       "alt": "Moose - This Is Why Wonka Had Rules",
-      "caption": "Moose - This Is Why Wonka Had Rules"
+      "caption": "Moose - This Is Why Wonka Had Rules",
+      "width": 1195,
+      "height": 896
     },
     {
       "src": "/images/gallery/Y_Glitterfied_Satans Prom King.jpg",
       "alt": "Y - Satans Prom King",
-      "caption": "Y - Satan's Prom King"
+      "caption": "Y - Satan's Prom King",
+      "width": 2160,
+      "height": 2160
     }
   ]
 }

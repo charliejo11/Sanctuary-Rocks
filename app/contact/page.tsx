@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
+import ForgedFooter from "../components/ForgedFooter";
 import ContactCrewCard from "./ContactCrewCard";
 import { cinzel, oswald, robotoCondensed } from "./fonts";
 import { generalManagers, owners } from "./staffData";
 import styles from "./contact.module.css";
-import { sanctuaryContent } from "../data/sanctuaryContent";
 
 export const metadata: Metadata = {
   title: "Contact | Sanctuary Rocks",
@@ -82,8 +82,6 @@ function Divider({ crest = false }: { crest?: boolean }) {
 // Contact page: dragon/forged-metal design. All text, links and buttons are
 // real HTML; the dragon artwork is transparent decoration layered around it.
 export default function ContactPage() {
-  const year = new Date().getFullYear();
-
   return (
     <main className={`${styles.page} ${cinzel.variable} ${oswald.variable} ${robotoCondensed.variable}`}>
       {/* ---------------------------------------------------------------- hero */}
@@ -231,22 +229,7 @@ export default function ContactPage() {
         <img className={styles.chainDrape} src={`${IMG}/accents/chain-horizontal.webp`} alt="" aria-hidden="true" loading="lazy" />
       </section>
 
-      {/* -------------------------------------------------------------- footer */}
-      <footer className={styles.footer}>
-        <img className={styles.footerEmbers} src={`${IMG}/overlays/ember-overlay.webp`} alt="" aria-hidden="true" loading="lazy" />
-        <div className={`${styles.wrap} ${styles.footerInner}`}>
-          <a className={styles.footerLogo} href={sanctuaryContent.logo.homeHref} aria-label={sanctuaryContent.logo.ariaLabel}>
-            <img src="/images/brand/sanctuary-rocks-logo-transparent.webp" alt="" width={640} height={640} loading="lazy" />
-          </a>
-          <div className={styles.footerText}>
-            <p className={styles.footerLine}>{sanctuaryContent.footer.description}</p>
-            <p className={styles.footerSmall}>
-              © {year} Sanctuary Rocks. All rights reserved.{" "}
-              <span className={styles.footerCredit}>Designed by CharlieJo11</span>
-            </p>
-          </div>
-        </div>
-      </footer>
+      <ForgedFooter />
     </main>
   );
 }

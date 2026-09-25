@@ -44,7 +44,7 @@
     linear-gradient(180deg, var(--black-2), var(--black) 40%, #070606);
 }
 
-/* This page has its own sticky dragon navigation and footer. */
+/* This page has its own sticky dragon navigation. */
 :global(body):has(.page) {
   padding-top: 0;
   background: var(--black, #050505);
@@ -706,79 +706,6 @@
   pointer-events: none;
 }
 
-/* ------------------------------------------------------------ footer */
-
-.footer {
-  position: relative;
-  margin-top: clamp(1.5rem, 3vw, 2.5rem);
-  padding: clamp(1.6rem, 3vw, 2.4rem) 0;
-  overflow: hidden;
-  border-top: 1px solid rgba(255, 90, 22, 0.45);
-  background:
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.015) 0 2px, transparent 2px 8px),
-    linear-gradient(180deg, #120c0b, #070505);
-  box-shadow: inset 0 1px 0 rgba(255, 138, 34, 0.2), 0 -10px 30px rgba(239, 34, 24, 0.12);
-  isolation: isolate;
-}
-
-.footerEmbers {
-  position: absolute;
-  top: -50%;
-  left: 0;
-  z-index: -1;
-  width: 100%;
-  height: 120%;
-  object-fit: cover;
-  opacity: 0.18;
-  mix-blend-mode: screen;
-  pointer-events: none;
-}
-
-.footerInner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
-}
-
-.footerLogo {
-  flex: none;
-  width: clamp(96px, 9vw, 140px);
-}
-
-.footerLogo img {
-  display: block;
-  width: 100%;
-  height: auto;
-  filter: drop-shadow(0 0 14px rgba(255, 90, 22, 0.4));
-}
-
-.footerText {
-  text-align: right;
-}
-
-.footerLine {
-  margin: 0;
-  color: var(--bone);
-  font-family: var(--display);
-  font-size: clamp(0.8rem, 1vw, 1rem);
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-}
-
-.footerSmall {
-  margin: 0.5rem 0 0;
-  color: var(--ash);
-  font-size: 0.85rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.footerCredit {
-  color: var(--red-hi);
-}
-
 /* -------------------------------------------------------- responsive */
 
 @media (max-width: 1200px) {
@@ -839,15 +766,6 @@
     order: -1;
     width: 100%;
     margin-inline: 0;
-  }
-
-  .footerInner {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .footerText {
-    text-align: center;
   }
 }
 

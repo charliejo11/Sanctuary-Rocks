@@ -1,0 +1,89 @@
+/* Forged-metal footer shared by the redesigned pages (moved from the Contact
+   page so Gallery can use the same one). */
+
+.footer {
+  position: relative;
+  margin-top: clamp(1.5rem, 3vw, 2.5rem);
+  padding: clamp(1.6rem, 3vw, 2.4rem) 0;
+  overflow: hidden;
+  border-top: 1px solid rgba(255, 90, 22, 0.45);
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.015) 0 2px, transparent 2px 8px),
+    linear-gradient(180deg, #120c0b, #070505);
+  box-shadow: inset 0 1px 0 rgba(255, 138, 34, 0.2), 0 -10px 30px rgba(239, 34, 24, 0.12);
+  color: #f0ece7;
+  font-family: var(--font-contact-body), "Roboto Condensed", "Arial Narrow", sans-serif;
+  line-height: 1.5;
+  isolation: isolate;
+}
+
+.embers {
+  position: absolute;
+  top: -50%;
+  left: 0;
+  z-index: -1;
+  width: 100%;
+  height: 120%;
+  object-fit: cover;
+  opacity: 0.18;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  width: min(1500px, calc(100% - 64px));
+  margin-inline: auto;
+}
+
+.logo {
+  flex: none;
+  width: clamp(96px, 9vw, 140px);
+}
+
+.logo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 0 14px rgba(255, 90, 22, 0.4));
+}
+
+.text {
+  text-align: right;
+}
+
+.line {
+  margin: 0;
+  font-family: var(--font-contact-display), "Cinzel", Georgia, serif;
+  font-size: clamp(0.8rem, 1vw, 1rem);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.small {
+  margin: 0.5rem 0 0;
+  color: #a9a6a3;
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.credit {
+  color: #ef2218;
+}
+
+@media (max-width: 760px) {
+  .inner {
+    flex-direction: column;
+    width: calc(100% - 28px);
+    text-align: center;
+  }
+
+  .text {
+    text-align: center;
+  }
+}
