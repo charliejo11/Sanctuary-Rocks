@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { oswald } from "../contact/fonts";
 import { sanctuaryContent } from "../data/sanctuaryContent";
@@ -35,9 +36,9 @@ export default function DragonNav({ links, pathname }: { links: NavLink[]; pathn
         <img className={`${styles.cap} ${styles.capLeft}`} src="/images/contact/nav/dragon-nav-cap-left.webp" alt="" aria-hidden="true" />
         <img className={`${styles.cap} ${styles.capRight}`} src="/images/contact/nav/dragon-nav-cap-right.webp" alt="" aria-hidden="true" />
 
-        <a className={styles.logo} href={sanctuaryContent.logo.homeHref} aria-label={sanctuaryContent.logo.ariaLabel}>
+        <Link className={styles.logo} href={sanctuaryContent.logo.homeHref} aria-label={sanctuaryContent.logo.ariaLabel}>
           <img src="/images/brand/sanctuary-rocks-logo-transparent.webp" alt="" width={640} height={640} />
-        </a>
+        </Link>
 
         <nav className={styles.nav} aria-label="Main navigation">
           <ul id="dragon-nav-links" className={`${styles.links} ${menuOpen ? styles.linksOpen : ""}`}>
@@ -45,14 +46,14 @@ export default function DragonNav({ links, pathname }: { links: NavLink[]; pathn
               const active = pathname === link.href;
               return (
                 <li key={link.href}>
-                  <a
+                  <Link
                     href={link.href}
                     className={active ? styles.active : undefined}
                     aria-current={active ? "page" : undefined}
                     onClick={() => setMenuOpen(false)}
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               );
             })}

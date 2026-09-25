@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useSanctuaryAudio } from "./audio/SanctuaryAudio";
 import styles from "./SanctuaryPlayer.module.css";
 
 /* Decorative "Hellforged Serpent" shell (1448 x 1086). Percent-encoded because
@@ -8,11 +9,7 @@ import styles from "./SanctuaryPlayer.module.css";
    back to a CSS-drawn gothic frame rather than a broken image. */
 const SHELL_ART_SRC = "/images/hero/Hellforged%20Serpent%20Media%20Frame.png";
 
-const STREAM_SRC = "/api/stream";
 const POLL_INTERVAL_MS = 12000;
-const VOLUME_STORAGE_KEY = "sanctuary:player-volume";
-const MUTED_STORAGE_KEY = "sanctuary:player-muted";
-const DEFAULT_VOLUME = 0.8;
 
 type NowPlayingData = {
   artist: string;
@@ -56,32 +53,14 @@ function normalizeLiveNow(data: Partial<LiveNowCalendarData>): LiveNowCalendarDa
   };
 }
 
-/* localStorage throws in private modes / blocked-cookie contexts. */
-function readStored(key: string): string | null {
-  try {
-    return window.localStorage.getItem(key);
-  } catch {
-    return null;
-  }
-}
-
-function writeStored(key: string, value: string) {
-  try {
-    window.localStorage.setItem(key, value);
-  } catch {
-    /* non-fatal: the volume simply is not remembered */
-  }
-}
-
+// The homepage's forged player skin. Playback itself lives in the sitewide
+// SanctuaryAudioProvider (one persistent stream for every page), so this only
+// shows the state and sends play / stop / volume / mute to it.
 export default function SanctuaryPlayer() {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  /* Volume to restore when unmuting a slider that was dragged to zero. */
-  const lastAudibleVolumeRef = useRef(DEFAULT_VOLUME);
-
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [volume, setVolume] = useState(DEFAULT_VOLUME);
-  const [playbackError, setPlaybackError] = useState("");
+  const audio = useSanctuaryAudio();
+  const isPlaying = audio.isOn;
+  const isMuted = audio.muted;
+  const volume = audio.volume;
   const [artFailed, setArtFailed] = useState(false);
   const [nowPlaying, setNowPlaying] = useState<NowPlayingData>(fallbackNowPlaying);
   const [liveNow, setLiveNow] = useState<LiveNowCalendarData>(fallbackLiveNow);
@@ -134,87 +113,10 @@ export default function SanctuaryPlayer() {
     };
   }, [refreshNowPlaying, refreshLiveNow]);
 
-  /* -------------------------------------------------------------- volume -- */
-
-  /* Restored after mount rather than during render, so the server HTML and the
-     first client render agree. */
-  useEffect(() => {
-    const stored = readStored(VOLUME_STORAGE_KEY);
-    const storedVolume = stored === null ? NaN : Number(stored);
-
-    if (Number.isFinite(storedVolume) && storedVolume >= 0 && storedVolume <= 1) {
-      setVolume(storedVolume);
-
-      if (storedVolume > 0) {
-        lastAudibleVolumeRef.current = storedVolume;
-      }
-    }
-
-    setIsMuted(readStored(MUTED_STORAGE_KEY) === "true");
-  }, []);
-
-  /* The single place where React state is pushed onto the audio element. */
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    audio.volume = volume;
-    audio.muted = isMuted;
-  }, [volume, isMuted]);
-
-  useEffect(() => {
-    writeStored(VOLUME_STORAGE_KEY, String(volume));
-    writeStored(MUTED_STORAGE_KEY, String(isMuted));
-  }, [volume, isMuted]);
-
   /* ------------------------------------------------------------ handlers -- */
 
-  async function handlePlayPause() {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (isPlaying) {
-      audio.pause();
-      setIsPlaying(false);
-      return;
-    }
-
-    try {
-      setPlaybackError("");
-      await audio.play();
-      setIsPlaying(true);
-    } catch (error) {
-      console.error("Playback failed:", error);
-      setPlaybackError("Stream unavailable");
-      setIsPlaying(false);
-    }
-  }
-
-  function handleMuteClick() {
-    if (!isMuted) {
-      setIsMuted(true);
-      return;
-    }
-
-    setIsMuted(false);
-
-    /* Unmuting a slider sitting at zero would otherwise still be silent. */
-    if (volume === 0) {
-      setVolume(lastAudibleVolumeRef.current || DEFAULT_VOLUME);
-    }
-  }
-
   function handleVolumeChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const nextVolume = Number(event.target.value);
-
-    setVolume(nextVolume);
-
-    if (nextVolume > 0) {
-      lastAudibleVolumeRef.current = nextVolume;
-      setIsMuted(false);
-    } else {
-      setIsMuted(true);
-    }
+    audio.setVolume(Number(event.target.value));
   }
 
   /* -------------------------------------------------------------- render -- */
@@ -250,7 +152,7 @@ export default function SanctuaryPlayer() {
         <button
           type="button"
           className={`${styles.muteButton} ${isMuted ? styles.muteButtonOn : ""}`}
-          onClick={handleMuteClick}
+          onClick={audio.toggleMute}
           aria-pressed={isMuted}
           aria-label={isMuted ? "Unmute the stream" : "Mute the stream"}
           title={isMuted ? "Unmute" : "Mute"}
@@ -330,34 +232,24 @@ export default function SanctuaryPlayer() {
         <button
           type="button"
           className={styles.playButton}
-          onClick={handlePlayPause}
+          onClick={audio.toggle}
           aria-pressed={isPlaying}
           aria-label={
             isPlaying
-              ? "Pause the Sanctuary Rocks stream"
+              ? "Stop the Sanctuary Rocks stream"
               : "Listen live to the Sanctuary Rocks stream"
           }
         >
-          {isPlaying ? "Pause" : "Listen Live"}
+          {audio.isLoading ? "Tuning in…" : audio.isReconnecting ? "Reconnecting…" : isPlaying ? "Pause" : "Listen Live"}
         </button>
 
-        {playbackError ? (
+        {audio.error ? (
           <p className={styles.error} role="status">
-            {playbackError}
+            {audio.error}
           </p>
         ) : null}
       </div>
 
-      <audio
-        ref={audioRef}
-        className={styles.audio}
-        preload="none"
-        onPlay={() => setIsPlaying(true)}
-        onPause={() => setIsPlaying(false)}
-      >
-        <source src={STREAM_SRC} type="audio/mpeg" />
-        Your browser does not support the audio player.
-      </audio>
     </div>
   );
 }

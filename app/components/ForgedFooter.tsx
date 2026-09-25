@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { cinzel, robotoCondensed } from "../contact/fonts";
 import { sanctuaryContent } from "../data/sanctuaryContent";
 import styles from "./ForgedFooter.module.css";
@@ -11,9 +12,9 @@ export default function ForgedFooter() {
     <footer className={`${styles.footer} ${cinzel.variable} ${robotoCondensed.variable}`}>
       <img className={styles.embers} src="/images/shared/overlays/ember-overlay.webp" alt="" aria-hidden="true" loading="lazy" />
       <div className={styles.inner}>
-        <a className={styles.logo} href={sanctuaryContent.logo.homeHref} aria-label={sanctuaryContent.logo.ariaLabel}>
+        <Link className={styles.logo} href={sanctuaryContent.logo.homeHref} aria-label={sanctuaryContent.logo.ariaLabel}>
           <img src="/images/brand/sanctuary-rocks-logo-transparent.webp" alt="" width={640} height={640} loading="lazy" />
-        </a>
+        </Link>
         <div className={styles.text}>
           <p className={styles.line}>{sanctuaryContent.footer.description}</p>
           <p className={styles.small}>
