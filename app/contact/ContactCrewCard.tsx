@@ -1,18 +1,13 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
+import styles from "./contact.module.css";
 import type { StaffMember } from "./staffData";
-
-export type StaffSlot = {
-  left: number;
-  top: number;
-  width: number;
-  height: number;
-};
 
 type ContactCrewCardProps = {
   member: StaffMember;
-  slot: StaffSlot;
+  /** The owner's card is drawn a little larger. */
+  featured?: boolean;
 };
 
 /** Trims and collapses a field down to `undefined` when it has nothing in
@@ -23,7 +18,10 @@ function presence(value?: string): string | undefined {
   return trimmed ? trimmed : undefined;
 }
 
-export default function ContactCrewCard({ member, slot }: ContactCrewCardProps) {
+// A crew member in the dragon crew-card frame: the photo sits in the frame's
+// opening and the name is real text on the frame's built-in nameplate.
+// Clicking opens the contact pop-up (SL names, Discord, profile, bio).
+export default function ContactCrewCard({ member, featured = false }: ContactCrewCardProps) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const headingId = useId();
@@ -72,25 +70,20 @@ export default function ContactCrewCard({ member, slot }: ContactCrewCardProps) 
     <>
       <button
         type="button"
-        className="contact-crew-card"
-        style={{
-          left: `${slot.left}%`,
-          top: `${slot.top}%`,
-          width: `${slot.width}%`,
-          height: `${slot.height}%`,
-        }}
+        className={`${styles.crewCard} ${featured ? styles.crewFeatured : ""}`}
         onClick={() => setOpen(true)}
         aria-label={`View contact information for ${member.name}`}
       >
-        <span className="contact-crew-photo">
+        <span className={styles.crewPhoto}>
           <img
-            src={member.image}
+            src={member.cardImage ?? member.image}
             alt=""
+            loading="lazy"
             style={member.imagePosition ? { objectPosition: member.imagePosition } : undefined}
           />
         </span>
-
-        <span className="contact-crew-nameplate">
+        <img className={styles.crewFrame} src="/images/contact/crew/crew-card-frame.webp" alt="" aria-hidden="true" />
+        <span className={styles.crewPlate}>
           <strong>{member.name}</strong>
           <small>{member.role}</small>
         </span>

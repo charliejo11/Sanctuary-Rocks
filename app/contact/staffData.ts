@@ -12,11 +12,15 @@
 // value (e.g. "center top", "center 20%") that keeps the right part of
 // the photo visible once it's cropped to fit inside the frame opening.
 // Adjust it if a new photo crops awkwardly; everyone else's is untouched.
+//
+// `cardImage` is an optional smaller copy used on the crew card (the
+// full `image` still shows in the pop-up).
 
 export type StaffMember = {
   name: string;
   role: "Owner" | "General Manager";
   image: string;
+  cardImage?: string;
   imagePosition?: string;
   slDisplayName?: string;
   slUsername?: string;
@@ -25,16 +29,15 @@ export type StaffMember = {
   bio?: string;
 };
 
-// The artwork has 3 Owner frames and 2 General Manager frames baked in.
-// Add up to that many entries per group and the layout in page.tsx will
-// place them automatically (a single Owner is centered; two take the
-// outer two frames). Going beyond 3 owners / 2 managers needs new
-// artwork before it can be wired up.
+// Each person gets their own dragon-framed card on the Contact page, so
+// adding or removing someone here is all it takes.
 export const owners: StaffMember[] = [
   {
     name: "Moose Houston",
     role: "Owner",
     image: "/images/owners/moose.png.jpg",
+    // Card copy is cropped inside that baked-in gold border.
+    cardImage: "/images/contact/crew/moose-720.webp",
     // The source photo has its own "Moose Houston / SR Owner" gold-frame
     // border baked in at the top and bottom - this crops past it so only
     // the portrait shows inside our frame, instead of a frame-in-a-frame.
@@ -52,6 +55,7 @@ export const generalManagers: StaffMember[] = [
     name: "Peacy",
     role: "General Manager",
     image: "/images/managers/Peacy.Graves.png.jpg",
+    cardImage: "/images/contact/crew/peacy-720.webp",
     imagePosition: "center 12%",
     slDisplayName: "",
     slUsername: "",
@@ -63,6 +67,7 @@ export const generalManagers: StaffMember[] = [
     name: "Troya",
     role: "General Manager",
     image: "/images/managers/Troya GM.jpg",
+    cardImage: "/images/contact/crew/troya-720.webp",
     imagePosition: "center top",
     slDisplayName: "",
     slUsername: "",

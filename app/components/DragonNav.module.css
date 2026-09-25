@@ -1,0 +1,360 @@
+/* =============================================================================
+   Dragon navigation (Contact page): a forged-metal bar in CSS with the two
+   dragon end caps from dragon-nav-bar.png laid over its ends.
+
+   Cap geometry (dragon-nav-cap-*.webp, 584 x 417): the cleared plate sits
+   between 44.1% and 79.1% of the cap's height and the metal end loop starts
+   at 76.2% of its width, so the CSS bar is sized to tuck under those edges.
+   ========================================================================== */
+
+.header {
+  --bar-h: 58px;
+  --cap-h: calc(var(--bar-h) / 0.35);
+  --cap-w: calc(var(--cap-h) * 584 / 417);
+  --bar-top: 74px;
+  --ember: #ff5a16;
+  --ember-hi: #ff8a22;
+  --red: #ef2218;
+
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  height: calc(var(--bar-top) + var(--bar-h) + 24px);
+  /* The hero slides up underneath; only the bar itself takes clicks. */
+  margin-bottom: calc(-1 * (var(--bar-top) + var(--bar-h) + 24px));
+  pointer-events: none;
+  overflow-x: clip;
+  font-family: var(--font-contact-label), "Oswald", "Arial Narrow", sans-serif;
+}
+
+.bar {
+  position: absolute;
+  top: var(--bar-top);
+  left: 50%;
+  width: min(1500px, calc(100% - 150px));
+  height: var(--bar-h);
+  transform: translateX(-50%);
+  border-top: 2px solid #3a2a24;
+  border-bottom: 2px solid #3a2a24;
+  background:
+    radial-gradient(ellipse 30% 90% at 18% 100%, rgba(239, 34, 24, 0.16), transparent 70%),
+    radial-gradient(ellipse 30% 90% at 78% 0%, rgba(255, 90, 22, 0.12), transparent 70%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.018) 0 2px, transparent 2px 7px),
+    linear-gradient(180deg, #221c1a 0%, #121010 42%, #0a0909 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 138, 34, 0.35),
+    inset 0 -1px 0 rgba(255, 90, 22, 0.3),
+    inset 0 0 24px rgba(0, 0, 0, 0.85),
+    0 0 18px rgba(239, 34, 24, 0.28),
+    0 12px 30px rgba(0, 0, 0, 0.7);
+  pointer-events: auto;
+  transition: top 350ms ease;
+}
+
+/* Molten seams along the top and bottom edges. */
+.bar::before,
+.bar::after {
+  content: "";
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--ember) 20%, var(--ember-hi) 50%, var(--ember) 80%, transparent);
+  box-shadow: 0 0 8px var(--ember);
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+.bar::before { top: 3px; }
+.bar::after { bottom: 3px; }
+
+.cap {
+  position: absolute;
+  top: calc(var(--bar-h) / 2 - var(--cap-h) * 0.616);
+  z-index: 1;
+  width: var(--cap-w);
+  height: var(--cap-h);
+  pointer-events: none;
+  user-select: none;
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.7));
+  transition: transform 350ms ease, opacity 350ms ease;
+}
+
+.capLeft {
+  left: calc(var(--cap-w) * -0.238);
+  transform-origin: 76% 62%;
+}
+
+.capRight {
+  right: calc(var(--cap-w) * -0.238);
+  transform-origin: 24% 62%;
+}
+
+/* Scrolled: the bar rides up to the top and the dragons draw in. */
+.compact .bar {
+  top: 12px;
+}
+
+.compact .cap {
+  transform: scale(0.62);
+}
+
+.logo {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--cap-w) * 0.6);
+  z-index: 3;
+  width: calc(var(--bar-h) * 1.85);
+  aspect-ratio: 1;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  /* Dark disc so the dragon cap never shows through the badge. */
+  background: radial-gradient(circle, #0b0707 62%, rgba(11, 7, 7, 0.85) 68%, transparent 71%);
+  transition: transform 300ms ease, filter 300ms ease;
+}
+
+/* sanctuary-rocks-logo.webp is the club logo with its black square made
+   transparent, so only the badge and lettering sit over the bar. */
+.logo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 10px rgba(255, 90, 22, 0.45));
+}
+
+.logo:hover,
+.logo:focus-visible {
+  transform: translateY(-50%) scale(1.05);
+  outline: none;
+}
+
+.logo:focus-visible img {
+  filter: drop-shadow(0 0 14px rgba(255, 138, 34, 0.9));
+}
+
+.nav {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0 calc(var(--cap-w) * 0.62) 0 calc(var(--cap-w) * 0.6 + var(--bar-h) * 2.1);
+}
+
+.links {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.links li + li {
+  position: relative;
+}
+
+/* Thin glowing separators between links, like the artwork. */
+.links li + li::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 1px;
+  height: 22px;
+  transform: translateY(-50%);
+  background: linear-gradient(180deg, transparent, var(--red), transparent);
+  box-shadow: 0 0 6px var(--red);
+}
+
+.links a {
+  position: relative;
+  display: block;
+  padding: 0.55rem clamp(0.8rem, 1.6vw, 1.7rem);
+  color: #e3ddd6;
+  font-size: clamp(0.92rem, 1.05vw, 1.1rem);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.9);
+  white-space: nowrap;
+  transition: color 200ms ease, text-shadow 200ms ease;
+}
+
+.links a:hover,
+.links a:focus-visible {
+  color: #fff;
+  text-shadow: 0 0 12px rgba(255, 90, 22, 0.8), 0 2px 3px rgba(0, 0, 0, 0.9);
+  outline: none;
+}
+
+.links a.active {
+  color: var(--ember-hi);
+  background: linear-gradient(180deg, #ffb347, var(--ember) 55%, var(--red));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 0 6px rgba(255, 90, 22, 0.55));
+}
+
+.links a.active::after {
+  content: "";
+  position: absolute;
+  right: clamp(0.8rem, 1.6vw, 1.7rem);
+  bottom: 0.25rem;
+  left: clamp(0.8rem, 1.6vw, 1.7rem);
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--red), var(--ember-hi), var(--red));
+  box-shadow: 0 0 8px var(--ember);
+}
+
+.menuButton {
+  display: none;
+}
+
+/* ----------------------------------------------------------- responsive */
+
+@media (max-width: 1180px) {
+  .header {
+    --bar-h: 52px;
+    --bar-top: 64px;
+  }
+
+  .links a {
+    padding-inline: 0.7rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Folded menu: logo on the left, menu button on the right. */
+@media (max-width: 960px) {
+  .header {
+    --bar-h: 50px;
+    --bar-top: 52px;
+  }
+
+  .bar {
+    width: calc(100% - 24px);
+  }
+
+  .cap {
+    --cap-h: 120px;
+    --cap-w: calc(120px * 584 / 417);
+    top: calc(var(--bar-h) / 2 - 120px * 0.616);
+  }
+
+  .capLeft { left: calc(var(--cap-w) * -0.45); }
+  .capRight { right: calc(var(--cap-w) * -0.45); }
+
+  .logo {
+    left: 56px;
+    width: 76px;
+  }
+
+  .nav {
+    justify-content: flex-end;
+    padding: 0 64px 0 0;
+  }
+
+  .menuButton {
+    position: relative;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.45rem 0.8rem;
+    border: 1px solid rgba(255, 90, 22, 0.55);
+    border-radius: 3px;
+    background: linear-gradient(180deg, #1c1614, #0b0909);
+    box-shadow: 0 0 10px rgba(239, 34, 24, 0.3);
+    color: #f0ece7;
+    font: inherit;
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .menuButton:focus-visible {
+    outline: 2px solid var(--ember-hi);
+    outline-offset: 3px;
+  }
+
+  .menuIcon,
+  .menuIcon::before,
+  .menuIcon::after {
+    display: block;
+    width: 18px;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--ember-hi);
+  }
+
+  .menuIcon {
+    position: relative;
+  }
+
+  .menuIcon::before,
+  .menuIcon::after {
+    content: "";
+    position: absolute;
+    left: 0;
+  }
+
+  .menuIcon::before { top: -6px; }
+  .menuIcon::after { top: 6px; }
+
+  .links {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    left: 0;
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0.4rem 0;
+    border: 1px solid rgba(255, 90, 22, 0.45);
+    background: linear-gradient(180deg, #171211, #090808);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.8), 0 0 18px rgba(239, 34, 24, 0.25);
+  }
+
+  .linksOpen {
+    display: flex;
+  }
+
+  .links li + li::before {
+    top: 0;
+    left: 10%;
+    right: 10%;
+    width: auto;
+    height: 1px;
+    transform: none;
+    background: linear-gradient(90deg, transparent, rgba(239, 34, 24, 0.6), transparent);
+    box-shadow: none;
+  }
+
+  .links a {
+    padding: 0.85rem 1.4rem;
+    font-size: 1rem;
+    text-align: center;
+  }
+
+  .links a.active::after {
+    right: 40%;
+    left: 40%;
+  }
+
+  .compact .bar {
+    top: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar,
+  .cap,
+  .logo {
+    transition: none;
+  }
+}

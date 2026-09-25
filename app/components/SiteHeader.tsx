@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import DragonNav from "./DragonNav";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -14,6 +15,10 @@ const navLinks = [
 
 export default function SiteHeader() {
   const pathname = usePathname();
+
+  // The Contact page uses the forged-metal dragon navigation; every other
+  // page keeps this header exactly as it was.
+  if (pathname === "/contact") return <DragonNav links={navLinks} pathname={pathname} />;
 
   return (
     <header className="site-header site-header--visible">

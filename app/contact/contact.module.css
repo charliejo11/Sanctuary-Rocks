@@ -1,0 +1,875 @@
+/* =============================================================================
+   Contact page: dragons, forged black metal and a molten red/orange glow.
+   All text and buttons are HTML; the transparent dragon/metal artwork in
+   /public/images/contact decorates the layout without sizing it.
+
+   Frame geometry (measured off the artwork):
+   - main-panel-frame.webp 1448 x 1073, opening 209..1239 x 197..912
+     -> border-image slices 197 208 160 209
+   - crew-card-frame.webp 1122 x 1350, photo opening 154..965 x 267..1070,
+     built-in nameplate at about 20..80% x 82..93.5%
+   - dragon-banner-frame.webp 1600 x 505, plate at 16..84% x 26..69%
+   ========================================================================== */
+
+.page {
+  --black: #050505;
+  --black-2: #090909;
+  --iron: #111111;
+  --iron-2: #191919;
+  --red: #c91515;
+  --red-hi: #ef2218;
+  --ember: #ff5a16;
+  --ember-hi: #ff8a22;
+  --bone: #f0ece7;
+  --ash: #a9a6a3;
+
+  --display: var(--font-contact-display), "Cinzel", Georgia, serif;
+  --label: var(--font-contact-label), "Oswald", "Arial Narrow", sans-serif;
+  --body: var(--font-contact-body), "Roboto Condensed", "Arial Narrow", sans-serif;
+
+  --wrap: min(1500px, calc(100% - 64px));
+  --molten: linear-gradient(180deg, #ffb347 0%, var(--ember) 38%, var(--red-hi) 68%, #8e0c0c 100%);
+
+  position: relative;
+  overflow-x: clip;
+  color: var(--bone);
+  font-family: var(--body);
+  line-height: 1.5;
+  background:
+    radial-gradient(ellipse 70% 40% at 50% 0%, rgba(201, 21, 21, 0.22), transparent 70%),
+    radial-gradient(ellipse 45% 30% at 0% 45%, rgba(255, 90, 22, 0.07), transparent 70%),
+    radial-gradient(ellipse 45% 30% at 100% 70%, rgba(255, 90, 22, 0.07), transparent 70%),
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.012) 0 2px, transparent 2px 9px),
+    repeating-linear-gradient(25deg, rgba(0, 0, 0, 0.25) 0 1px, transparent 1px 13px),
+    linear-gradient(180deg, var(--black-2), var(--black) 40%, #070606);
+}
+
+/* This page has its own sticky dragon navigation and footer. */
+:global(body):has(.page) {
+  padding-top: 0;
+  background: var(--black, #050505);
+}
+
+.wrap {
+  width: var(--wrap);
+  margin-inline: auto;
+}
+
+/* ------------------------------------------------------------- shared type */
+
+.panelTitle,
+.sectionTitle,
+.linkTitle {
+  margin: 0;
+  background: var(--molten);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-family: var(--display);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.05;
+  text-transform: uppercase;
+  filter: drop-shadow(0 0 10px rgba(239, 34, 24, 0.35)) drop-shadow(0 2px 2px rgba(0, 0, 0, 0.9));
+}
+
+.panelText {
+  margin: 0.8rem auto 0;
+  max-width: 34rem;
+  color: var(--bone);
+  font-size: clamp(1.02rem, 1.1vw, 1.15rem);
+  line-height: 1.55;
+}
+
+/* Molten metal button. */
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 1.6rem;
+  padding: 0.8rem 1.4rem 0.8rem 0.9rem;
+  border: 1px solid rgba(255, 138, 34, 0.75);
+  border-radius: 999px;
+  background:
+    radial-gradient(ellipse 80% 120% at 50% 0%, rgba(255, 90, 22, 0.35), transparent 60%),
+    linear-gradient(180deg, #3a0a08 0%, #1a0505 55%, #0c0303 100%);
+  box-shadow:
+    inset 0 0 0 3px #0c0303,
+    inset 0 0 0 4px rgba(239, 34, 24, 0.55),
+    0 0 18px rgba(239, 34, 24, 0.35),
+    0 10px 24px rgba(0, 0, 0, 0.6);
+  color: var(--bone);
+  font-family: var(--label);
+  font-size: clamp(1rem, 1.1vw, 1.15rem);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+  transition:
+    transform 250ms ease,
+    box-shadow 250ms ease;
+}
+
+.button:hover,
+.button:focus-visible {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 0 0 3px #0c0303,
+    inset 0 0 0 4px rgba(255, 138, 34, 0.9),
+    0 0 30px rgba(255, 90, 22, 0.6),
+    0 14px 28px rgba(0, 0, 0, 0.7);
+  outline: none;
+}
+
+.buttonIcon {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid rgba(255, 138, 34, 0.7);
+  border-radius: 50%;
+  background: radial-gradient(circle, #3a0a08, #120303);
+  color: var(--ember-hi);
+}
+
+.buttonIcon svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.chevron {
+  color: var(--ember-hi);
+  font-size: 1.35em;
+  line-height: 1;
+}
+
+/* ------------------------------------------------------------------ hero */
+
+.hero {
+  position: relative;
+  display: grid;
+  place-items: center;
+  /* Room for the sticky nav, which the hero slides underneath. */
+  min-height: calc(156px + clamp(500px, 36vw, 650px));
+  padding: 170px 0 clamp(2.5rem, 4vw, 3.5rem);
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse 42% 55% at 50% 55%, rgba(5, 5, 5, 0.92), transparent 80%),
+    radial-gradient(ellipse 60% 70% at 50% 100%, rgba(239, 34, 24, 0.28), transparent 70%),
+    radial-gradient(ellipse 30% 50% at 12% 60%, rgba(255, 90, 22, 0.22), transparent 70%),
+    radial-gradient(ellipse 30% 50% at 88% 60%, rgba(255, 90, 22, 0.22), transparent 70%);
+}
+
+.heroDragon {
+  position: absolute;
+  bottom: 0;
+  z-index: -1;
+  height: auto;
+  max-height: 96%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  filter: drop-shadow(0 0 30px rgba(239, 34, 24, 0.35));
+}
+
+.heroDragonLeft {
+  left: 0;
+  width: clamp(170px, 27vw, 520px);
+  object-position: left bottom;
+}
+
+.heroDragonRight {
+  right: 0;
+  width: clamp(140px, 22vw, 420px);
+  object-position: right bottom;
+}
+
+/* Fade the hero's lower edge into the page. */
+.hero::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 0;
+  height: 22%;
+  background: linear-gradient(180deg, transparent, var(--black-2));
+  pointer-events: none;
+}
+
+.heroEmbers {
+  position: absolute;
+  right: 0;
+  bottom: -4%;
+  left: 0;
+  z-index: -1;
+  width: 100%;
+  height: 40%;
+  object-fit: cover;
+  opacity: 0.4;
+  mix-blend-mode: screen;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 45%);
+  mask-image: linear-gradient(180deg, transparent, #000 45%);
+  pointer-events: none;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 1;
+  max-width: min(860px, calc(100% - 2rem));
+  text-align: center;
+}
+
+.heroTitle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  font-family: var(--display);
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+/* Chrome-silver "CONTACT". */
+.heroContact {
+  background: linear-gradient(180deg, #ffffff 0%, #d9d6d2 32%, #8d8884 52%, #e8e4df 70%, #6d6864 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-size: clamp(3.4rem, 8.4vw, 8.6rem);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.9)) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 22px rgba(239, 34, 24, 0.35));
+}
+
+/* Molten "SANCTUARY ROCKS". */
+.heroClub {
+  margin-top: 0.12em;
+  background: var(--molten);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-size: clamp(1.9rem, 4.6vw, 4.8rem);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  filter: drop-shadow(0 0 14px rgba(239, 34, 24, 0.55)) drop-shadow(0 3px 3px rgba(0, 0, 0, 0.9));
+}
+
+.heroText {
+  margin: 1.2rem 0 0;
+  color: var(--bone);
+  font-size: clamp(1.15rem, 1.6vw, 1.6rem);
+  line-height: 1.4;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
+}
+
+/* The CTA is the dragon banner frame with the label on its plate. */
+.heroCta {
+  position: relative;
+  display: block;
+  width: clamp(320px, 34vw, 540px);
+  margin: clamp(1.4rem, 2.4vw, 2rem) auto 0;
+  transition:
+    transform 300ms ease,
+    filter 300ms ease;
+}
+
+.heroCta img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.7));
+}
+
+.heroCtaLabel {
+  position: absolute;
+  top: 26%;
+  right: 16%;
+  left: 16%;
+  height: 43%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  color: var(--bone);
+  font-family: var(--label);
+  font-size: clamp(0.82rem, 1.2vw, 1.22rem);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+.heroCtaLabel .buttonIcon {
+  width: 1.8em;
+  height: 1.8em;
+}
+
+.heroCta:hover,
+.heroCta:focus-visible {
+  transform: translateY(-2px) scale(1.02);
+  filter: drop-shadow(0 0 18px rgba(255, 90, 22, 0.55));
+  outline: none;
+}
+
+/* -------------------------------------------------------------- dividers */
+
+.divider {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  margin: clamp(-1.5rem, -1.5vw, -0.5rem) 0;
+  pointer-events: none;
+}
+
+.divider img {
+  display: block;
+  width: min(900px, 86%);
+  height: auto;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.7));
+}
+
+.dividerCrest img {
+  width: min(560px, 76%);
+}
+
+/* ---------------------------------------------------------- framed panels */
+
+.twoUp {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1.5rem, 3vw, 3rem);
+  padding-block: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+/* main-panel-frame.png stretched around the content with border-image. */
+.panel {
+  --fw-t: 84px;
+  --fw-r: 88px;
+  --fw-b: 68px;
+  --fw-l: 88px;
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  border-style: solid;
+  border-width: var(--fw-t) var(--fw-r) var(--fw-b) var(--fw-l);
+  border-image: url("/images/contact/frames/main-panel-frame.webp") 197 208 160 209 stretch;
+  padding: 0.6rem 0.4rem 0.8rem;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(239, 34, 24, 0.14), transparent 70%),
+    radial-gradient(ellipse 70% 50% at 50% 100%, rgba(255, 90, 22, 0.1), transparent 70%),
+    linear-gradient(180deg, #120b0a, #080606);
+  background-clip: padding-box;
+  text-align: center;
+  filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.7));
+}
+
+.panel .button {
+  margin-top: auto;
+}
+
+.panelTitle {
+  font-size: clamp(1.7rem, 2.5vw, 2.6rem);
+}
+
+/* Centre the application copy between the frame top and the button. */
+.panelMedallion {
+  width: 84px;
+  height: auto;
+  margin: auto 0 0.8rem;
+  filter: drop-shadow(0 0 10px rgba(239, 34, 24, 0.45));
+}
+
+.steps {
+  display: grid;
+  gap: 0.5rem;
+  margin: 1.4rem auto auto;
+  padding: 0 0 1.6rem;
+  list-style: none;
+  text-align: left;
+}
+
+.steps li {
+  position: relative;
+  padding-left: 1.6rem;
+  color: var(--bone);
+  font-size: clamp(1.02rem, 1.1vw, 1.12rem);
+}
+
+.steps li::before {
+  content: "";
+  position: absolute;
+  top: 0.45em;
+  left: 0.2rem;
+  width: 0.62em;
+  height: 0.62em;
+  transform: rotate(45deg);
+  background: linear-gradient(135deg, var(--ember-hi), var(--red-hi));
+  box-shadow: 0 0 8px rgba(239, 34, 24, 0.8);
+}
+
+.clubImage {
+  position: relative;
+  width: 100%;
+  margin: 1.3rem 0 1.6rem;
+  border: 1px solid rgba(255, 90, 22, 0.45);
+  box-shadow:
+    0 0 0 4px #0b0606,
+    0 0 0 5px rgba(239, 34, 24, 0.35),
+    0 12px 26px rgba(0, 0, 0, 0.7);
+}
+
+.clubImage > img:first-child {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  object-position: 45% 45%;
+}
+
+.clubCorner {
+  position: absolute;
+  width: clamp(56px, 16%, 110px);
+  height: auto;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.7));
+}
+
+.clubCornerTl {
+  top: -14px;
+  left: -14px;
+}
+
+.clubCornerBr {
+  right: -14px;
+  bottom: -14px;
+  transform: rotate(180deg);
+}
+
+/* ------------------------------------------------------------ crew */
+
+.crewSection {
+  position: relative;
+  padding-block: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.sectionHead {
+  margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+  text-align: center;
+}
+
+.sectionTitle {
+  font-size: clamp(1.65rem, 4.2vw, 3.6rem);
+}
+
+.sectionSub {
+  margin: 0.5rem 0 0;
+  color: var(--bone);
+  font-family: var(--display);
+  font-size: clamp(0.8rem, 1.1vw, 1.05rem);
+  font-weight: 600;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+}
+
+.crewGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+  gap: clamp(1rem, 3vw, 3.5rem);
+  max-width: 1180px;
+}
+
+.crewCard {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1122 / 1350;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  container-type: inline-size;
+  transition: transform 350ms ease;
+}
+
+.crewFeatured {
+  width: 112%;
+  margin-inline: -6%;
+}
+
+.crewPhoto {
+  position: absolute;
+  top: 19.6%;
+  left: 13.5%;
+  width: 72.6%;
+  height: 60%;
+  overflow: hidden;
+  background: #0b0707;
+}
+
+.crewPhoto img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition:
+    transform 500ms ease,
+    filter 500ms ease;
+}
+
+.crewFrame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  filter: drop-shadow(0 16px 24px rgba(0, 0, 0, 0.75));
+  transition: filter 350ms ease;
+}
+
+.crewPlate {
+  position: absolute;
+  top: 82%;
+  right: 20%;
+  left: 20%;
+  height: 11.5%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.crewPlate strong {
+  color: var(--bone);
+  font-family: var(--label);
+  font-size: 6.8cqw;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.95), 0 0 10px rgba(239, 34, 24, 0.35);
+  white-space: nowrap;
+}
+
+.crewPlate small {
+  margin-top: 0.35cqw;
+  color: var(--ember-hi);
+  font-family: var(--display);
+  font-size: 3.3cqw;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.crewCard:hover,
+.crewCard:focus-visible {
+  transform: translateY(-5px);
+  outline: none;
+}
+
+.crewCard:hover .crewPhoto img,
+.crewCard:focus-visible .crewPhoto img {
+  transform: scale(1.04);
+  filter: brightness(1.08);
+}
+
+.crewCard:hover .crewFrame,
+.crewCard:focus-visible .crewFrame {
+  filter: drop-shadow(0 0 18px rgba(255, 90, 22, 0.55)) drop-shadow(0 16px 24px rgba(0, 0, 0, 0.75));
+}
+
+.crewHint {
+  margin: 1.2rem 0 0;
+  color: var(--ash);
+  font-family: var(--label);
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+/* Chains hanging at the outer edges of the crew section. */
+.chain {
+  position: absolute;
+  top: 8%;
+  z-index: -1;
+  width: clamp(44px, 3.6vw, 70px);
+  height: auto;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.chainLeft { left: clamp(8px, 1.5vw, 32px); }
+.chainRight { right: clamp(8px, 1.5vw, 32px); }
+
+/* ------------------------------------------------------------ links */
+
+.linksSection {
+  position: relative;
+  padding-bottom: clamp(1rem, 2vw, 1.5rem);
+}
+
+.linkPanel {
+  flex-direction: row;
+  align-items: center;
+  gap: clamp(1rem, 2vw, 2rem);
+  text-align: left;
+}
+
+.linkPanel .button {
+  margin-top: 1.2rem;
+}
+
+.medallion {
+  position: relative;
+  flex: none;
+  width: clamp(120px, 11vw, 170px);
+  aspect-ratio: 1;
+}
+
+.medallion > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 16px rgba(239, 34, 24, 0.4));
+}
+
+/* A plain disc over the medallion's centre carries the brand icon. */
+.medallionIcon {
+  position: absolute;
+  inset: 22%;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  box-shadow:
+    inset 0 0 12px rgba(0, 0, 0, 0.8),
+    0 0 0 2px rgba(0, 0, 0, 0.6);
+}
+
+.medallionIcon svg {
+  width: 58%;
+  height: 58%;
+}
+
+.gridsterIcon {
+  background: radial-gradient(circle at 40% 35%, #2a0706, #0b0202 75%);
+  color: var(--red-hi);
+  filter: drop-shadow(0 0 8px rgba(239, 34, 24, 0.6));
+}
+
+.discordIcon {
+  background: radial-gradient(circle at 40% 35%, #6f7bff, #4752c4 75%);
+  color: #fff;
+}
+
+.linkBody {
+  min-width: 0;
+}
+
+.linkKicker {
+  margin: 0;
+  color: var(--bone);
+  font-family: var(--display);
+  font-size: clamp(0.85rem, 1vw, 1rem);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.linkTitle {
+  margin-top: 0.15rem;
+  font-size: clamp(1.9rem, 2.8vw, 2.8rem);
+}
+
+.linkPanel .panelText {
+  margin-left: 0;
+}
+
+.chainDrape {
+  display: block;
+  width: min(760px, 70%);
+  height: auto;
+  margin: 0.5rem auto 0;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+/* ------------------------------------------------------------ footer */
+
+.footer {
+  position: relative;
+  margin-top: clamp(1.5rem, 3vw, 2.5rem);
+  padding: clamp(1.6rem, 3vw, 2.4rem) 0;
+  overflow: hidden;
+  border-top: 1px solid rgba(255, 90, 22, 0.45);
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.015) 0 2px, transparent 2px 8px),
+    linear-gradient(180deg, #120c0b, #070505);
+  box-shadow: inset 0 1px 0 rgba(255, 138, 34, 0.2), 0 -10px 30px rgba(239, 34, 24, 0.12);
+  isolation: isolate;
+}
+
+.footerEmbers {
+  position: absolute;
+  top: -50%;
+  left: 0;
+  z-index: -1;
+  width: 100%;
+  height: 120%;
+  object-fit: cover;
+  opacity: 0.18;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.footerInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.footerLogo {
+  flex: none;
+  width: clamp(96px, 9vw, 140px);
+}
+
+.footerLogo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 0 14px rgba(255, 90, 22, 0.4));
+}
+
+.footerText {
+  text-align: right;
+}
+
+.footerLine {
+  margin: 0;
+  color: var(--bone);
+  font-family: var(--display);
+  font-size: clamp(0.8rem, 1vw, 1rem);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.footerSmall {
+  margin: 0.5rem 0 0;
+  color: var(--ash);
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.footerCredit {
+  color: var(--red-hi);
+}
+
+/* -------------------------------------------------------- responsive */
+
+@media (max-width: 1200px) {
+  .chain {
+    display: none;
+  }
+}
+
+@media (max-width: 1100px) {
+  .twoUp {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 760px;
+  }
+}
+
+@media (max-width: 760px) {
+  .page {
+    --wrap: calc(100% - 28px);
+  }
+
+  .hero {
+    min-height: 0;
+    padding-top: 150px;
+    padding-bottom: 2.5rem;
+  }
+
+  .heroDragon {
+    opacity: 0.5;
+  }
+
+  .heroDragonLeft { width: 46vw; }
+  .heroDragonRight { width: 37vw; }
+
+  .panel {
+    --fw-t: 56px;
+    --fw-r: 58px;
+    --fw-b: 45px;
+    --fw-l: 58px;
+    padding-inline: 0.4rem;
+  }
+
+  .linkPanel {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .linkPanel .panelText {
+    margin-left: auto;
+  }
+
+  .crewGrid {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 340px;
+    gap: 1.5rem;
+  }
+
+  .crewFeatured {
+    order: -1;
+    width: 100%;
+    margin-inline: 0;
+  }
+
+  .footerInner {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .footerText {
+    text-align: center;
+  }
+}
+
+@media (max-width: 420px) {
+  .panel {
+    --fw-t: 44px;
+    --fw-r: 44px;
+    --fw-b: 36px;
+    --fw-l: 44px;
+  }
+
+  .button {
+    padding-inline: 0.7rem 1rem;
+    font-size: 0.95rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button,
+  .heroCta,
+  .crewCard,
+  .crewPhoto img {
+    transition: none;
+  }
+}
