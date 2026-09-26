@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FALLBACK_LOGO, findRosterMatch } from "../../data/crewTypes";
+import { FALLBACK_LOGO, findDjProfile } from "../../data/crewTypes";
 import type { CrewMember } from "../../data/crewTypes";
 import ListenLiveButton from "./ListenLiveButton";
 import styles from "./home.module.css";
@@ -53,7 +53,7 @@ export default function NowOnAir() {
   const isLive = Boolean(live?.isLive);
   // Hide calendar codes such as "(9)" in "DJ Frenchie (9)".
   const djName = isLive ? (live?.djName ?? "").replace(/\s*\([^)]*\)\s*/g, " ").trim() : "";
-  const dj = djName ? findRosterMatch(djName, roster) : undefined;
+  const dj = djName ? findDjProfile(djName, roster) : undefined;
   const photo = !dj?.image || photoFailed ? FALLBACK_LOGO : dj.image;
   // Prefer /api/now-playing; when it has no artist, use the track in
   // /api/live-now ("DJ … @ Sanctuary Rocks - Artist - Title").

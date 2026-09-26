@@ -109,3 +109,28 @@ export function getVisibleItems<T>(items: T[], startIndex: number, count: number
 
   return visible;
 }
+
+// Photo aliases for calendar DJ names that don't match a roster photo by
+// their own name: a roster filename spelled differently, or someone who DJs
+// but only has a photo in the Host folder. Exact normalized-key lookup only
+// (never fuzzy), used by the DJ Lineup page and the Home page's Now On Air.
+const DJ_PHOTO_ALIASES: Record<string, { source: "dj" | "host"; name: string }> = {
+  daan: { source: "dj", name: "Dann" }, // calendar says "DJ Daan"; roster photo is "Dann.png.jpg"
+  domi: { source: "host", name: "Domi" }, // calendar says "DJ Domi"; only a Host photo exists
+  molokai: { source: "dj", name: "Moloaki" }, // calendar says "DJ Molokai"; roster photo is "Moloaki.png"
+};
+
+/** The roster entry (with photo) for a DJ name from the calendar. */
+export function findDjProfile<T extends { name: string; normalizedName?: string }>(
+  djName: string,
+  djRoster: T[],
+  hostRoster: T[] = [],
+): T | undefined {
+  if (!djName) return undefined;
+  const direct = findRosterMatch(djName, djRoster);
+  if (direct) return direct;
+  const alias = DJ_PHOTO_ALIASES[normalizeForMatch(djName)];
+  if (!alias) return undefined;
+  return findRosterMatch(alias.name, alias.source === "host" ? hostRoster : djRoster);
+}
+

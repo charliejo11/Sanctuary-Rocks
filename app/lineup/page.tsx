@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSanctuaryAudio } from "../components/audio/SanctuaryAudio";
 import ForgedFooter from "../components/ForgedFooter";
 import { cinzel, oswald, robotoCondensed } from "../contact/fonts";
-import { FALLBACK_LOGO, findRosterMatch, normalizeForMatch } from "../data/crewTypes";
+import { FALLBACK_LOGO, findDjProfile, findRosterMatch, normalizeForMatch } from "../data/crewTypes";
 import type { CrewMember } from "../data/crewTypes";
 import styles from "./lineup.module.css";
 
@@ -12,16 +12,6 @@ import styles from "./lineup.module.css";
 // shows who is on stage now (DJ + Host), a Listen Live panel, and every
 // upcoming set with its DJ and Host. Photos come from the DJ and Host
 // rosters; anyone without a photo gets the real Sanctuary Rocks logo.
-
-// Explicit, lineup-only photo aliases for calendar DJ names that don't
-// match any roster photo by their own name - a typo'd roster filename, or
-// someone who DJs but only has a photo in the Host folder. Exact
-// normalized-key lookup only (never fuzzy/substring), and scoped to this
-// page alone so it can't affect the Crew page's roster names or photos.
-const LINEUP_PHOTO_ALIASES: Record<string, { source: "dj" | "host"; name: string }> = {
-  daan: { source: "dj", name: "Dann" }, // calendar says "DJ Daan"; roster photo is "Dann.png.jpg"
-  domi: { source: "host", name: "Domi" }, // calendar says "DJ Domi"; only a Host photo exists
-};
 
 // The public Sanctuary Rocks Google Calendar (the same calendar /api/lineup
 // reads), shown in Pacific / SLT time.
@@ -52,15 +42,6 @@ type LineupResponse = {
   sets: LineupSet[];
   error?: { type: string; message: string };
 };
-
-function findDjProfile(djName: string, djRoster: CrewMember[], hostRoster: CrewMember[]) {
-  if (!djName) return undefined;
-  const direct = findRosterMatch(djName, djRoster);
-  if (direct) return direct;
-  const alias = LINEUP_PHOTO_ALIASES[normalizeForMatch(djName)];
-  if (!alias) return undefined;
-  return findRosterMatch(alias.name, alias.source === "host" ? hostRoster : djRoster);
-}
 
 function findHostProfile(hostName: string, hostRoster: CrewMember[]) {
   if (!hostName || /^(host\s+)?tba$/i.test(hostName.trim())) return undefined;
