@@ -23,6 +23,11 @@ const LINEUP_PHOTO_ALIASES: Record<string, { source: "dj" | "host"; name: string
   domi: { source: "host", name: "Domi" }, // calendar says "DJ Domi"; only a Host photo exists
 };
 
+// The public Sanctuary Rocks Google Calendar (the same calendar /api/lineup
+// reads), shown in Pacific / SLT time.
+const GOOGLE_CALENDAR_URL =
+  "https://calendar.google.com/calendar/embed?src=ba33d2d221fc80a1a2bf0d55439608ea1f7896d48077388fd77f36dbc622a70e%40group.calendar.google.com&ctz=America%2FLos_Angeles";
+
 const SETS_PER_PAGE = 8;
 const TIME_ZONE = "America/Los_Angeles"; // SLT
 const GENERIC_TITLE = "Sanctuary Rocks Set";
@@ -522,6 +527,29 @@ export default function LineupPage() {
           )}
           {updatedLabel ? <p className={styles.updated}>Updated {updatedLabel}</p> : null}
         </div>
+      </section>
+
+      {/* ---------------------------------------------------- google calendar */}
+      <section className={styles.calendarSection} aria-labelledby="calendar-title">
+        <a className={styles.calendarBlock} href={GOOGLE_CALENDAR_URL} target="_blank" rel="noopener noreferrer">
+          <span className={styles.calendarIcon} aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <rect x="3" y="4.5" width="18" height="16.5" rx="2" fill="none" stroke="currentColor" strokeWidth="1.7" />
+              <path d="M3 9.5h18M8 2.5v4M16 2.5v4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+              <path d="M7 13h2m3 0h2m3 0h0M7 17h2m3 0h2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </span>
+          <span className={styles.calendarText}>
+            <span className={styles.blockLabel}>Full schedule</span>
+            <strong id="calendar-title" className={styles.calendarTitle}>
+              Google Calendar
+            </strong>
+            <span className={styles.calendarNote}>See every Sanctuary Rocks set on our public Google Calendar.</span>
+          </span>
+          <span className={styles.calendarCta}>
+            Open calendar <span aria-hidden="true">→</span>
+          </span>
+        </a>
       </section>
 
       {/* ------------------------------------------------------------- slogan */}
