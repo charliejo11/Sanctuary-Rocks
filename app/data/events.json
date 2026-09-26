@@ -18,7 +18,8 @@
       "title": "Abba Gone Metal",
       "dj": "DJ Calamity",
       "host": "Host Teaghen",
-      "description": ""
+      "description": "",
+      "image": "/images/events/flyers/abba-gone-metal-1100.webp"
     },
     {
       "date": "September 15",
@@ -27,7 +28,8 @@
       "title": "80s Hair Band",
       "dj": "DJ Raevyn",
       "host": "Host Imogen",
-      "description": ""
+      "description": "",
+      "image": "/images/events/flyers/80s-hair-band-1100.webp"
     },
     {
       "date": "September 30",
@@ -37,7 +39,8 @@
       "dj": "DJ Frenchie",
       "host": "Host Teaghen",
       "description": "Celebrating the Women of Rock & Metal!",
-      "badge": "women-of-rock"
+      "badge": "women-of-rock",
+      "image": "/images/events/flyers/man-on-pause-1400.webp"
     },
     {
       "date": "November 5",
