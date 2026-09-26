@@ -1,0 +1,1170 @@
+/* =============================================================================
+   Home: castle hero with the real logo, Featured Artists, the three info
+   cards, gallery preview and CTA strip, in the dragon / forged-metal style of
+   the rest of the site. All text is HTML; the art in /public/images/home is
+   decoration layered around it.
+
+   Asset geometry (measured off the trimmed artwork):
+   - home-section-frame.webp 1448 x 1080: border slices 270 160 260 160
+   - home-card-frame.webp 1448 x 1083: photo window 13.7..86.3% x 19.9..77.2%
+   - home-button-frame.webp 2135 x 657: hollow 11.2..88.6% x 28.5..71%
+   - home-cta-panel.webp 1653 x 597: medallion ~16% x 52% (d 22.5%w),
+     main plate 30..70% x 30..75%, end plate 72.5..95% x 45..66%
+   - home-section-title-bar.webp 2136 x 684: plate 17..83% x 29..54%
+   - home-visitor-counter-frame.webp 2172 x 685: plate 12..88% x 34..73%
+   ========================================================================== */
+
+.page {
+  --black: #050505;
+  --black-2: #0a0707;
+  --red: #c91515;
+  --red-hi: #ef2218;
+  --ember: #ff5a16;
+  --ember-hi: #ff8a22;
+  --bone: #f0ece7;
+  --ash: #a9a6a3;
+
+  --display: var(--font-contact-display), "Cinzel", Georgia, serif;
+  --label: var(--font-contact-label), "Oswald", "Arial Narrow", sans-serif;
+  --body: var(--font-contact-body), "Roboto Condensed", "Arial Narrow", sans-serif;
+
+  --wrap: min(1440px, calc(100% - 64px));
+  --gap: clamp(1.2rem, 2.2vw, 2rem);
+
+  position: relative;
+  overflow-x: clip;
+  color: var(--bone);
+  font-family: var(--body);
+  line-height: 1.5;
+  background:
+    radial-gradient(ellipse 60% 30% at 50% 38%, rgba(201, 21, 21, 0.1), transparent 70%),
+    radial-gradient(ellipse 40% 25% at 0% 70%, rgba(255, 90, 22, 0.07), transparent 70%),
+    radial-gradient(ellipse 40% 25% at 100% 55%, rgba(255, 90, 22, 0.07), transparent 70%),
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.012) 0 2px, transparent 2px 9px),
+    linear-gradient(180deg, var(--black-2), var(--black) 40%, #070505);
+}
+
+/* This page has its own sticky dragon navigation. */
+:global(body):has(.page) {
+  padding-top: 0;
+  background: var(--black, #050505);
+}
+
+.wrap {
+  width: var(--wrap);
+  margin-inline: auto;
+}
+
+.isLogo {
+  padding: 8%;
+  background: radial-gradient(circle at 50% 45%, #2a0c08, #0b0606 72%);
+  object-fit: contain !important;
+}
+
+.textLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ember-hi);
+  font-family: var(--label);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 200ms ease;
+}
+
+.textLink:hover,
+.textLink:focus-visible {
+  color: #fff;
+  outline: none;
+}
+
+/* ------------------------------------------------------------------ hero */
+
+.hero {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: clamp(660px, 47vw, 900px);
+  padding: 150px 1rem clamp(2rem, 3vw, 2.8rem);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.heroArt {
+  z-index: -2;
+  object-fit: cover;
+  object-position: 50% 35%;
+}
+
+/* Darken behind the text and fade the art into the page. */
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 34% 30% at 50% 74%, rgba(5, 3, 3, 0.55), transparent 80%),
+    linear-gradient(180deg, rgba(5, 5, 5, 0.25) 0%, transparent 25%, transparent 62%, rgba(10, 7, 7, 0.85) 90%, var(--black-2) 100%);
+  pointer-events: none;
+}
+
+.heroContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(1100px, 100%);
+  text-align: center;
+}
+
+.heroTitle {
+  margin: 0;
+  line-height: 0;
+}
+
+.heroLogo {
+  width: clamp(250px, 25vw, 430px);
+  height: auto;
+  filter: drop-shadow(0 0 30px rgba(255, 90, 22, 0.55)) drop-shadow(0 14px 22px rgba(0, 0, 0, 0.85));
+}
+
+.heroLine {
+  margin: clamp(0.6rem, 1.2vw, 1rem) 0 0;
+  color: var(--bone);
+  font-family: var(--display);
+  font-size: clamp(1.3rem, 2.3vw, 2.2rem);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95);
+}
+
+.heroTagline {
+  margin: 0.35rem 0 0;
+  color: var(--red-hi);
+  font-family: var(--label);
+  font-size: clamp(1.2rem, 2.1vw, 2rem);
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-shadow: 0 0 16px rgba(239, 34, 24, 0.55), 0 2px 4px rgba(0, 0, 0, 0.95);
+}
+
+/* Three calls to action in the forged button frame. */
+.heroCtas {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(0.8rem, 2vw, 1.8rem);
+  margin-top: clamp(1.4rem, 2.6vw, 2.2rem);
+}
+
+.ctaButton {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  width: clamp(250px, 21vw, 330px);
+  aspect-ratio: 2135 / 657;
+  padding: 0 14%;
+  border: 0;
+  background: url("/images/home/controls/home-button-frame.webp") center / 100% 100% no-repeat;
+  color: var(--bone);
+  font-family: var(--label);
+  font-size: clamp(0.95rem, 1.1vw, 1.12rem);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  isolation: isolate;
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.7));
+  transition:
+    transform 250ms ease,
+    filter 250ms ease;
+}
+
+/* The frame is hollow: a dark forged fill behind the label. */
+.ctaButton::before {
+  content: "";
+  position: absolute;
+  inset: 28.5% 11.4% 29% 11.2%;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 70% 120% at 50% 0%, rgba(255, 90, 22, 0.22), transparent 70%),
+    linear-gradient(180deg, #1c1110, #0b0707);
+}
+
+.ctaButton:hover,
+.ctaButton:focus-visible {
+  transform: translateY(-3px);
+  filter: drop-shadow(0 0 16px rgba(255, 90, 22, 0.6)) drop-shadow(0 10px 16px rgba(0, 0, 0, 0.7));
+  outline: none;
+}
+
+.ctaButton[data-on] {
+  color: #ffd0a0;
+}
+
+.ctaIcon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 1.5em;
+  height: 1.5em;
+  color: var(--ember-hi);
+}
+
+.ctaIcon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.ctaLabel {
+  white-space: nowrap;
+}
+
+.ctaChevron {
+  color: var(--ember-hi);
+  font-size: 1.4em;
+  line-height: 1;
+}
+
+/* -------------------------------------------------------------- divider */
+
+.divider {
+  display: flex;
+  justify-content: center;
+  margin: clamp(-1.5rem, -1vw, -0.5rem) auto 0;
+  pointer-events: none;
+}
+
+.divider img {
+  display: block;
+  width: min(480px, 70%);
+  height: auto;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.7));
+}
+
+/* ------------------------------------------------ framed section panels */
+
+.panel {
+  position: relative;
+  margin-top: clamp(5.5rem, 8.5vw, 8rem);
+  padding: clamp(2.6rem, 4vw, 3.4rem) clamp(1rem, 2.4vw, 2.4rem) clamp(1.4rem, 2.4vw, 2rem);
+  border: 1px solid rgba(255, 90, 22, 0.3);
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 0%, rgba(239, 34, 24, 0.1), transparent 70%),
+    linear-gradient(180deg, rgba(22, 13, 12, 0.94), rgba(8, 6, 6, 0.96));
+  box-shadow:
+    inset 0 0 0 4px #0a0706,
+    inset 0 0 0 5px rgba(239, 34, 24, 0.22),
+    inset 0 0 40px rgba(0, 0, 0, 0.8),
+    0 24px 50px rgba(0, 0, 0, 0.6);
+}
+
+/* Section title plate straddling the panel's top edge. */
+.titleBar {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 2;
+  width: clamp(340px, 34vw, 560px);
+  transform: translate(-50%, -52%);
+  container-type: inline-size;
+  pointer-events: none;
+}
+
+.titleBar img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.75));
+}
+
+.titleText {
+  position: absolute;
+  top: 29%;
+  right: 17%;
+  left: 17%;
+  height: 25%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  margin: 0;
+  color: var(--bone);
+  font-family: var(--display);
+  font-size: 4.6cqw;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.95);
+  white-space: nowrap;
+}
+
+.titleIcon {
+  display: inline-grid;
+  width: 0.9em;
+  height: 0.9em;
+  color: var(--red-hi);
+}
+
+.titleIcon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Two dragon corner ornaments on the Featured Artists panel only. */
+.corner {
+  position: absolute;
+  top: -18px;
+  z-index: 1;
+  width: clamp(56px, 6vw, 92px);
+  height: auto;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.7));
+}
+
+.cornerL { left: -16px; }
+.cornerR { right: -16px; transform: scaleX(-1); }
+
+.panelFoot {
+  margin: 1.2rem 0 0;
+  text-align: right;
+}
+
+/* ------------------------------------------------------ featured artists */
+
+.artists {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(0.5rem, 1.2vw, 1rem);
+}
+
+.artistViewport {
+  overflow: hidden;
+  touch-action: pan-y;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 3%, #000 97%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 3%, #000 97%, transparent);
+}
+
+.artistTrack {
+  display: flex;
+  gap: clamp(0.8rem, 1.4vw, 1.2rem);
+  width: max-content;
+  margin: 0;
+  padding: 0.4rem 0;
+  list-style: none;
+  will-change: transform;
+}
+
+.artistCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: clamp(150px, 12.5vw, 190px);
+}
+
+.artistCover {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border: 1px solid rgba(160, 140, 130, 0.5);
+  background: #0b0707;
+  box-shadow:
+    inset 0 0 0 3px rgba(8, 5, 5, 0.9),
+    0 0 0 3px #120c0b,
+    0 0 0 4px rgba(255, 90, 22, 0.35),
+    0 10px 18px rgba(0, 0, 0, 0.6);
+  transition: box-shadow 300ms ease;
+}
+
+.artistCard:hover .artistCover {
+  box-shadow:
+    inset 0 0 0 3px rgba(8, 5, 5, 0.9),
+    0 0 0 3px #120c0b,
+    0 0 0 4px rgba(255, 138, 34, 0.85),
+    0 0 18px rgba(239, 34, 24, 0.45);
+}
+
+.artistPlaceholder {
+  position: absolute;
+  inset: 0;
+  background:
+    url("/images/brand/sanctuary-rocks-logo-transparent.webp") center / 55% no-repeat,
+    radial-gradient(circle at 50% 45%, #2a0c08, #0b0606 72%);
+}
+
+.artistName {
+  margin-top: 0.7rem;
+  color: var(--bone);
+  font-family: var(--label);
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.artistArrow {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid rgba(160, 140, 130, 0.5);
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #2a1512, #0b0707 75%);
+  color: var(--bone);
+  cursor: pointer;
+  transition:
+    border-color 200ms ease,
+    color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.artistArrow svg {
+  width: 20px;
+  height: 20px;
+}
+
+.artistArrow:hover,
+.artistArrow:focus-visible {
+  border-color: var(--ember);
+  box-shadow: 0 0 14px rgba(255, 90, 22, 0.5);
+  color: var(--ember-hi);
+  outline: none;
+}
+
+/* ------------------------------------------------------ three info cards */
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--gap);
+  margin-top: clamp(2rem, 3.5vw, 3rem);
+}
+
+/* home-section-frame around each card. */
+.infoCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 330px;
+  border-style: solid;
+  border-width: 78px 46px 72px;
+  border-image: url("/images/home/frames/home-section-frame.webp") 270 160 260 160 stretch;
+  padding: 0 0.4rem;
+  background: linear-gradient(180deg, #120b0a, #080606);
+  background-clip: padding-box;
+  filter: drop-shadow(0 16px 26px rgba(0, 0, 0, 0.65));
+}
+
+.cardHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem 1rem;
+  padding-bottom: 0.7rem;
+  border-bottom: 1px solid rgba(255, 90, 22, 0.25);
+}
+
+.cardTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0;
+  color: var(--bone);
+  font-family: var(--display);
+  font-size: clamp(1.05rem, 1.4vw, 1.35rem);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.cardIcon {
+  display: inline-grid;
+  width: 1.15em;
+  height: 1.15em;
+  color: var(--red-hi);
+}
+
+.cardIcon svg {
+  width: 100%;
+  height: 100%;
+}
+
+svg.cardIcon {
+  flex: none;
+}
+
+.cardEmpty {
+  margin: 1rem 0 0;
+  color: var(--ash);
+}
+
+/* Upcoming events list */
+.eventList {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0.8rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.eventItem {
+  display: grid;
+  grid-template-columns: 3.2rem 3.6rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.45rem;
+  border: 1px solid rgba(160, 140, 130, 0.22);
+  background: rgba(22, 14, 13, 0.85);
+}
+
+.eventDate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.25rem 0;
+  border: 1px solid rgba(255, 90, 22, 0.45);
+  background: linear-gradient(180deg, #2a0907, #0e0404);
+  line-height: 1.05;
+}
+
+.eventDate small {
+  color: var(--ember-hi);
+  font-family: var(--label);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+}
+
+.eventDate strong {
+  color: var(--bone);
+  font-family: var(--label);
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.eventThumb {
+  display: block;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid rgba(255, 90, 22, 0.35);
+}
+
+.eventThumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 25%;
+}
+
+.eventText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.eventText strong {
+  color: var(--bone);
+  font-family: var(--label);
+  font-size: 0.98rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.eventText small {
+  margin-top: 0.15rem;
+  color: var(--ember-hi);
+  font-family: var(--label);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.eventTime {
+  color: var(--ash);
+  font-family: var(--label);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Now On Air */
+.liveBadge {
+  padding: 0.12rem 0.6rem;
+  border: 1px solid rgba(160, 140, 130, 0.55);
+  border-radius: 3px;
+  color: var(--ash);
+  font-family: var(--label);
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.liveBadgeOn {
+  border-color: var(--red-hi);
+  background: linear-gradient(180deg, #e0281c, #8e0c0c);
+  box-shadow: 0 0 12px rgba(239, 34, 24, 0.6);
+  color: #fff;
+}
+
+.airBody {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 1rem;
+  margin-top: 0.9rem;
+}
+
+.airPhoto {
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid rgba(255, 90, 22, 0.45);
+  box-shadow: 0 0 14px rgba(239, 34, 24, 0.2);
+}
+
+.airPhoto img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 22%;
+}
+
+.airText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.airArtist {
+  margin: 0;
+  color: var(--bone);
+  font-family: var(--label);
+  font-size: 1.1rem;
+  font-weight: 500;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.airSong {
+  margin: 0.2rem 0 0;
+  color: var(--ash);
+  font-size: 0.95rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.airBars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 22px;
+  margin-top: 0.7rem;
+}
+
+.airBars i {
+  width: 4px;
+  height: 40%;
+  border-radius: 1px;
+  background: rgba(160, 140, 130, 0.45);
+}
+
+.airBars i:nth-child(3n) { height: 75%; }
+.airBars i:nth-child(4n) { height: 55%; }
+.airBars i:nth-child(5n) { height: 95%; }
+
+.airWith {
+  margin: 0.8rem 0 0;
+  color: var(--ash);
+  font-family: var(--label);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.airDj {
+  margin: 0.1rem 0 0.8rem;
+  color: var(--red-hi);
+  font-family: var(--label);
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.airText .textLink {
+  margin-top: auto;
+  align-self: flex-start;
+}
+
+/* More Than A Club: the castle art behind the words. */
+.clubCard {
+  justify-content: center;
+  overflow: hidden;
+}
+
+.clubArt {
+  z-index: 0;
+  object-fit: cover;
+  object-position: 78% 40%;
+  opacity: 0.55;
+}
+
+.clubText {
+  position: relative;
+  z-index: 1;
+  padding: 0.4rem;
+  text-align: left;
+}
+
+.clubTitle {
+  margin: 0;
+  color: var(--bone);
+  font-family: var(--display);
+  font-size: clamp(1.7rem, 2.4vw, 2.3rem);
+  font-weight: 700;
+  line-height: 1.05;
+  text-transform: uppercase;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
+}
+
+.clubBody {
+  margin: 1rem 0 0;
+  color: #ddd6cf;
+  font-family: var(--label);
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  line-height: 1.45;
+  text-transform: uppercase;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95);
+}
+
+.smallButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1.2rem;
+  padding: 0.6rem 1.2rem;
+  border: 1px solid rgba(255, 90, 22, 0.8);
+  background: rgba(20, 8, 7, 0.85);
+  box-shadow: 0 0 14px rgba(239, 34, 24, 0.3);
+  color: var(--bone);
+  font-family: var(--label);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition:
+    box-shadow 250ms ease,
+    transform 250ms ease;
+}
+
+.smallButton:hover,
+.smallButton:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 0 22px rgba(255, 90, 22, 0.6);
+  outline: none;
+}
+
+/* ------------------------------------------------------- gallery preview */
+
+.galleryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.galleryTile {
+  position: relative;
+  display: block;
+  aspect-ratio: 1448 / 1083;
+  color: inherit;
+  transition: transform 300ms ease;
+}
+
+.galleryPhoto {
+  position: absolute;
+  inset: 19.9% 13.7% 22.8%;
+  overflow: hidden;
+  background: #0b0707;
+}
+
+.galleryPhoto img {
+  object-fit: cover;
+  transition: transform 500ms ease;
+}
+
+.galleryFrame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.7));
+}
+
+.galleryCaption {
+  position: absolute;
+  right: 12%;
+  bottom: 2%;
+  left: 12%;
+  color: var(--bone);
+  font-family: var(--label);
+  font-size: clamp(0.7rem, 0.8vw, 0.82rem);
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95);
+}
+
+.galleryTile:hover,
+.galleryTile:focus-visible {
+  transform: translateY(-3px);
+  outline: none;
+}
+
+.galleryTile:hover .galleryPhoto img,
+.galleryTile:focus-visible .galleryPhoto img {
+  transform: scale(1.05);
+}
+
+/* -------------------------------------------------------------- CTA strip */
+
+.ctaStrip {
+  margin-top: clamp(1rem, 2vw, 1.5rem);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1.5rem, 4vw, 4rem);
+  max-width: 1100px;
+  margin-bottom: clamp(2rem, 4vw, 3rem);
+}
+
+.ctaPanel {
+  position: relative;
+  display: block;
+  aspect-ratio: 1653 / 597;
+  padding: 0;
+  border: 0;
+  background: url("/images/home/frames/home-cta-panel.webp") center / 100% 100% no-repeat;
+  color: var(--bone);
+  text-align: left;
+  cursor: pointer;
+  container-type: inline-size;
+  filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.7));
+  transition:
+    transform 250ms ease,
+    filter 250ms ease;
+}
+
+.ctaPanel:hover,
+.ctaPanel:focus-visible {
+  transform: translateY(-3px);
+  filter: drop-shadow(0 0 16px rgba(255, 90, 22, 0.55)) drop-shadow(0 12px 20px rgba(0, 0, 0, 0.7));
+  outline: none;
+}
+
+.panelIcon {
+  position: absolute;
+  top: 36%;
+  left: 9.5%;
+  display: grid;
+  place-items: center;
+  width: 13%;
+  aspect-ratio: 1;
+  color: var(--ember-hi);
+  filter: drop-shadow(0 0 8px rgba(255, 90, 22, 0.6));
+}
+
+.panelIcon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.panelText {
+  position: absolute;
+  top: 30%;
+  right: 30%;
+  bottom: 25%;
+  left: 30%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 1.15;
+}
+
+.panelText strong {
+  color: var(--bone);
+  font-family: var(--label);
+  font-size: 4.1cqw;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.panelText small {
+  margin-top: 0.4cqw;
+  color: var(--ash);
+  font-family: var(--label);
+  font-size: 3cqw;
+  letter-spacing: 0.04em;
+}
+
+.panelGo {
+  position: absolute;
+  top: 45%;
+  right: 5%;
+  left: 72.5%;
+  height: 21%;
+  display: grid;
+  place-items: center;
+  color: #ffd0a0;
+  font-family: var(--label);
+  font-size: 3.6cqw;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* ------------------------------------------------ footer extras (Home) */
+
+.footerNav {
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  gap: 0.2rem 1.1rem;
+  font-family: var(--label);
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.footerNav a {
+  color: #d8d1ca;
+  transition: color 200ms ease;
+}
+
+.footerNav a:hover,
+.footerNav a:focus-visible {
+  color: var(--ember-hi);
+  outline: none;
+}
+
+.gridster {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.6rem 1rem;
+  border: 1px solid rgba(160, 140, 130, 0.45);
+  background: linear-gradient(180deg, #1a1210, #0b0707);
+  box-shadow: inset 0 0 0 3px #0b0707, inset 0 0 0 4px rgba(255, 90, 22, 0.25);
+  color: var(--bone);
+  font-family: var(--label);
+  line-height: 1.15;
+  transition: box-shadow 250ms ease;
+}
+
+.gridster:hover,
+.gridster:focus-visible {
+  box-shadow: inset 0 0 0 3px #0b0707, inset 0 0 0 4px rgba(255, 138, 34, 0.7), 0 0 16px rgba(255, 90, 22, 0.4);
+  outline: none;
+}
+
+.gridsterStar {
+  color: #b58cff;
+  font-size: 1.6rem;
+  filter: drop-shadow(0 0 6px rgba(160, 110, 255, 0.7));
+}
+
+.gridster strong {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.gridster small {
+  color: var(--ash);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Visitor counter in its forged frame; the digits are HTML. */
+.counter {
+  position: relative;
+  width: 340px;
+  container-type: inline-size;
+}
+
+.counter img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.counterPlate {
+  position: absolute;
+  top: 34%;
+  right: 13%;
+  bottom: 27%;
+  left: 13%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4cqw;
+}
+
+.counterLabel {
+  display: flex;
+  align-items: center;
+  gap: 1.4cqw;
+  color: var(--ash);
+  font-family: var(--label);
+  font-size: 3.6cqw;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.counterLabel svg {
+  width: 4.6cqw;
+  height: 4.6cqw;
+  color: var(--ember-hi);
+}
+
+.counterDigits {
+  display: flex;
+  gap: 0.8cqw;
+}
+
+.counterDigits span {
+  display: grid;
+  place-items: center;
+  width: 5.6cqw;
+  height: 7.6cqw;
+  border: 1px solid rgba(160, 140, 130, 0.4);
+  background: linear-gradient(180deg, #1a0706, #050202);
+  color: var(--ember-hi);
+  font-family: var(--label);
+  font-size: 5.2cqw;
+  font-weight: 600;
+  text-shadow: 0 0 6px rgba(255, 90, 22, 0.8);
+}
+
+/* ------------------------------------------------------------ responsive */
+
+@media (max-width: 1180px) {
+  .infoGrid {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 560px;
+  }
+
+  .ctaStrip {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 560px;
+  }
+
+  .galleryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .page {
+    --wrap: calc(100% - 24px);
+  }
+
+  .hero {
+    min-height: 0;
+    padding-top: 130px;
+  }
+
+  .heroArt {
+    object-position: 50% 30%;
+  }
+
+  .heroCtas {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .ctaButton {
+    width: min(320px, 90vw);
+  }
+
+  .titleBar {
+    width: min(360px, 92%);
+  }
+
+  .corner {
+    width: 52px;
+  }
+
+  .infoCard {
+    border-width: 64px 38px 58px;
+  }
+
+  .eventItem {
+    grid-template-columns: 3rem 3.2rem minmax(0, 1fr);
+  }
+
+  .eventTime {
+    grid-column: 3;
+  }
+
+  .airBody {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  }
+
+  .footerNav {
+    grid-template-columns: repeat(4, auto);
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .galleryGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .artistCard {
+    width: 150px;
+  }
+
+  .counter {
+    width: min(320px, 90vw);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ctaButton,
+  .ctaPanel,
+  .galleryTile,
+  .galleryPhoto img,
+  .smallButton {
+    transition: none;
+  }
+}

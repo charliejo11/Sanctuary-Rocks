@@ -2,32 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { FALLBACK_LOGO } from "../data/crewTypes";
+import type { BoardEvent, EventItem } from "../lib/events";
 import styles from "./events.module.css";
-
-/** One entry in app/data/events.json. `image` is optional; without it the
- *  real Sanctuary Rocks logo is shown. */
-export type EventItem = {
-  date: string;
-  day: string;
-  time: string;
-  title: string;
-  dj: string;
-  host: string;
-  description: string;
-  badge?: string;
-  image?: string;
-};
-
-export type BoardEvent = EventItem & {
-  id: string;
-  start: number;
-  end: number;
-  monthKey: string;
-  monthLabel: string;
-  weekdayLabel: string;
-  dayLabel: string;
-  monthShort: string;
-};
 
 // The public Sanctuary Rocks Google Calendar, where the full details live.
 const CALENDAR_URL =

@@ -20,6 +20,8 @@ type FeaturedArtist = {
 const HERO = "/images/hero";
 
 export const FEATURED_ARTISTS: FeaturedArtist[] = [
+  // Sanctuary Rocks' own featured artist leads the row.
+  { name: "Maphra", image: "/images/artists/maphra.jpg", imagePosition: "50% 30%" },
   { name: "Ice Nine Kills", image: `${HERO}/ice%20nine%20kills.png` },
   { name: "Motionless in White" },
   { name: "Avenged Sevenfold" },

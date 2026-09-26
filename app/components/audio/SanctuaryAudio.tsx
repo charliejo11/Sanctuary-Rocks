@@ -8,7 +8,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
    The provider sits in the root layout, which never unmounts while the visitor
    moves between pages (all internal links use next/link, so navigation is
    client-side). It owns the only <audio> element on the site; every Listen
-   Live button (homepage player, DJ Lineup) talks to it through
+   Live button (Home page, DJ Lineup) talks to it through
    useSanctuaryAudio(), so there is never a second copy of the stream.
 
    The stream is /api/stream: the site's own HTTPS relay of the station's
