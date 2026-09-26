@@ -516,96 +516,85 @@ svg.cardIcon {
   color: var(--ash);
 }
 
-/* Upcoming events list */
-.eventList {
-  display: grid;
-  gap: 0.6rem;
-  margin: 0.8rem 0 0;
-  padding: 0;
-  list-style: none;
+/* Listeners: the live count from the station */
+.listenersBody {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 0 0.2rem;
+  text-align: center;
 }
 
-.eventItem {
+.listenersNumber {
+  margin: 0;
+  background: linear-gradient(180deg, #ffb347 0%, var(--ember) 38%, var(--red-hi) 68%, #8e0c0c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-family: var(--label);
+  font-size: clamp(3.6rem, 5.4vw, 5.2rem);
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  filter: drop-shadow(0 0 16px rgba(239, 34, 24, 0.55)) drop-shadow(0 3px 3px rgba(0, 0, 0, 0.9));
+}
+
+.listenersLabel {
+  margin: 0.35rem 0 0;
+  color: var(--bone);
+  font-family: var(--label);
+  font-size: 0.85rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.listenersMeter {
+  width: 100%;
+  height: 8px;
+  margin-top: 1rem;
+  overflow: hidden;
+  border: 1px solid rgba(160, 140, 130, 0.35);
+  background: #140c0b;
+}
+
+.listenersMeter span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--red), var(--ember-hi));
+  box-shadow: 0 0 10px rgba(255, 90, 22, 0.7);
+  transition: width 800ms ease;
+}
+
+.listenersStats {
   display: grid;
-  grid-template-columns: 3.2rem 3.6rem minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0.7rem;
-  padding: 0.45rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.listenersStats div {
+  padding: 0.45rem 0.2rem;
   border: 1px solid rgba(160, 140, 130, 0.22);
   background: rgba(22, 14, 13, 0.85);
 }
 
-.eventDate {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0.25rem 0;
-  border: 1px solid rgba(255, 90, 22, 0.45);
-  background: linear-gradient(180deg, #2a0907, #0e0404);
-  line-height: 1.05;
-}
-
-.eventDate small {
-  color: var(--ember-hi);
-  font-family: var(--label);
-  font-size: 0.7rem;
-  letter-spacing: 0.14em;
-}
-
-.eventDate strong {
-  color: var(--bone);
-  font-family: var(--label);
-  font-size: 1.15rem;
-  font-weight: 600;
-}
-
-.eventThumb {
-  display: block;
-  aspect-ratio: 1;
-  overflow: hidden;
-  border: 1px solid rgba(255, 90, 22, 0.35);
-}
-
-.eventThumb img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 50% 25%;
-}
-
-.eventText {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  line-height: 1.25;
-}
-
-.eventText strong {
-  color: var(--bone);
-  font-family: var(--label);
-  font-size: 0.98rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.eventText small {
-  margin-top: 0.15rem;
-  color: var(--ember-hi);
-  font-family: var(--label);
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.eventTime {
+.listenersStats dt {
   color: var(--ash);
   font-family: var(--label);
-  font-size: 0.78rem;
-  letter-spacing: 0.06em;
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  white-space: nowrap;
+}
+
+.listenersStats dd {
+  margin: 0.1rem 0 0;
+  color: var(--bone);
+  font-family: var(--label);
+  font-size: 1.05rem;
+  font-weight: 500;
 }
 
 /* Now On Air */
@@ -1127,14 +1116,6 @@ svg.cardIcon {
     border-width: 64px 38px 58px;
   }
 
-  .eventItem {
-    grid-template-columns: 3rem 3.2rem minmax(0, 1fr);
-  }
-
-  .eventTime {
-    grid-column: 3;
-  }
-
   .airBody {
     grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
   }
@@ -1162,6 +1143,7 @@ svg.cardIcon {
 @media (prefers-reduced-motion: reduce) {
   .ctaButton,
   .ctaPanel,
+  .listenersMeter span,
   .galleryTile,
   .galleryPhoto img,
   .smallButton {

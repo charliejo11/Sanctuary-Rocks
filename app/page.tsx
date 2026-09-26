@@ -3,23 +3,18 @@ import Image from "next/image";
 import Link from "next/link";
 import ForgedFooter from "./components/ForgedFooter";
 import HomeArtists from "./components/home/HomeArtists";
+import ListenersCard from "./components/home/ListenersCard";
 import ListenLiveButton from "./components/home/ListenLiveButton";
 import NowOnAir from "./components/home/NowOnAir";
 import VisitorCounter from "./components/home/VisitorCounter";
 import styles from "./components/home/home.module.css";
 import { cinzel, oswald, robotoCondensed } from "./contact/fonts";
-import { FALLBACK_LOGO } from "./data/crewTypes";
 import galleryData from "./data/gallery.json";
-import { upcomingEvents } from "./lib/events";
 
 export const metadata: Metadata = {
   title: "Sanctuary Rocks | Second Life's Rock & Metal Club",
   description: "Second Life's rock & metal club. Hard rock. Heavy metal. Always loud.",
 };
-
-// Upcoming events are read on each request so the preview never shows a
-// finished event.
-export const dynamic = "force-dynamic";
 
 // Links already used across the site.
 const TELEPORT_URL = "http://maps.secondlife.com/secondlife/Rhage/160/106/24";
@@ -87,11 +82,9 @@ function Divider() {
 }
 
 // Home: the castle hero with the real logo, three calls to action, Featured
-// Artists, Upcoming Events / Now On Air / More Than A Club, a gallery
+// Artists, Listeners / Now On Air / More Than A Club, a gallery
 // preview, a closing CTA strip and the shared footer with the visitor counter.
 export default function Home() {
-  const events = upcomingEvents(3);
-
   return (
     <main id="home" className={`${styles.page} ${cinzel.variable} ${oswald.variable} ${robotoCondensed.variable}`}>
       {/* ---------------------------------------------------------------- hero */}
@@ -145,45 +138,7 @@ export default function Home() {
 
       {/* ------------------------------------------------- three-column info */}
       <div className={`${styles.wrap} ${styles.infoGrid}`}>
-        <article className={styles.infoCard} aria-labelledby="events-preview-title">
-          <header className={styles.cardHead}>
-            <h2 id="events-preview-title" className={styles.cardTitle}>
-              <span className={styles.cardIcon}>{Icon.calendar}</span>
-              Upcoming Events
-            </h2>
-            <Link className={styles.textLink} href="/events">
-              View all events <span aria-hidden="true">→</span>
-            </Link>
-          </header>
-          {events.length > 0 ? (
-            <ol className={styles.eventList}>
-              {events.map((event) => (
-                <li key={event.id} className={styles.eventItem}>
-                  <span className={styles.eventDate}>
-                    <small>{event.monthShort}</small>
-                    <strong>{event.dayLabel}</strong>
-                  </span>
-                  <span className={styles.eventThumb}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      className={event.image ? undefined : styles.isLogo}
-                      src={event.image || FALLBACK_LOGO}
-                      alt=""
-                      loading="lazy"
-                    />
-                  </span>
-                  <span className={styles.eventText}>
-                    <strong>{event.title}</strong>
-                    <small>{[event.dj, event.host].filter((s) => s.trim()).join(" · ") || "Lineup coming soon"}</small>
-                  </span>
-                  <span className={styles.eventTime}>{event.time || event.day}</span>
-                </li>
-              ))}
-            </ol>
-          ) : (
-            <p className={styles.cardEmpty}>New events are being lined up. Check back soon.</p>
-          )}
-        </article>
+        <ListenersCard />
 
         <NowOnAir />
 
