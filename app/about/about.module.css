@@ -1,0 +1,604 @@
+/* =============================================================================
+   About: compact, polished, in the Sanctuary Rocks dragon / forged-metal
+   style. Every box uses the About-page frame artwork via border-image (so the
+   corners never stretch) with real HTML text inside.
+
+   Frame slices (measured off the trimmed artwork, px):
+   - about-who-we-are-frame  1672 x 926  : 280 181 222 180
+   - about-value-card-frame  1048 x 1419 : 180 149 208 147
+   - about-spotlight-frame   1448 x 1047 : 272 129 194 128
+   - about-cta-panel         1800 x 576  : red centre panel 21..86% x 34..80%
+   - about-spotlight-title-plate 1800 x 582 : plate 14..86% x 34..68%
+   ========================================================================== */
+
+.page {
+  --black: #050505;
+  --black-2: #0a0707;
+  --red: #c91515;
+  --red-hi: #ef2218;
+  --ember: #ff5a16;
+  --ember-hi: #ff8a22;
+  --bone: #f0ece7;
+  --ash: #a9a6a3;
+
+  --display: var(--font-contact-display), "Cinzel", Georgia, serif;
+  --label: var(--font-contact-label), "Oswald", "Arial Narrow", sans-serif;
+  --body: var(--font-contact-body), "Roboto Condensed", "Arial Narrow", sans-serif;
+  --metal: var(--font-gallery-display), "Rubik Distressed", Impact, sans-serif;
+
+  --wrap: min(1320px, calc(100% - 64px));
+  --section: clamp(2.8rem, 5vw, 4.5rem);
+  --molten: linear-gradient(180deg, #ffb347 0%, var(--ember) 38%, var(--red-hi) 68%, #8e0c0c 100%);
+  --chrome: linear-gradient(180deg, #ffffff 0%, #e2ded9 28%, #8f8a86 50%, #ece8e3 68%, #6a6561 100%);
+
+  position: relative;
+  overflow-x: clip;
+  color: var(--bone);
+  font-family: var(--body);
+  line-height: 1.55;
+  background:
+    radial-gradient(ellipse 60% 30% at 50% 40%, rgba(201, 21, 21, 0.1), transparent 70%),
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.012) 0 2px, transparent 2px 9px),
+    linear-gradient(180deg, var(--black-2), var(--black) 40%, #070505);
+}
+
+/* This page has its own sticky dragon navigation. */
+:global(body):has(.page) {
+  padding-top: 0;
+  background: var(--black, #050505);
+}
+
+.wrap {
+  width: var(--wrap);
+  margin-inline: auto;
+}
+
+.heading {
+  margin: 0 0 0.7rem;
+  background: var(--molten);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-family: var(--display);
+  font-size: clamp(1.7rem, 2.4vw, 2.3rem);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1.1;
+  text-transform: uppercase;
+  filter: drop-shadow(0 0 10px rgba(239, 34, 24, 0.4));
+}
+
+/* ----------------------------------------------------------------- banner */
+
+.banner {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: clamp(460px, 34vw, 560px);
+  padding: 150px 0 clamp(2rem, 3.5vw, 3rem);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.bannerArt {
+  z-index: -2;
+  object-fit: cover;
+  object-position: 60% 40%;
+}
+
+.banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(90deg, rgba(5, 3, 3, 0.9) 0%, rgba(5, 3, 3, 0.6) 45%, transparent 75%),
+    linear-gradient(180deg, rgba(5, 5, 5, 0.3), transparent 30%, transparent 70%, var(--black-2));
+  pointer-events: none;
+}
+
+.bannerInner {
+  display: flex;
+  align-items: center;
+  gap: clamp(1.2rem, 3vw, 2.6rem);
+}
+
+.bannerLogo {
+  flex: none;
+  width: clamp(140px, 14vw, 220px);
+  height: auto;
+  filter: drop-shadow(0 0 24px rgba(255, 90, 22, 0.5)) drop-shadow(0 10px 18px rgba(0, 0, 0, 0.85));
+}
+
+.title {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  background: var(--molten);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-family: var(--metal);
+  font-size: clamp(2.6rem, 5.4vw, 5rem);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 0.95;
+  text-transform: uppercase;
+  filter: drop-shadow(0 0 18px rgba(239, 34, 24, 0.5)) drop-shadow(0 3px 3px rgba(0, 0, 0, 0.95));
+}
+
+.title span {
+  background: var(--chrome);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-size: 0.6em;
+}
+
+.lede {
+  max-width: 36rem;
+  margin: 0.9rem 0 0;
+  color: #e8e1db;
+  font-size: clamp(1.02rem, 1.2vw, 1.18rem);
+  line-height: 1.5;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95);
+}
+
+/* ------------------------------------------------------------- who we are */
+
+.who {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(1.4rem, 3vw, 2.6rem);
+  margin-top: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.whoFrame {
+  border-style: solid;
+  border-width: 72px 46px 58px 46px;
+  border-image: url("/images/about/frames/about-who-we-are-frame.webp") 280 181 222 180 stretch;
+  padding: 0.3rem 0.8rem 0.4rem;
+  background: linear-gradient(180deg, #140c0b, #080606);
+  background-clip: padding-box;
+  filter: drop-shadow(0 16px 26px rgba(0, 0, 0, 0.65));
+}
+
+.whoFrame p {
+  margin: 0 0 0.7rem;
+  color: #e3dcd5;
+  font-size: 1.05rem;
+}
+
+.whoFrame .motto {
+  margin: 0.9rem 0 0;
+  color: var(--ember-hi);
+  font-family: var(--label);
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.whoArt {
+  position: relative;
+  aspect-ratio: 880 / 390;
+  overflow: hidden;
+  border: 1px solid rgba(255, 90, 22, 0.4);
+  box-shadow:
+    0 0 0 4px #0b0707,
+    0 0 0 5px rgba(160, 140, 130, 0.35),
+    0 0 30px rgba(239, 34, 24, 0.2),
+    0 18px 30px rgba(0, 0, 0, 0.7);
+}
+
+.whoArt img {
+  object-fit: cover;
+}
+
+/* --------------------------------------------------------------- divider */
+
+.divider {
+  display: flex;
+  justify-content: center;
+  margin: calc(var(--section) * 0.55) auto;
+  pointer-events: none;
+}
+
+.divider img {
+  display: block;
+  width: min(620px, 72%);
+  height: auto;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.7));
+}
+
+/* ---------------------------------------------------------------- values */
+
+.values {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1rem, 2.2vw, 2rem);
+}
+
+.valueCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-style: solid;
+  border-width: 50px 40px 56px 40px;
+  border-image: url("/images/about/frames/about-value-card-frame.webp") 180 149 208 147 stretch;
+  padding: 0.2rem 0.4rem 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(239, 34, 24, 0.12), transparent 70%), linear-gradient(180deg, #140c0b, #080606);
+  background-clip: padding-box;
+  text-align: center;
+  filter: drop-shadow(0 14px 22px rgba(0, 0, 0, 0.6));
+}
+
+.valueIcon {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  color: var(--red-hi);
+  filter: drop-shadow(0 0 10px rgba(239, 34, 24, 0.6));
+}
+
+.valueIcon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.valueTitle {
+  margin: 0.5rem 0 0;
+  color: var(--bone);
+  font-family: var(--label);
+  font-size: clamp(1.25rem, 1.6vw, 1.5rem);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+.valueText {
+  max-width: 22rem;
+  margin: 0.5rem 0 0;
+  color: #d9d2cb;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* ------------------------------------------------------ personality strip */
+
+.strip {
+  margin-top: var(--section);
+}
+
+.strip img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid rgba(255, 90, 22, 0.3);
+  box-shadow:
+    0 0 0 4px #0b0707,
+    0 0 0 5px rgba(160, 140, 130, 0.3),
+    0 18px 30px rgba(0, 0, 0, 0.7);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+}
+
+/* -------------------------------------------------------------- spotlight */
+
+.spotlight {
+  position: relative;
+  margin-top: var(--section);
+  max-width: 1100px;
+}
+
+.titlePlate {
+  position: relative;
+  z-index: 2;
+  width: min(520px, 90%);
+  margin: 0 auto -2.2rem;
+  container-type: inline-size;
+}
+
+.titlePlate img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.75));
+}
+
+.titlePlateText {
+  position: absolute;
+  top: 34%;
+  right: 14%;
+  bottom: 32%;
+  left: 14%;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  background: var(--molten);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-family: var(--display);
+  font-size: 4.1cqw;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  filter: drop-shadow(0 0 8px rgba(239, 34, 24, 0.5));
+}
+
+.spotFrame {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(1rem, 2.4vw, 2rem);
+  border-style: solid;
+  border-width: 70px 42px 52px 42px;
+  border-image: url("/images/about/frames/about-spotlight-frame.webp") 272 129 194 128 stretch;
+  padding: 0.6rem 0.8rem 0.4rem;
+  background:
+    radial-gradient(ellipse 60% 70% at 85% 50%, rgba(239, 34, 24, 0.15), transparent 70%),
+    linear-gradient(180deg, #140c0b, #080606);
+  background-clip: padding-box;
+  filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.7));
+}
+
+.spotName {
+  margin: 0;
+  background: var(--chrome);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-family: var(--metal);
+  font-size: clamp(2.8rem, 4.6vw, 4.2rem);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-transform: uppercase;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 14px rgba(239, 34, 24, 0.35));
+}
+
+.spotTag {
+  margin: 0.35rem 0 0.9rem;
+  color: var(--red-hi);
+  font-family: var(--label);
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.spotBody p:not(.spotTag) {
+  margin: 0 0 0.65rem;
+  color: #e0d9d2;
+  font-size: 1.02rem;
+  line-height: 1.55;
+}
+
+.spotPhoto {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid rgba(255, 90, 22, 0.5);
+  box-shadow:
+    0 0 0 4px #0b0707,
+    0 0 0 5px rgba(160, 140, 130, 0.35),
+    0 0 28px rgba(239, 34, 24, 0.25);
+}
+
+.spotPhoto img {
+  object-fit: cover;
+  object-position: 50% 30%;
+}
+
+/* ---------------------------------------------------------- call to action */
+
+.cta {
+  margin-bottom: var(--section);
+}
+
+/* The panel art at its own proportions; content sits in the red centre. */
+.ctaPanel {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1800 / 576;
+  background: url("/images/about/frames/about-cta-panel.webp") center / contain no-repeat;
+  container-type: inline-size;
+  filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.7));
+}
+
+.ctaContent {
+  position: absolute;
+  top: 34%;
+  right: 14.5%;
+  bottom: 20%;
+  left: 21%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.ctaTitle {
+  margin: 0;
+  background: var(--chrome);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-family: var(--metal);
+  font-size: 4.2cqw;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-transform: uppercase;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.95));
+}
+
+.ctaTag {
+  margin: 0.5cqw 0 0;
+  color: #ffd7c0;
+  font-family: var(--label);
+  font-size: 1.5cqw;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+.ctaButtons {
+  display: flex;
+  justify-content: center;
+  gap: 1.4cqw;
+  margin-top: 1.6cqw;
+}
+
+/* Same forged button family as the rest of the site. */
+.ctaButton {
+  padding: 0.75cqw 1.8cqw;
+  border: 1px solid rgba(255, 138, 34, 0.8);
+  border-radius: 999px;
+  background:
+    radial-gradient(ellipse 80% 120% at 50% 0%, rgba(255, 90, 22, 0.35), transparent 60%),
+    linear-gradient(180deg, #3a0a08 0%, #1a0505 55%, #0c0303 100%);
+  box-shadow:
+    inset 0 0 0 2px #0c0303,
+    inset 0 0 0 3px rgba(239, 34, 24, 0.5),
+    0 0 12px rgba(239, 34, 24, 0.35);
+  color: var(--bone);
+  font-family: var(--label);
+  font-size: 1.25cqw;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    transform 250ms ease,
+    box-shadow 250ms ease;
+}
+
+.ctaButton:hover,
+.ctaButton:focus-visible {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 0 0 2px #0c0303,
+    inset 0 0 0 3px rgba(255, 138, 34, 0.9),
+    0 0 22px rgba(255, 90, 22, 0.6);
+  outline: none;
+}
+
+.ctaButton[data-on] {
+  color: #ffd0a0;
+}
+
+/* ------------------------------------------------------------ responsive */
+
+@media (max-width: 1000px) {
+  .who {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .whoArt {
+    max-width: 640px;
+    width: 100%;
+    margin-inline: auto;
+  }
+
+  .values {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 480px;
+  }
+}
+
+/* The CTA panel's centre gets too small for the buttons: show the panel art
+   as a banner with the title, and the buttons in a row below. */
+@media (max-width: 860px) {
+  .ctaPanel {
+    aspect-ratio: auto;
+    padding-top: 32%;
+    background-position: top center;
+    background-size: 100% auto;
+  }
+
+  /* Title in the red centre panel; tagline and buttons underneath. */
+  .ctaContent {
+    position: static;
+    margin-top: -17%;
+  }
+
+  .ctaTitle {
+    font-size: 5.6cqw;
+  }
+
+  .ctaTag {
+    margin-top: 8cqw;
+    font-size: 2.8cqw;
+    color: var(--ember-hi);
+  }
+
+  .ctaButtons {
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1.8rem;
+  }
+
+  .ctaButton {
+    padding: 0.75rem 1.2rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 760px) {
+  .page {
+    --wrap: calc(100% - 24px);
+  }
+
+  .banner {
+    min-height: 0;
+    padding-top: 130px;
+  }
+
+  .bannerInner {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .bannerLogo {
+    width: 130px;
+  }
+
+  .title {
+    align-items: center;
+  }
+
+  .spotFrame {
+    grid-template-columns: minmax(0, 1fr);
+    border-width: 56px 30px 42px 30px;
+  }
+
+  .spotPhoto {
+    order: -1;
+    max-width: 260px;
+    width: 100%;
+    margin-inline: auto;
+  }
+
+  .spotBody {
+    text-align: center;
+  }
+
+  .whoFrame {
+    border-width: 56px 34px 44px 34px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ctaButton {
+    transition: none;
+  }
+}

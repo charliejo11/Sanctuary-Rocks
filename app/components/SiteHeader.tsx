@@ -16,7 +16,7 @@ const navLinks = [
 
 // Redesigned pages that use the forged-metal dragon navigation; every other
 // page keeps this header exactly as it was.
-const DRAGON_NAV_PAGES = new Set(["/", "/contact", "/crew", "/gallery", "/lineup", "/events"]);
+const DRAGON_NAV_PAGES = new Set(["/", "/about", "/contact", "/crew", "/gallery", "/lineup", "/events"]);
 
 export default function SiteHeader() {
   const pathname = usePathname();
