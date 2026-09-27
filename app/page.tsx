@@ -4,7 +4,6 @@ import Link from "next/link";
 import ForgedFooter from "./components/ForgedFooter";
 import HomeArtists from "./components/home/HomeArtists";
 import ListenersCard from "./components/home/ListenersCard";
-import ListenLiveButton from "./components/home/ListenLiveButton";
 import NowOnAir from "./components/home/NowOnAir";
 import VisitorCounter from "./components/home/VisitorCounter";
 import styles from "./components/home/home.module.css";
@@ -81,7 +80,7 @@ function Divider() {
   );
 }
 
-// Home: the castle hero with the real logo, three calls to action, Featured
+// Home: the castle hero with the real logo, two calls to action, Featured
 // Artists, Listeners / Now On Air / More Than A Club, a gallery
 // preview, a closing CTA strip and the shared footer with the visitor counter.
 export default function Home() {
@@ -107,7 +106,6 @@ export default function Home() {
           <p className={styles.heroTagline}>Hard rock. Heavy metal. Always loud.</p>
 
           <div className={styles.heroCtas}>
-            <ListenLiveButton variant="hero" />
             <Link className={styles.ctaButton} href="/events">
               <span className={styles.ctaIcon}>{Icon.calendar}</span>
               <span className={styles.ctaLabel}>Upcoming Events</span>

@@ -3,17 +3,17 @@
 import { useEffect, useState } from "react";
 import { FALLBACK_LOGO, findDjProfile } from "../../data/crewTypes";
 import type { CrewMember } from "../../data/crewTypes";
-import ListenLiveButton from "./ListenLiveButton";
 import styles from "./home.module.css";
 
-// Now On Air: a status card, not a player. Reads the existing /api/live-now
-// (calendar: who is on stage) and /api/now-playing (stream metadata), and its
-// Listen Live button drives the sitewide radio session.
+// Now On Air: an information card, not a player. Reads the existing
+// /api/live-now (calendar: who is on stage) and /api/now-playing (stream
+// metadata), and invites visitors to teleport to the club in Second Life.
 
 type LiveNow = { isLive: boolean; djName: string; currentSong: string };
 type NowPlaying = { artist: string; title: string; raw: string };
 
 const POLL_MS = 20000;
+const TELEPORT_URL = "http://maps.secondlife.com/secondlife/Rhage/160/106/24";
 
 export default function NowOnAir() {
   const [live, setLive] = useState<LiveNow | null>(null);
@@ -97,7 +97,12 @@ export default function NowOnAir() {
           </span>
           <p className={styles.airWith}>{isLive ? "On air with" : "On air"}</p>
           <p className={styles.airDj}>{djName || "Sanctuary Rocks Radio"}</p>
-          <ListenLiveButton variant="link" />
+          <div className={styles.airVisit}>
+            <p className={styles.airVisitLabel}>Stop by &amp; visit us</p>
+            <a className={styles.airTeleport} href={TELEPORT_URL} target="_blank" rel="noopener noreferrer">
+              Teleport to Sanctuary Rocks <span aria-hidden="true">›</span>
+            </a>
+          </div>
         </div>
       </div>
     </article>

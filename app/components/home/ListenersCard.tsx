@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import ListenLiveButton from "./ListenLiveButton";
 import styles from "./home.module.css";
 
 // Live listener count from the station (/api/listeners), refreshed every 30
@@ -74,8 +73,6 @@ export default function ListenersCard() {
             <dd>{data?.bitrate ? `${data.bitrate} kbps` : "--"}</dd>
           </div>
         </dl>
-
-        <ListenLiveButton variant="link" />
       </div>
     </article>
   );

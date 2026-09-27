@@ -3,7 +3,6 @@ import Image from "next/image";
 import ForgedFooter from "../components/ForgedFooter";
 import { cinzel, oswald, robotoCondensed } from "../contact/fonts";
 import { distressed } from "../gallery/fonts";
-import AboutListenButton from "./AboutListenButton";
 import styles from "./about.module.css";
 
 export const metadata: Metadata = {
@@ -180,7 +179,6 @@ export default function AboutPage() {
             </h2>
             <p className={styles.ctaTag}>Hard rock. Heavy metal. Always loud.</p>
             <div className={styles.ctaButtons}>
-              <AboutListenButton className={styles.ctaButton} />
               <a className={styles.ctaButton} href={TELEPORT_URL} target="_blank" rel="noopener noreferrer">
                 Teleport to the club
               </a>

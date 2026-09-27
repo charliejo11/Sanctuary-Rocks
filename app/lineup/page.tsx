@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSanctuaryAudio } from "../components/audio/SanctuaryAudio";
 import ForgedFooter from "../components/ForgedFooter";
 import { cinzel, oswald, robotoCondensed } from "../contact/fonts";
 import { FALLBACK_LOGO, findDjProfile, findRosterMatch, normalizeForMatch } from "../data/crewTypes";
@@ -9,7 +8,7 @@ import type { CrewMember } from "../data/crewTypes";
 import styles from "./lineup.module.css";
 
 // DJ Lineup: reads the Google Calendar through /api/lineup (unchanged) and
-// shows who is on stage now (DJ + Host), a Listen Live panel, and every
+// shows who is on stage now (DJ + Host), a Now Playing panel, and every
 // upcoming set with its DJ and Host. Photos come from the DJ and Host
 // rosters; anyone without a photo gets the real Sanctuary Rocks logo.
 
@@ -17,6 +16,9 @@ import styles from "./lineup.module.css";
 // reads), shown in Pacific / SLT time.
 const GOOGLE_CALENDAR_URL =
   "https://calendar.google.com/calendar/embed?src=ba33d2d221fc80a1a2bf0d55439608ea1f7896d48077388fd77f36dbc622a70e%40group.calendar.google.com&ctz=America%2FLos_Angeles";
+
+// The club in Second Life (the same SLURL used across the site).
+const TELEPORT_URL = "http://maps.secondlife.com/secondlife/Rhage/160/106/24";
 
 const SETS_PER_PAGE = 8;
 const TIME_ZONE = "America/Los_Angeles"; // SLT
@@ -101,11 +103,9 @@ function SectionTitle({ id, children, sub }: { id: string; children: React.React
   );
 }
 
-/** Listen Live: controls the sitewide radio session (SanctuaryAudioProvider),
- *  so it shows the real state if the stream is already playing and never
- *  starts a second copy. */
-function ListenLive() {
-  const audio = useSanctuaryAudio();
+/** Now Playing: the current song from /api/now-playing, plus an invitation to
+ *  visit the club in Second Life. Information only - no audio on the site. */
+function NowPlayingCard() {
   const [song, setSong] = useState("");
 
   useEffect(() => {
@@ -128,87 +128,15 @@ function ListenLive() {
     };
   }, []);
 
-  const label = audio.isPlaying
-    ? "Playing Live"
-    : audio.isReconnecting
-      ? "Reconnecting…"
-      : audio.isLoading
-        ? "Tuning in…"
-        : "Listen Live";
-  const shownVolume = audio.muted ? 0 : audio.volume;
-
   return (
-    <article className={`${styles.block} ${styles.listenBlock}`} aria-labelledby="listen-title">
+    <article className={`${styles.block} ${styles.playingBlock}`} aria-labelledby="playing-title">
       <p className={styles.blockLabel}>24/7 Radio</p>
-      <h3 id="listen-title" className={styles.listenTitle}>
-        Listen Live
+      <h3 id="playing-title" className={styles.playingTitle}>
+        Now Playing
       </h3>
-      <button
-        type="button"
-        className={`${styles.listenButton} ${audio.isOn ? styles.listenOn : ""}`}
-        onClick={audio.toggle}
-        aria-pressed={audio.isOn}
-        aria-label={audio.isOn ? "Stop the Sanctuary Rocks live stream" : "Listen live to the Sanctuary Rocks stream"}
-      >
-        <span className={styles.listenIcon} aria-hidden="true">
-          {audio.isOn ? (
-            <svg viewBox="0 0 24 24">
-              <rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor" />
-              <rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor" />
-            </svg>
-          ) : (
-            <svg viewBox="0 0 24 24">
-              <path d="M8 5.5v13l11-6.5z" fill="currentColor" />
-            </svg>
-          )}
-        </span>
-        <span>{label}</span>
-      </button>
-
-      <p className={`${styles.liveStatus} ${audio.isPlaying ? styles.liveStatusOn : ""}`} role="status">
-        <span aria-hidden="true" />
-        {audio.isPlaying
-          ? "On air: you're tuned in"
-          : audio.isReconnecting
-            ? "Connection dropped: reconnecting"
-            : audio.isLoading
-              ? "Connecting to the stream"
-              : audio.error || "Stream ready"}
-      </p>
-
-      <div className={styles.volumeRow}>
-        <button
-          type="button"
-          className={styles.muteButton}
-          onClick={audio.toggleMute}
-          aria-pressed={audio.muted}
-          aria-label={audio.muted ? "Unmute" : "Mute"}
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M11 4.5 6.4 8.8H3v6.4h3.4L11 19.5v-15Z" fill="currentColor" />
-            {audio.muted ? (
-              <path d="m15 9 6 6m0-6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            ) : (
-              <path d="M15 8.5a5 5 0 0 1 0 7M17.8 6a8.6 8.6 0 0 1 0 12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-            )}
-          </svg>
-        </button>
-        <input
-          type="range"
-          className={styles.volume}
-          min={0}
-          max={1}
-          step={0.01}
-          value={shownVolume}
-          onChange={(e) => audio.setVolume(Number(e.target.value))}
-          aria-label="Volume"
-          aria-valuetext={`${Math.round(shownVolume * 100)} percent`}
-          style={{ "--vol": `${Math.round(shownVolume * 100)}%` } as React.CSSProperties}
-        />
-      </div>
 
       <div className={styles.nowPlaying}>
-        <span className={`${styles.eq} ${audio.isPlaying ? styles.eqOn : ""}`} aria-hidden="true">
+        <span className={styles.eq} aria-hidden="true">
           <i />
           <i />
           <i />
@@ -219,7 +147,16 @@ function ListenLive() {
           <p className={styles.nowSong}>{song || "Sanctuary Rocks Radio"}</p>
         </div>
       </div>
-      <p className={styles.listenNote}>Keeps playing while you explore the rest of the site.</p>
+
+      <p className={styles.visitLabel}>Stop by &amp; visit us</p>
+      <a className={styles.teleportButton} href={TELEPORT_URL} target="_blank" rel="noopener noreferrer">
+        <span className={styles.teleportIcon} aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2.5c-3.9 0-7 3-7 6.9 0 5.2 7 12.1 7 12.1s7-6.9 7-12.1c0-3.9-3.1-6.9-7-6.9zm0 9.6a2.7 2.7 0 110-5.4 2.7 2.7 0 010 5.4z" fill="currentColor" />
+          </svg>
+        </span>
+        <span>Teleport to Sanctuary Rocks</span>
+      </a>
     </article>
   );
 }
@@ -403,7 +340,7 @@ export default function LineupPage() {
                 </dl>
               </article>
 
-              <ListenLive />
+              <NowPlayingCard />
             </div>
           ) : (
             <div className={styles.stageGrid}>
@@ -417,7 +354,7 @@ export default function LineupPage() {
                     : "Upcoming DJ sets will appear here when the calendar feed responds."}
                 </span>
               </div>
-              <ListenLive />
+              <NowPlayingCard />
             </div>
           )}
         </div>

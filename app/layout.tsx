@@ -1,8 +1,6 @@
 ﻿import type { Metadata } from "next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
-import "./player-fix.css";
-import { SanctuaryAudioProvider } from "./components/audio/SanctuaryAudio";
 import DragonCursor from "./components/DragonCursor";
 import SiteHeader from "./components/SiteHeader";
 import { sanctuaryContent } from "./data/sanctuaryContent";
@@ -20,11 +18,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {/* One persistent live-radio session for every page. */}
-        <SanctuaryAudioProvider>
-          <SiteHeader />
-          {children}
-        </SanctuaryAudioProvider>
+        <SiteHeader />
+        {children}
         <DragonCursor />
         <SpeedInsights />
       </body>

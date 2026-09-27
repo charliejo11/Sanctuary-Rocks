@@ -1,7 +1,7 @@
 /* =============================================================================
    DJ Lineup: the backdrop art behind modular forged-metal panels, built like
    the Crew page. Every section is its own framed area and every block inside
-   it has its own room: hero, On Stage Now (DJ, Host, Listen Live), Upcoming
+   it has its own room: hero, On Stage Now (DJ, Host, Now Playing), Upcoming
    Lineup (one card per set, with DJ and Host), and the closing slogan.
    ========================================================================== */
 
@@ -384,8 +384,8 @@
   font-size: 1.02rem;
 }
 
-/* Listen Live: its own card, centred, with room to breathe. */
-.listenBlock {
+/* Now Playing: its own card, centred, with room to breathe. */
+.playingBlock {
   align-items: center;
   justify-content: center;
   gap: 0.2rem;
@@ -395,11 +395,11 @@
     linear-gradient(180deg, rgba(28, 18, 16, 0.9), rgba(12, 8, 8, 0.95));
 }
 
-.listenBlock .blockLabel {
+.playingBlock .blockLabel {
   margin-top: 0;
 }
 
-.listenTitle {
+.playingTitle {
   margin: 0.2rem 0 0;
   background: var(--molten);
   -webkit-background-clip: text;
@@ -413,172 +413,13 @@
   filter: drop-shadow(0 0 12px rgba(239, 34, 24, 0.5));
 }
 
-.listenButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.9rem;
-  margin-top: 1.4rem;
-  padding: 0.95rem 1.8rem 0.95rem 1rem;
-  border: 1px solid rgba(255, 138, 34, 0.8);
-  border-radius: 999px;
-  background:
-    radial-gradient(ellipse 80% 120% at 50% 0%, rgba(255, 90, 22, 0.4), transparent 60%),
-    linear-gradient(180deg, #3a0a08 0%, #1a0505 55%, #0c0303 100%);
-  box-shadow:
-    inset 0 0 0 3px #0c0303,
-    inset 0 0 0 4px rgba(239, 34, 24, 0.55),
-    0 0 20px rgba(239, 34, 24, 0.4);
-  color: var(--bone);
-  font-family: var(--label);
-  font-size: 1.15rem;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition:
-    transform 250ms ease,
-    box-shadow 250ms ease;
-}
-
-.listenButton:hover,
-.listenButton:focus-visible {
-  transform: translateY(-2px);
-  box-shadow:
-    inset 0 0 0 3px #0c0303,
-    inset 0 0 0 4px rgba(255, 138, 34, 0.9),
-    0 0 32px rgba(255, 90, 22, 0.65);
-  outline: none;
-}
-
-.listenIcon {
-  display: grid;
-  place-items: center;
-  width: 2.6rem;
-  height: 2.6rem;
-  border-radius: 50%;
-  background: linear-gradient(180deg, #ff6a3a, #c91515);
-  box-shadow: 0 0 14px rgba(239, 34, 24, 0.7);
-  color: #fff;
-}
-
-.listenIcon svg {
-  width: 1.3rem;
-  height: 1.3rem;
-}
-
-.listenOn .listenIcon {
-  animation: pulse 1.6s ease-in-out infinite;
-}
-
-/* Live status line under the button. */
-.liveStatus {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 1rem 0 0;
-  color: var(--ash);
-  font-family: var(--label);
-  font-size: 0.82rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.liveStatus span {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #5a4a44;
-}
-
-.liveStatusOn {
-  color: var(--bone);
-}
-
-.liveStatusOn span {
-  background: var(--red-hi);
-  box-shadow: 0 0 8px var(--red-hi);
-  animation: pulse 1.4s ease-in-out infinite;
-}
-
-.volumeRow {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  width: 100%;
-  max-width: 300px;
-  margin-top: 1rem;
-}
-
-.muteButton {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border: 1px solid rgba(160, 140, 130, 0.45);
-  border-radius: 50%;
-  background: linear-gradient(180deg, #1d1715, #0c0a09);
-  color: var(--bone);
-  cursor: pointer;
-  transition:
-    border-color 200ms ease,
-    color 200ms ease;
-}
-
-.muteButton svg {
-  width: 20px;
-  height: 20px;
-}
-
-.muteButton:hover,
-.muteButton:focus-visible,
-.muteButton[aria-pressed="true"] {
-  border-color: var(--ember);
-  color: var(--ember-hi);
-  outline: none;
-}
-
-.volume {
-  flex: 1;
-  height: 6px;
-  border-radius: 3px;
-  appearance: none;
-  background: linear-gradient(90deg, var(--ember) 0 var(--vol, 80%), #2a211e var(--vol, 80%) 100%);
-  cursor: pointer;
-}
-
-.volume::-webkit-slider-thumb {
-  width: 18px;
-  height: 18px;
-  border: 2px solid #ffb347;
-  border-radius: 50%;
-  appearance: none;
-  background: radial-gradient(circle, #ff6a3a, #9b0e0e);
-  box-shadow: 0 0 10px rgba(239, 34, 24, 0.7);
-}
-
-.volume::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  border: 2px solid #ffb347;
-  border-radius: 50%;
-  background: radial-gradient(circle, #ff6a3a, #9b0e0e);
-  box-shadow: 0 0 10px rgba(239, 34, 24, 0.7);
-}
-
-.volume:focus-visible {
-  outline: 2px solid var(--ember-hi);
-  outline-offset: 4px;
-}
-
 .nowPlaying {
   display: flex;
   align-items: center;
   gap: 0.8rem;
   width: 100%;
   max-width: 320px;
-  margin-top: 1.6rem;
+  margin-top: 1.4rem;
   padding: 0.8rem 1rem;
   border: 1px solid rgba(160, 140, 130, 0.25);
   background: rgba(5, 4, 4, 0.6);
@@ -617,24 +458,72 @@
   background: linear-gradient(180deg, var(--ember-hi), var(--red));
 }
 
-.eqOn i {
-  animation: eq 1s ease-in-out infinite;
-}
+.eq i:nth-child(2) { height: 75%; }
+.eq i:nth-child(3) { height: 55%; }
+.eq i:nth-child(4) { height: 95%; }
 
-.eq i:nth-child(2) { animation-delay: -0.3s; }
-.eq i:nth-child(3) { animation-delay: -0.6s; }
-.eq i:nth-child(4) { animation-delay: -0.15s; }
-
-@keyframes eq {
-  0%, 100% { height: 30%; }
-  50% { height: 100%; }
-}
-
-.listenNote {
-  max-width: 300px;
-  margin: 0.8rem 0 0;
+/* Stop by & visit us: the teleport call to action. */
+.visitLabel {
+  margin: 1.6rem 0 0;
   color: var(--ash);
-  font-size: 0.88rem;
+  font-family: var(--label);
+  font-size: 0.82rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.teleportButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-top: 0.7rem;
+  padding: 0.8rem 1.6rem 0.8rem 0.9rem;
+  border: 1px solid rgba(255, 138, 34, 0.8);
+  border-radius: 999px;
+  background:
+    radial-gradient(ellipse 80% 120% at 50% 0%, rgba(255, 90, 22, 0.4), transparent 60%),
+    linear-gradient(180deg, #3a0a08 0%, #1a0505 55%, #0c0303 100%);
+  box-shadow:
+    inset 0 0 0 3px #0c0303,
+    inset 0 0 0 4px rgba(239, 34, 24, 0.55),
+    0 0 20px rgba(239, 34, 24, 0.4);
+  color: var(--bone);
+  font-family: var(--label);
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-align: left;
+  text-transform: uppercase;
+  transition:
+    transform 250ms ease,
+    box-shadow 250ms ease;
+}
+
+.teleportButton:hover,
+.teleportButton:focus-visible {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 0 0 3px #0c0303,
+    inset 0 0 0 4px rgba(255, 138, 34, 0.9),
+    0 0 32px rgba(255, 90, 22, 0.65);
+  outline: none;
+}
+
+.teleportIcon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.3rem;
+  height: 2.3rem;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #ff6a3a, #c91515);
+  box-shadow: 0 0 14px rgba(239, 34, 24, 0.7);
+  color: #fff;
+}
+
+.teleportIcon svg {
+  width: 1.2rem;
+  height: 1.2rem;
 }
 
 .stateBlock {
@@ -1039,12 +928,12 @@
 /* ------------------------------------------------------------ responsive */
 
 @media (max-width: 1180px) {
-  /* DJ and Host side by side, Listen Live across the full width below. */
+  /* DJ and Host side by side, Now Playing across the full width below. */
   .stageGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .listenBlock {
+  .playingBlock {
     grid-column: 1 / -1;
   }
 
@@ -1110,10 +999,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .badgeLive::before,
-  .listenOn .listenIcon,
-  .liveStatusOn span,
-  .eqOn i {
+  .badgeLive::before {
     animation: none;
+  }
+
+  .teleportButton {
+    transition: none;
   }
 }
