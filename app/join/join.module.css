@@ -1,0 +1,327 @@
+/* =============================================================================
+   Join the Sanctuary Rocks Team: the staff application page.
+   Built on the Contact page's design (contact.module.css supplies the page
+   background, colours, fonts, hero, framed panel, dividers and molten
+   button); this file only adds the shorter hero and the form itself.
+   ========================================================================== */
+
+/* -------------------------------------------------------------------- hero */
+
+.hero {
+  min-height: calc(156px + clamp(340px, 24vw, 440px));
+}
+
+.heroJoin {
+  font-size: clamp(2.8rem, 7vw, 7rem);
+}
+
+.heroTeam {
+  font-size: clamp(1.6rem, 3.8vw, 3.9rem);
+}
+
+.heroText {
+  max-width: 44rem;
+  margin-inline: auto;
+  font-size: clamp(1.05rem, 1.35vw, 1.3rem);
+}
+
+/* ------------------------------------------------------------- form panel */
+
+.formWrap {
+  max-width: 980px;
+  padding-block: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.formPanel {
+  align-items: stretch;
+  padding: 0.6rem clamp(0.4rem, 2vw, 1.6rem) 1.4rem;
+  text-align: left;
+}
+
+.formPanel > img:first-child {
+  align-self: center;
+  margin-top: 0;
+}
+
+.formTitle {
+  text-align: center;
+}
+
+.form {
+  display: grid;
+  gap: 1.4rem;
+  margin-top: 1.2rem;
+}
+
+.requiredNote {
+  margin: 0;
+  color: var(--ash);
+  font-size: 0.95rem;
+  text-align: right;
+}
+
+/* Each block of questions is a fieldset with an engraved legend. */
+.group {
+  display: grid;
+  gap: 1.15rem;
+  min-width: 0;
+  margin: 0;
+  padding: 1.2rem clamp(0.9rem, 2vw, 1.4rem) 1.3rem;
+  border: 1px solid rgba(255, 90, 22, 0.28);
+  border-radius: 6px;
+  background: linear-gradient(180deg, rgba(20, 10, 9, 0.75), rgba(8, 6, 6, 0.75));
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.8),
+    0 8px 18px rgba(0, 0, 0, 0.45);
+}
+
+.legend {
+  padding: 0 0.6rem;
+  background: var(--molten);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-family: var(--display);
+  font-size: clamp(1.05rem, 1.4vw, 1.3rem);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.15rem 1.4rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.label {
+  margin: 0;
+  color: var(--ember-hi);
+  font-family: var(--label);
+  font-size: 0.98rem;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+.required {
+  color: var(--red-hi);
+}
+
+.optional {
+  color: var(--ash);
+  font-family: var(--body);
+  font-size: 0.88rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.hint {
+  margin: -0.15rem 0 0.1rem;
+  color: var(--ash);
+  font-size: 0.95rem;
+}
+
+/* Dark forged-iron inputs with an ember glow on focus. */
+.input {
+  width: 100%;
+  min-width: 0;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid rgba(255, 90, 22, 0.35);
+  border-radius: 4px;
+  background: linear-gradient(180deg, #0d0807, #070505);
+  box-shadow:
+    inset 0 0 0 1px #000,
+    inset 0 2px 8px rgba(0, 0, 0, 0.85);
+  color: var(--bone);
+  font-family: var(--body);
+  font-size: 1.05rem;
+  line-height: 1.45;
+  transition:
+    border-color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.input:hover {
+  border-color: rgba(255, 138, 34, 0.6);
+}
+
+.input:focus,
+.input:focus-visible {
+  border-color: var(--ember-hi);
+  box-shadow:
+    inset 0 0 0 1px #000,
+    inset 0 2px 8px rgba(0, 0, 0, 0.85),
+    0 0 0 3px rgba(255, 90, 22, 0.22),
+    0 0 16px rgba(239, 34, 24, 0.35);
+  outline: none;
+}
+
+.textarea {
+  min-height: 6.2rem;
+  resize: vertical;
+}
+
+.select {
+  appearance: none;
+  padding-right: 2.6rem;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23ff8a22' stroke-width='1.8'/%3E%3C/svg%3E") no-repeat right 0.9rem center / 0.8rem,
+    linear-gradient(180deg, #0d0807, #070505);
+  cursor: pointer;
+}
+
+.select option {
+  background: #0d0807;
+  color: var(--bone);
+}
+
+.choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.6rem;
+}
+
+.choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--bone);
+  font-size: 1.05rem;
+  cursor: pointer;
+}
+
+.choice input,
+.consent input {
+  width: 1.15rem;
+  height: 1.15rem;
+  margin: 0;
+  accent-color: var(--ember);
+  cursor: pointer;
+}
+
+.consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(239, 34, 24, 0.4);
+  border-radius: 6px;
+  background: rgba(201, 21, 21, 0.08);
+  color: var(--bone);
+  font-size: 1.02rem;
+  line-height: 1.45;
+  cursor: pointer;
+}
+
+.consent input {
+  flex: none;
+  margin-top: 0.15rem;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+/* Off-screen bot trap (never seen, never focused). */
+.trap {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.error {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(239, 34, 24, 0.75);
+  border-radius: 6px;
+  background: linear-gradient(180deg, rgba(58, 10, 8, 0.85), rgba(26, 5, 5, 0.85));
+  color: var(--bone);
+  font-size: 1.02rem;
+  text-align: center;
+  box-shadow: 0 0 16px rgba(239, 34, 24, 0.25);
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+}
+
+.submit {
+  margin-top: 0.2rem;
+  padding: 0.85rem 1.6rem;
+  cursor: pointer;
+}
+
+.submit:disabled {
+  cursor: progress;
+  opacity: 0.75;
+  transform: none;
+}
+
+.spinner {
+  width: 1.1rem;
+  height: 1.1rem;
+  border: 2px solid rgba(255, 138, 34, 0.35);
+  border-top-color: var(--ember-hi);
+  border-radius: 50%;
+  animation: spin 800ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --------------------------------------------------------- confirmation */
+
+.done {
+  display: grid;
+  gap: 0.4rem;
+  padding: 1.6rem 0.5rem 1.2rem;
+  text-align: center;
+}
+
+.doneTitle {
+  outline: none;
+}
+
+/* -------------------------------------------------------- responsive */
+
+@media (max-width: 760px) {
+  .row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .formPanel {
+    padding-inline: 0.2rem;
+  }
+
+  .group {
+    padding-inline: 0.75rem;
+  }
+
+  .requiredNote {
+    text-align: left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .input {
+    transition: none;
+  }
+
+  .spinner {
+    animation-duration: 2s;
+  }
+}

@@ -1,0 +1,13 @@
+# Sanctuary Rocks staff applications relay: a Cloudflare Worker that holds the
+# Google Apps Script URL + shared secret (Worker secrets, not in this repo).
+# Deploy from this folder with: npx wrangler deploy
+# Secrets (once):  npx wrangler secret put APPLICATIONS_SCRIPT_URL
+#                  npx wrangler secret put APPLICATIONS_SECRET
+name = "sanctuary-rocks-applications"
+main = "worker.js"
+compatibility_date = "2026-09-01"
+workers_dev = true
+
+[[kv_namespaces]]
+binding = "APPLY_LIMIT"
+id = "f7da619ade174a8e89f5ddeab62e06ba"

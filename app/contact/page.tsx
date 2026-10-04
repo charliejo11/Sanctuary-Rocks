@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import ForgedFooter from "../components/ForgedFooter";
 import ContactCrewCard from "./ContactCrewCard";
 import { cinzel, oswald, robotoCondensed } from "./fonts";
@@ -13,7 +14,8 @@ export const metadata: Metadata = {
 const TELEPORT_URL = "http://maps.secondlife.com/secondlife/Rhage/160/106/24";
 const GRIDSTER_URL = "https://gridster.elfavina89.workers.dev";
 const DISCORD_URL = "https://discord.gg/239QyWDW4";
-const VIP_APPLICATION_URL = "https://discord.gg/GdsJeQDnc";
+// Staff applications are made privately on the site now (/join), not in the VIP Discord.
+const APPLICATION_PAGE = "/join";
 
 const IMG = "/images/contact";
 
@@ -45,6 +47,16 @@ function GlobeIcon() {
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeWidth="1.5">
       <circle cx="12" cy="12" r="9.5" />
       <path d="M2.5 12h19M12 2.5c2.6 2.6 3.9 5.8 3.9 9.5s-1.3 6.9-3.9 9.5M12 2.5C9.4 5.1 8.1 8.3 8.1 12s1.3 6.9 3.9 9.5M4.2 7h15.6M4.2 17h15.6" />
+    </svg>
+  );
+}
+
+function QuillIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 3.5c-6.5.5-11.5 5-13 12.5l-1.5 4.5" />
+      <path d="M20 3.5c-1 5.5-4.5 9.5-10.5 11" />
+      <path d="M9.5 9.5h5M8 13h4" />
     </svg>
   );
 }
@@ -123,13 +135,19 @@ export default function ContactPage() {
             Want to work at Sanctuary Rocks? Join our crew! We are always looking for talented DJs, hosts, and creators.
           </p>
           <ul className={styles.steps}>
-            <li>Join our VIP Discord</li>
-            <li>Grab the application</li>
-            <li>Apply to join the crew</li>
+            <li>Fill in the short application</li>
+            <li>It goes privately to management</li>
+            <li>We&rsquo;ll contact you after review</li>
           </ul>
-          <ForgedButton href={VIP_APPLICATION_URL} icon={<DiscordIcon />}>
-            Apply in Discord
-          </ForgedButton>
+          <Link className={styles.button} href={APPLICATION_PAGE}>
+            <span className={styles.buttonIcon}>
+              <QuillIcon />
+            </span>
+            <span>Apply Now</span>
+            <span className={styles.chevron} aria-hidden="true">
+              »
+            </span>
+          </Link>
         </article>
 
         <article className={`${styles.panel} ${styles.visitPanel}`}>
