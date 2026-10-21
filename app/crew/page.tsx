@@ -1,19 +1,36 @@
 import type { Metadata } from "next";
 import SponsorCard from "../components/SponsorCard";
 import { cinzel, oswald, robotoCondensed } from "../contact/fonts";
-import { loadDjs, loadHosts, loadSponsors } from "../data/crew";
-import { shuffleCrew } from "../data/crewTypes";
+import type { SponsorEntry } from "../data/crewTypes";
+import djRoster from "../data/djRoster.generated.json";
+import hostRoster from "../data/hostRoster.generated.json";
+import sponsorRosterData from "../data/sponsorRoster.generated.json";
 import CrewRoster from "./CrewRoster";
 import styles from "./crew.module.css";
+
+// Explicitly typed: when the sponsors folder is empty (as it is right now),
+// the generated JSON is a literal `[]`, which TypeScript would otherwise
+// infer as `never[]` and break `.map()` below.
+const sponsorRoster = sponsorRosterData as SponsorEntry[];
 
 export const metadata: Metadata = {
   title: "Meet the Crew | Sanctuary Rocks",
   description: "The misfits behind the mayhem: every DJ and host who keeps Sanctuary Rocks alive.",
 };
 
-// Force a fresh render (and a fresh shuffle) on every request/refresh,
-// instead of Next.js statically caching a single random order at build time.
-export const dynamic = "force-dynamic";
+// Statically generated, and reads build-time-generated JSON rather than
+// calling loadDjs()/loadHosts()/loadSponsors() directly - NOT just because
+// of the fs-at-request-time problem (see app/api/dj-roster/route.ts's
+// comment), but because this page hit a second, distinct bug: even though
+// `next build` correctly bakes real data into this page's static HTML
+// (confirmed by checking .next/server/app/crew.html directly), OpenNext
+// stores a static page's prerendered output as an ISR "route cache" entry
+// (.open-next/cache/.../route-cache/APP_PAGE/.../crew.cache) rather than a
+// plain static asset - and without an R2 cache binding configured (this
+// project doesn't have one), there's nowhere to read that cache from at
+// runtime, so the Worker falls back to re-rendering the page live, where
+// the fs read returns nothing. Importing the generated JSON sidesteps the
+// whole question by not needing fs OR a cache binding at all.
 
 const DISCORD_URL = "https://discord.gg/239QyWDW4";
 const LOGO = "/images/brand/sanctuary-rocks-logo-transparent.webp";
@@ -52,9 +69,9 @@ function HighlightIcon({ name }: { name: (typeof highlights)[number]["icon"] }) 
 // Crew page: dragon/forged-metal design matching Contact. Every DJ and Host
 // (read from public/images/djs and public/images/hosts) gets their own card.
 export default function CrewPage() {
-  const djs = shuffleCrew(loadDjs());
-  const hosts = shuffleCrew(loadHosts());
-  const sponsors = loadSponsors();
+  const djs = djRoster;
+  const hosts = hostRoster;
+  const sponsors = sponsorRoster;
 
   return (
     <main className={`${styles.page} ${cinzel.variable} ${oswald.variable} ${robotoCondensed.variable}`}>
@@ -135,14 +152,37 @@ export default function CrewPage() {
 
       {/* --------------------------------------------------------- sponsors */}
       {sponsors.length > 0 ? (
-        <section className="crew-sponsors" aria-label="Sponsors">
-          <h2 className="crew-sponsors-heading">
-            <span>Sponsors</span>
-          </h2>
-          <div className="crew-sponsors-grid">
-            {sponsors.map((sponsor) => (
-              <SponsorCard key={sponsor.image} sponsor={sponsor} />
+        <section className={styles.roster} aria-labelledby="crew-sponsors">
+          <header className={styles.sectionHead}>
+            <img className={styles.headDivider} src="/images/crew/headings/crew-dragon-chain-divider.webp" alt="" aria-hidden="true" loading="lazy" />
+            <div className={styles.titlePlate}>
+              <img src="/images/crew/headings/crew-section-title-plate.webp" alt="" aria-hidden="true" loading="lazy" />
+              <h2 id="crew-sponsors" className={styles.titleText}>
+                <span aria-hidden="true">✦</span> Sponsors <span aria-hidden="true">✦</span>
+              </h2>
+            </div>
+            <div className={styles.subPlate}>
+              <img src="/images/crew/cards/role-tag-plate.webp" alt="" aria-hidden="true" loading="lazy" />
+              <p className={styles.subText}>Supporting Our Sanctuary</p>
+            </div>
+          </header>
+
+          <div className={styles.rosterPanel}>
+            {(["tl", "tr", "bl", "br"] as const).map((corner) => (
+              <img
+                key={corner}
+                className={`${styles.corner} ${styles[`corner_${corner}`]}`}
+                src="/images/crew/cards/card-corner-ornament.webp"
+                alt=""
+                aria-hidden="true"
+                loading="lazy"
+              />
             ))}
+            <div className="crew-sponsors-grid">
+              {sponsors.map((sponsor) => (
+                <SponsorCard key={sponsor.image} sponsor={sponsor} />
+              ))}
+            </div>
           </div>
         </section>
       ) : null}

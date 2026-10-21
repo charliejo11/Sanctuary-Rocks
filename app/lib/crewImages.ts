@@ -19,7 +19,7 @@ export type RosterEntry = {
 const IMAGE_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".webp", ".gif"]);
 
 // Filenames that are placeholder/fallback art, not a real crew member.
-const EXCLUDED_FILES = new Set(["default-dj.png", "Sanctuary Rocks DJ.png"]);
+const EXCLUDED_FILES = new Set(["default-dj.png", "Sanctuary Rocks DJ.png", "Sanctuary new logo.png"]);
 
 function stripAllExtensions(filename: string): string {
   let base = filename;

@@ -1,0 +1,135 @@
+[
+ {
+  "name": "Bebe",
+  "role": "Host",
+  "image": "/images/hosts/Bebe.png.jpg",
+  "bio": "Keeping the crowd moving and the night alive.",
+  "normalizedName": "bebe"
+ },
+ {
+  "name": "Dante",
+  "role": "Host",
+  "image": "/images/hosts/Dante.png",
+  "bio": "Keeping the crowd moving and the night alive.",
+  "normalizedName": "dante"
+ },
+ {
+  "name": "Essa",
+  "role": "Host",
+  "image": "/images/hosts/Essa.png.png",
+  "bio": "Keeping the crowd moving and the night alive.",
+  "normalizedName": "essa"
+ },
+ {
+  "name": "Fanny FooFoo",
+  "role": "Host",
+  "image": "/images/hosts/Fanny%20FooFoo.png.jpg",
+  "bio": "Keeping the crowd moving and the night alive.",
+  "normalizedName": "fanny foofoo"
+ },
+ {
+  "name": "Ginny",
+  "role": "Host",
+  "image": "/images/hosts/Ginny.png.jpg",
+  "bio": "Keeping the crowd moving and the night alive.",
+  "normalizedName": "ginny"
+ },
+ {
+  "name": "Imogen",
+  "role": "Host",
+  "image": "/images/hosts/Imogen.png.jpg",
+  "bio": "Keeping the crowd moving and the night alive.",
+  "normalizedName": "imogen"
+ },
+ {
+  "name": "Irish Beauty",
+  "role": "Host",
+  "image": "/images/hosts/Irish_Beauty.png.png",
+  "bio": "Keeping the crowd moving and the night alive.",
+  "normalizedName": "irish beauty"
+ },
+ {
+  "name": "Legs",
+  "role": "Host",
+  "image": "/images/hosts/Legs.png.png",
+  "bio": "Keeping the crowd moving and the night alive.",
+  "normalizedName": "legs"
+ },
+ {
+  "name": "Mist Doll",
+  "role": "Host",
+  "image": "/images/hosts/Mist_Doll.png",
+  "bio": "Keeping the crowd moving and the night alive.",
+  "normalizedName": "mist doll"
+ },
+ {
+  "name": "Mocha",
+  "role": "Host",
+  "image": "/images/hosts/Mocha.png.jpg",
+  "bio": "Keeping the crowd moving and the night alive.",
+  "normalizedName": "mocha"
+ },
+ {
+  "name": "Nawti",
+  "role": "Host",
+  "image": "/images/hosts/Nawti.png.jpg",
+  "bio": "Keeping the crowd moving and the night alive.",
+  "normalizedName": "nawti"
+ },
+ {
+  "name": "Pepper",
+  "role": "Host",
+  "image": "/images/hosts/Pepper_dragons.png",
+  "bio": "Keeping the crowd moving and the night alive.",
+  "normalizedName": "pepper"
+ },
+ {
+  "name": "Raven",
+  "role": "Host",
+  "image": "/images/hosts/Raven.png.png",
+  "bio": "Keeping the crowd moving and the night alive.",
+  "normalizedName": "raven"
+ },
+ {
+  "name": "Rebekka",
+  "role": "Host",
+  "image": "/images/hosts/Rebekka.png.png",
+  "bio": "Keeping the crowd moving and the night alive.",
+  "normalizedName": "rebekka"
+ },
+ {
+  "name": "Shari",
+  "role": "Host",
+  "image": "/images/hosts/Shari.png.jpg",
+  "bio": "Keeping the crowd moving and the night alive.",
+  "normalizedName": "shari"
+ },
+ {
+  "name": "Tea",
+  "role": "Host",
+  "image": "/images/hosts/Tea_Host.png",
+  "bio": "Keeping the crowd moving and the night alive.",
+  "normalizedName": "tea"
+ },
+ {
+  "name": "Tilly",
+  "role": "Host",
+  "image": "/images/hosts/Tilly.png.jpg",
+  "bio": "Keeping the crowd moving and the night alive.",
+  "normalizedName": "tilly"
+ },
+ {
+  "name": "Troya",
+  "role": "Host",
+  "image": "/images/hosts/Troya__host.jpg",
+  "bio": "Keeping the crowd moving and the night alive.",
+  "normalizedName": "troya"
+ },
+ {
+  "name": "Victor",
+  "role": "Host",
+  "image": "/images/hosts/Victor.png.jpg",
+  "bio": "Keeping the crowd moving and the night alive.",
+  "normalizedName": "victor"
+ }
+]

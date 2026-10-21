@@ -356,6 +356,13 @@ export const CREW_BIOS: CrewBioEntry[] = [
     bio: "Born in Cali but raised in Kansas, I have my prissy side but mostly my sassy ass country side. I'm a loyal and dedicated friend, always willing to listen with a friendly ear. Lover of dragons and butterflies and exotic cats.. I'm creative in both worlds, love to work with my hands. My furbaby is my ride or die and best friend.. Legz has a \"I don't give a shit\" attitude and will snap your britches when needed. I will laugh at your goofy jokes as I love to laugh. I was a nurse's aide for 30 yrs, so yes, I have a caring heart and I love to cook.",
   },
   {
+    id: "host-mist-doll",
+    name: "Mist Doll",
+    role: "Host",
+    image: "/images/hosts/Mist_Doll.png",
+    bio: "Proudly French, with music running through my veins and rhythm in my soul! Music is my passion and my happy place. Always happy to share my love for music, meet amazing people, and discover new sounds along the way!",
+  },
+  {
     id: "host-mistine",
     name: "Mistine",
     role: "Host",

@@ -5,6 +5,9 @@
 /.next/
 /out/
 
+# cloudflare (opennextjs-cloudflare build output)
+/.open-next/
+
 # production
 /build
 

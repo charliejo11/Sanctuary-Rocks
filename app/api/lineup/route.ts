@@ -1,4 +1,4 @@
-import { loadDjs } from "../../data/crew";
+import djRoster from "../../data/djRoster.generated.json";
 import {
   cleanText,
   expandRecurringEvent,
@@ -6,7 +6,6 @@ import {
   parseCalendarEvents,
   type CalendarOccurrence,
 } from "../../lib/icsCalendar";
-import https from "node:https";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -44,7 +43,7 @@ class CalendarFetchError extends Error {
   }
 }
 
-const profiles = loadDjs();
+const profiles = djRoster.map((dj) => dj.name);
 
 async function withTimeout<T>(
   promise: Promise<T>,
@@ -66,124 +65,61 @@ async function withTimeout<T>(
   }
 }
 
-function fetchIcsText(input: string, timeoutMs = 18000, redirects = 0) {
-  return new Promise<string>((resolve, reject) => {
-    if (redirects > 3) {
-      reject(
-        new CalendarFetchError(
-          "fetch-failed",
-          "Google Calendar ICS fetch redirected too many times.",
-        ),
-      );
-      return;
-    }
+// fetch() follows redirects and handles encoding on its own, so this is a
+// much shorter edge-safe replacement for the old node:https version - it
+// only needs to re-add the same status-code -> error-type classification
+// the rest of this file (toLineupError, statusForLineupError) relies on.
+async function fetchIcsText(input: string, timeoutMs = 18000): Promise<string> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
-    let settled = false;
-    const url = new URL(input);
-
-    const finish = (value: string) => {
-      if (settled) return;
-      settled = true;
-      resolve(value);
-    };
-
-    const fail = (error: Error) => {
-      if (settled) return;
-      settled = true;
-      reject(error);
-    };
-
-    const request = https.request(
-      url,
-      {
-        family: 4,
-        method: "GET",
-        headers: {
-          Accept: "text/calendar,text/plain,*/*",
-          "User-Agent": "Sanctuary Rocks Website",
-        },
+  let response: Response;
+  try {
+    response = await fetch(input, {
+      signal: controller.signal,
+      cache: "no-store",
+      headers: {
+        Accept: "text/calendar,text/plain,*/*",
+        "User-Agent": "Sanctuary Rocks Website",
       },
-      (response) => {
-        const statusCode = response.statusCode ?? 0;
-        const location = response.headers.location;
-
-        if (statusCode >= 300 && statusCode < 400 && location) {
-          response.resume();
-          const redirectUrl = new URL(location, url).toString();
-          fetchIcsText(redirectUrl, timeoutMs, redirects + 1).then(finish, fail);
-          return;
-        }
-
-        if (statusCode < 200 || statusCode >= 300) {
-          response.resume();
-
-          if (statusCode === 401 || statusCode === 403) {
-            fail(
-              new CalendarFetchError(
-                "permission-denied",
-                `Google Calendar permission denied (${statusCode}). Make sure the calendar is public.`,
-                statusCode,
-              ),
-            );
-            return;
-          }
-
-          if (statusCode === 404 || statusCode === 410) {
-            fail(
-              new CalendarFetchError(
-                "not-public",
-                `Google Calendar ICS feed was not found or is not public (${statusCode}).`,
-                statusCode,
-              ),
-            );
-            return;
-          }
-
-          fail(
-            new CalendarFetchError(
-              "fetch-failed",
-              `Google Calendar ICS fetch failed with status ${statusCode}.`,
-              statusCode,
-            ),
-          );
-          return;
-        }
-
-        response.setEncoding("utf8");
-        let body = "";
-
-        response.on("data", (chunk) => {
-          body += chunk;
-        });
-
-        response.on("end", () => {
-          finish(body);
-        });
-      },
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new CalendarFetchError(
+      "fetch-failed",
+      `Google Calendar ICS fetch failed: ${message || "No response received."}`,
     );
+  } finally {
+    clearTimeout(timeout);
+  }
 
-    request.setTimeout(timeoutMs, () => {
-      fail(
-        new CalendarFetchError(
-          "fetch-failed",
-          `Google Calendar ICS fetch timed out after ${timeoutMs}ms.`,
-        ),
-      );
-      request.destroy();
-    });
+  const statusCode = response.status;
 
-    request.on("error", (error: NodeJS.ErrnoException) => {
-      const detail = [error.code, error.message].filter(Boolean).join(" ");
-      fail(
-        new CalendarFetchError(
-          "fetch-failed",
-          `Google Calendar ICS fetch failed: ${detail || "No response received."}`,
-        ),
-      );
-    });
+  if (statusCode === 401 || statusCode === 403) {
+    throw new CalendarFetchError(
+      "permission-denied",
+      `Google Calendar permission denied (${statusCode}). Make sure the calendar is public.`,
+      statusCode,
+    );
+  }
 
-    request.end();
-  });
+  if (statusCode === 404 || statusCode === 410) {
+    throw new CalendarFetchError(
+      "not-public",
+      `Google Calendar ICS feed was not found or is not public (${statusCode}).`,
+      statusCode,
+    );
+  }
+
+  if (!response.ok) {
+    throw new CalendarFetchError(
+      "fetch-failed",
+      `Google Calendar ICS fetch failed with status ${statusCode}.`,
+      statusCode,
+    );
+  }
+
+  return response.text();
 }
 
 function escapeRegExp(value: string) {
@@ -228,14 +164,14 @@ function extractDjName(title: string, description: string) {
 
   const normalized = combined.toLowerCase();
 
-  const knownDj = profiles.find((profile) => {
-    const name = profile.name.toLowerCase();
+  const knownDj = profiles.find((profileName) => {
+    const name = profileName.toLowerCase();
     const nameWithoutPrefix = name.replace(/^dj\s+/, "");
 
     return normalized.includes(name) || normalized.includes(nameWithoutPrefix);
   });
 
-  return knownDj?.name ?? "Sanctuary Rocks DJ";
+  return knownDj ?? "Sanctuary Rocks DJ";
 }
 
 function extractHost(title: string, description: string) {

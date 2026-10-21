@@ -43,6 +43,36 @@
       "image": "/images/events/flyers/man-on-pause-1400.webp"
     },
     {
+      "date": "October 19",
+      "day": "Monday",
+      "time": "2pm-4pm SLT",
+      "title": "Spooktacular Industrial",
+      "dj": "DJ Manchester",
+      "host": "Host Raven",
+      "description": "",
+      "image": "/images/events/flyers/raven-manchester-industrial.png"
+    },
+    {
+      "date": "October 22",
+      "day": "Thursday",
+      "time": "10am-12pm SLT",
+      "title": "Zet Vortex Live Mixing",
+      "dj": "DJ Zet Vortex",
+      "host": "Host Maria",
+      "description": "Bringing a fresh new direction to rock and metal.",
+      "image": "/images/events/flyers/zet-vortex-live-mixing.png"
+    },
+    {
+      "date": "October 31",
+      "day": "Saturday",
+      "time": "8am-10am SLT",
+      "title": "Spooktacular - Der Geistertanz",
+      "dj": "DJ Zet Vortex",
+      "host": "Host Teaghen",
+      "description": "Halloween favourites to a spooky beat.",
+      "image": "/images/events/flyers/Zet_tea_R_Hal.png"
+    },
+    {
       "date": "November 5",
       "day": "Thursday",
       "time": "10am SLT",

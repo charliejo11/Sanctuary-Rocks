@@ -1,0 +1,23 @@
+[
+ {
+  "name": "Ashes to Ashes",
+  "role": "Sponsor",
+  "image": "/images/sponsors/Ashes_to_Ashes_Logo.png",
+  "bio": "Proud supporter of Sanctuary Rocks.",
+  "normalizedName": "ashes to ashes"
+ },
+ {
+  "name": "Chaotic",
+  "role": "Sponsor",
+  "image": "/images/sponsors/Chaotic.png.png",
+  "bio": "Proud supporter of Sanctuary Rocks.",
+  "normalizedName": "chaotic"
+ },
+ {
+  "name": "CryBunBun.com",
+  "role": "Sponsor",
+  "image": "/images/sponsors/CryBunBun.com.jpg",
+  "bio": "Proud supporter of Sanctuary Rocks.",
+  "normalizedName": "crybunbuncom"
+ }
+]

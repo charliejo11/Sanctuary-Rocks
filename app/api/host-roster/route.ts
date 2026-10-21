@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
-import { loadHosts } from "../../data/crew";
+import hostRoster from "../../data/hostRoster.generated.json";
 
-// Server-only (loadHosts reads public/images/hosts via node:fs), so the DJ
-// Lineup page - a client component - fetches this route instead of
-// importing loadHosts directly.
-export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
+// Built-time-generated roster (scripts/generate-roster.mjs), NOT a live
+// loadHosts() call - see app/api/dj-roster/route.ts for why.
+export const dynamic = "force-static";
 
 export async function GET() {
-  return NextResponse.json({ hosts: loadHosts() });
+  return NextResponse.json({ hosts: hostRoster });
 }

@@ -1,4 +1,3 @@
-import net from "node:net";
 import {
   cleanText,
   findLiveOccurrence,
@@ -10,8 +9,6 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 const STREAM_BASE_URL = "http://sor.digistream.info:10206";
-const STREAM_HOST = "sor.digistream.info";
-const STREAM_PORT = 10206;
 const CALENDAR_EMAIL = "ba33d2d221fc80a1a2bf0d55439608ea1f7896d48077388fd77f36dbc622a70e@group.calendar.google.com";
 
 type LiveNowResponse = {
@@ -111,150 +108,36 @@ async function getCurrentCalendarEvent() {
   return occurrence ? { summary: occurrence.summary } : null;
 }
 
-async function getCurrentSong() {
-  return new Promise<string>((resolve, reject) => {
-    const socket = net.connect(STREAM_PORT, STREAM_HOST);
-    let headerBuffer = Buffer.alloc(0);
-    let metadataInterval = 0;
-    let audioBytesUntilMetadata = 0;
-    let metadataLength: number | null = null;
-    let metadataBuffer = Buffer.alloc(0);
-    let headersParsed = false;
-    let settled = false;
+// Just the one endpoint, with the SAME User-Agent header /api/listeners
+// uses - see the full story in /api/now-playing's getNowPlayingFromShoutcast
+// comment: this stream host 520s (Cloudflare's "unknown error") without a
+// browser-like User-Agent, regardless of request count/ordering/concurrency,
+// all of which were ruled out by testing directly against the deployed
+// Worker. This was previously a raw-TCP ICY-metadata reader (node:net),
+// which has no Cloudflare Workers equivalent - the site no longer needs
+// in-browser playback, so there's no TCP fallback to keep.
+async function getCurrentSong(): Promise<string> {
+  try {
+    const response = await fetchWithTimeout(
+      `${STREAM_BASE_URL}/7.html`,
+      { cache: "no-store", headers: { Accept: "*/*", "User-Agent": "Mozilla/5.0 (Sanctuary Rocks Website)" } },
+      8000,
+    );
+    if (!response.ok) return "Sanctuary Rocks Radio";
+    const rawText = await response.text();
 
-    const finish = (song: string) => {
-      if (settled) return;
-      settled = true;
-      socket.destroy();
-      resolve(cleanText(song, "Sanctuary Rocks Radio"));
-    };
-
-    const fail = (error: Error) => {
-      if (settled) return;
-      settled = true;
-      socket.destroy();
-      reject(error);
-    };
-
-    const timeout = setTimeout(() => {
-      fail(new Error("Stream metadata timed out"));
-    }, 7000);
-
-    const parseMetadata = (metadata: Buffer) => {
-      const text = metadata.toString("latin1").replace(/\0+$/g, "").trim();
-      const titleMatch = text.match(/StreamTitle='([^']*)'/i);
-      return titleMatch?.[1]?.trim() ?? "";
-    };
-
-    const processBody = (incoming: Buffer) => {
-      let chunk = incoming;
-
-      while (chunk.length > 0 && !settled) {
-        if (audioBytesUntilMetadata > 0) {
-          const audioBytes = Math.min(audioBytesUntilMetadata, chunk.length);
-          audioBytesUntilMetadata -= audioBytes;
-          chunk = chunk.subarray(audioBytes);
-          continue;
-        }
-
-        if (metadataLength === null) {
-          metadataLength = chunk[0] * 16;
-          metadataBuffer = Buffer.alloc(0);
-          chunk = chunk.subarray(1);
-
-          if (metadataLength === 0) {
-            metadataLength = null;
-            audioBytesUntilMetadata = metadataInterval;
-          }
-
-          continue;
-        }
-
-        const needed = metadataLength - metadataBuffer.length;
-        const metadataBytes = Math.min(needed, chunk.length);
-        metadataBuffer = Buffer.concat([
-          metadataBuffer,
-          chunk.subarray(0, metadataBytes),
-        ]);
-        chunk = chunk.subarray(metadataBytes);
-
-        if (metadataBuffer.length >= metadataLength) {
-          const song = parseMetadata(metadataBuffer);
-
-          if (song) {
-            finish(song);
-            return;
-          }
-
-          metadataLength = null;
-          audioBytesUntilMetadata = metadataInterval;
-        }
-      }
-    };
-
-    socket.setTimeout(7000, () => {
-      fail(new Error("Stream metadata connection timed out"));
-    });
-
-    socket.once("connect", () => {
-      socket.write(
-        [
-          "GET / HTTP/1.0",
-          `Host: ${STREAM_HOST}:${STREAM_PORT}`,
-          "User-Agent: Sanctuary Rocks Website",
-          "Accept: audio/mpeg,audio/*,*/*",
-          "Icy-MetaData: 1",
-          "Connection: close",
-          "",
-          "",
-        ].join("\r\n"),
-      );
-    });
-
-    socket.on("data", (chunk) => {
-      if (settled) return;
-
-      if (!headersParsed) {
-        headerBuffer = Buffer.concat([headerBuffer, chunk]);
-
-        const headerEnd = headerBuffer.indexOf("\r\n\r\n");
-        const fallbackHeaderEnd = headerBuffer.indexOf("\n\n");
-        const endIndex = headerEnd !== -1 ? headerEnd : fallbackHeaderEnd;
-        const delimiterLength = headerEnd !== -1 ? 4 : 2;
-
-        if (endIndex === -1) return;
-
-        const rawHeaders = headerBuffer.slice(0, endIndex).toString("latin1");
-        const intervalMatch = rawHeaders.match(/^icy-metaint:\s*(\d+)/im);
-        metadataInterval = Number(intervalMatch?.[1] ?? 0);
-
-        if (!metadataInterval) {
-          finish("Sanctuary Rocks Radio");
-          return;
-        }
-
-        headersParsed = true;
-        audioBytesUntilMetadata = metadataInterval;
-
-        const remaining = headerBuffer.slice(endIndex + delimiterLength);
-        if (remaining.length > 0) {
-          processBody(remaining);
-        }
-
-        return;
-      }
-
-      processBody(chunk);
-    });
-
-    socket.on("error", fail);
-    socket.on("end", () => {
-      if (!settled) finish("Sanctuary Rocks Radio");
-    });
-    socket.on("close", () => {
-      clearTimeout(timeout);
-    });
-  });
+    const bodyMatch = rawText.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+    const bodyContent = bodyMatch ? bodyMatch[1] : rawText;
+    const cleanContent = bodyContent.replace(/<[^>]*>/g, "");
+    const normalizedContent = cleanContent.replace(/\s+/g, " ").trim();
+    const commaMatch = normalizedContent.match(/,\s*([^,]+)$/i);
+    if (commaMatch?.[1]?.trim() && commaMatch[1].trim().length > 2) {
+      return cleanText(commaMatch[1].trim(), "Sanctuary Rocks Radio");
+    }
+    return "Sanctuary Rocks Radio";
+  } catch {
+    return "Sanctuary Rocks Radio";
+  }
 }
 
 const CALENDAR_CACHE_TTL_MS = 5 * 60 * 1000;
@@ -296,14 +179,18 @@ async function getCalendarInfo(): Promise<CalendarInfo> {
 }
 
 export async function GET() {
-  const calendarInfo = await getCalendarInfo();
-  let currentSong = "Unable to load current track";
-
-  try {
-    currentSong = await getCurrentSong();
-  } catch (error) {
-    console.error("Stream current song error:", error);
-  }
+  // Calendar and stream metadata are two unrelated external hosts - run in
+  // parallel for speed (see getCurrentSong()'s own comment for the real bug
+  // this route had; this parallelization is a separate, genuine speedup,
+  // not the fix for that).
+  const [calendarInfo, songResult] = await Promise.all([
+    getCalendarInfo(),
+    getCurrentSong().catch((error) => {
+      console.error("Stream current song error:", error);
+      return "Unable to load current track";
+    }),
+  ]);
+  const currentSong = songResult;
 
   const result: LiveNowResponse = {
     ...calendarInfo,

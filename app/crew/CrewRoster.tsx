@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import CrewBioModal from "../components/CrewBioModal";
 import type { CrewMember } from "../data/crewTypes";
+import { shuffleCrew } from "../data/crewTypes";
 import CrewMemberCard from "./CrewMemberCard";
 import styles from "./crew.module.css";
 
@@ -10,9 +11,27 @@ type Group = { id: string; title: string; subtitle: string; members: CrewMember[
 
 // Every DJ and every Host on their own card (no carousel), with one shared
 // bio pop-up for the whole page.
+//
+// Shuffling happens here (client-side, after mount) rather than on the
+// server: the page itself needs to stay statically generated (the roster
+// comes from a build-time fs read - see app/crew/page.tsx - which doesn't
+// exist on Cloudflare Workers at request time), but we still want a fresh
+// random order each time someone visits. Starting from the unshuffled
+// `groups` prop and only randomizing inside useEffect keeps the initial
+// server-rendered HTML and the client's first render identical (useEffect
+// never runs during SSR) - shuffling eagerly (e.g. in useMemo, which DOES
+// run during SSR) would make the server's random order and the client's
+// random order disagree and trigger a hydration mismatch.
 export default function CrewRoster({ groups }: { groups: Group[] }) {
   const [active, setActive] = useState<CrewMember | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [shuffledGroups, setShuffledGroups] = useState(groups);
+
+  useEffect(() => {
+    setShuffledGroups(groups.map((group) => ({ ...group, members: shuffleCrew(group.members) })));
+    // Only on mount - groups are static for the page's lifetime.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const select = (member: CrewMember, trigger: HTMLButtonElement) => {
     triggerRef.current = trigger;
@@ -21,7 +40,7 @@ export default function CrewRoster({ groups }: { groups: Group[] }) {
 
   return (
     <>
-      {groups.map((group) => (
+      {shuffledGroups.map((group) => (
         <section key={group.id} className={styles.roster} aria-labelledby={`crew-${group.id}`}>
           <header className={styles.sectionHead}>
             <img className={styles.headDivider} src="/images/crew/headings/crew-dragon-chain-divider.webp" alt="" aria-hidden="true" loading="lazy" />

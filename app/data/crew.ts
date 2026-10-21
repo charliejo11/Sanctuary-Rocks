@@ -23,8 +23,10 @@ type CrewOverride = Partial<Pick<CrewMember, "name" | "role" | "bio" | "quote">>
 const DJ_OVERRIDES: Record<string, CrewOverride> = {
   "DJ_Frenchie_Fry.jpg": { name: "DJ Frenchie" },
   "JIMMY_PROFILE_JUL25.png": { name: "DJ Jimmy" },
+  "Zet_Solo_2026_2026-08-18_144403_001_crop.png": { name: "Zet Vortex" },
 };
 const HOST_OVERRIDES: Record<string, CrewOverride> = {
+  "Pepper_dragons.png": { name: "Pepper" },
   "Tea_Host.png": { name: "Tea" },
   "Troya__host.jpg": { name: "Troya" },
 };
