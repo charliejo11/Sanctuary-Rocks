@@ -21,13 +21,16 @@ type CrewOverride = Partial<Pick<CrewMember, "name" | "role" | "bio" | "quote">>
 // the default role, and the default bio above - so new photos "just work"
 // the moment they're dropped into the folder, no code change required.
 const DJ_OVERRIDES: Record<string, CrewOverride> = {
+  "DJ RICK BLOOD.png": { name: "DJ Rick Blood" },
+  "DJ Rose - Profile - 09 30 2026.png": { name: "DJ Rose" },
   "DJ_Frenchie_Fry.jpg": { name: "DJ Frenchie" },
   "JIMMY_PROFILE_JUL25.png": { name: "DJ Jimmy" },
   "Zet_Solo_2026_2026-08-18_144403_001_crop.png": { name: "Zet Vortex" },
 };
 const HOST_OVERRIDES: Record<string, CrewOverride> = {
+  "Nikcara_Snorty_Nutcase.png": { name: "Nikcara" },
   "Pepper_dragons.png": { name: "Pepper" },
-  "Tea_Host.png": { name: "Tea" },
+  "Tea_cyber.png": { name: "Tea" },
   "Troya__host.jpg": { name: "Troya" },
 };
 

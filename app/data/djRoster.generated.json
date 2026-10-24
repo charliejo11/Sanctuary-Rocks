@@ -49,6 +49,13 @@
   "normalizedName": "charliejo"
  },
  {
+  "name": "DJ Dahrk",
+  "role": "Resident DJ",
+  "image": "/images/djs/DJ%20Dahrk.png",
+  "bio": "Keeps the Sanctuary loud, wild, and rocking.",
+  "normalizedName": "dahrk"
+ },
+ {
   "name": "DJ Eros",
   "role": "Resident DJ",
   "image": "/images/djs/DJ%20Eros.png.jpg",
@@ -82,6 +89,20 @@
   "image": "/images/djs/DJ%20Lucky_.png.jpg",
   "bio": "Keeps the Sanctuary loud, wild, and rocking.",
   "normalizedName": "lucky"
+ },
+ {
+  "name": "DJ Rick Blood",
+  "role": "Resident DJ",
+  "image": "/images/djs/DJ%20RICK%20BLOOD.png",
+  "bio": "Keeps the Sanctuary loud, wild, and rocking.",
+  "normalizedName": "rick blood"
+ },
+ {
+  "name": "DJ Rose",
+  "role": "Resident DJ",
+  "image": "/images/djs/DJ%20Rose%20-%20Profile%20-%2009%2030%202026.png",
+  "bio": "Keeps the Sanctuary loud, wild, and rocking.",
+  "normalizedName": "rose"
  },
  {
   "name": "DJ Trelk",

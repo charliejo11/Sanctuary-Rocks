@@ -34,13 +34,16 @@ const DJ_DEFAULT_BIO = "Keeps the Sanctuary loud, wild, and rocking.";
 const HOST_DEFAULT_BIO = "Keeping the crowd moving and the night alive.";
 const SPONSOR_DEFAULT_BIO = "Proud supporter of Sanctuary Rocks.";
 const DJ_OVERRIDES = {
+  "DJ RICK BLOOD.png": { name: "DJ Rick Blood" },
+  "DJ Rose - Profile - 09 30 2026.png": { name: "DJ Rose" },
   "DJ_Frenchie_Fry.jpg": { name: "DJ Frenchie" },
   "JIMMY_PROFILE_JUL25.png": { name: "DJ Jimmy" },
   "Zet_Solo_2026_2026-08-18_144403_001_crop.png": { name: "Zet Vortex" },
 };
 const HOST_OVERRIDES = {
+  "Nikcara_Snorty_Nutcase.png": { name: "Nikcara" },
   "Pepper_dragons.png": { name: "Pepper" },
-  "Tea_Host.png": { name: "Tea" },
+  "Tea_cyber.png": { name: "Tea" },
   "Troya__host.jpg": { name: "Troya" },
 };
 const SPONSOR_OVERRIDES = {

@@ -77,6 +77,13 @@
   "normalizedName": "nawti"
  },
  {
+  "name": "Nikcara",
+  "role": "Host",
+  "image": "/images/hosts/Nikcara_Snorty_Nutcase.png",
+  "bio": "Keeping the crowd moving and the night alive.",
+  "normalizedName": "nikcara"
+ },
+ {
   "name": "Pepper",
   "role": "Host",
   "image": "/images/hosts/Pepper_dragons.png",
@@ -107,7 +114,7 @@
  {
   "name": "Tea",
   "role": "Host",
-  "image": "/images/hosts/Tea_Host.png",
+  "image": "/images/hosts/Tea_cyber.png",
   "bio": "Keeping the crowd moving and the night alive.",
   "normalizedName": "tea"
  },
