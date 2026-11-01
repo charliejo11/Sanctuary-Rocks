@@ -1,0 +1,104 @@
+/* The approved Roadie Manual book, unchanged: same leather binding, paper, type, spread and page turn as
+   SR_Roadie_Manual_Interactive_Book.html. Only the additions at the end are new. */
+.root {
+  --ink: #281922;
+  --accent: #8e3041;
+  --gold: #bc915e;
+  --paper: #f2e6d1;
+  background: radial-gradient(circle at 50% 20%, #48222b, #140c12 65%, #060507);
+  color: #f3e8df;
+  font: 15px/1.5 Georgia, serif;
+  border-radius: 12px;
+  padding: 18px 15px 24px;
+}
+.root *, .root *::before, .root *::after { box-sizing: border-box; }
+.root :global(button) { border: 1px solid #9f6773; background: linear-gradient(#572937, #311a23); color: #fff0e8; padding: 11px 14px; border-radius: 8px; cursor: pointer; font: 600 12px Arial; }
+.root :global(button:hover) { filter: brightness(1.22); }
+.root :global(button:disabled) { opacity: .35; cursor: default; }
+.root :global(.stage) { margin-top: 18px; position: relative; perspective: 1600px; }
+.root :global(.book) { position: relative; display: grid; grid-template-columns: 1fr 1fr; min-height: 660px; border: 10px ridge #7f4c34; box-shadow: 0 24px 85px #000, inset 0 0 25px #000; background: linear-gradient(90deg, #bfae90 49.7%, #675848 50%, #bdad92 50.3%); border-radius: 12px; overflow: hidden; transform-style: preserve-3d; }
+.root :global(.book.closed) { grid-template-columns: 1fr; background: #080609; border-color: #4f2f24; }
+.root :global(.cover) { grid-column: 1 / -1; width: 100%; height: 700px; max-height: 80vh; object-fit: contain; background: #080609; display: block; transform-origin: left center; animation: openCover .8s ease-out; }
+.root :global(.sheet) { --err: #8c1d1d; --okc: #2c5f2c; background: repeating-linear-gradient(0deg, transparent, transparent 34px, #aa896314 35px), var(--paper); color: var(--ink); min-height: 660px; padding: 34px clamp(18px, 3vw, 42px); overflow-y: auto; max-height: 760px; box-shadow: inset 0 0 40px #ac876465; position: relative; }
+.root :global(.sheet:nth-child(odd)) { border-right: 2px solid #baa489; }
+/* kept as two rules: combined, the build folds them into :is(), which can't hold pseudo-elements */
+.root :global(.sheet::before) { content: '✦'; position: absolute; color: #916a5d; font-size: 23px; }
+.root :global(.sheet::after) { content: '✦'; position: absolute; color: #916a5d; font-size: 23px; }
+.root :global(.sheet::before) { top: 11px; left: 14px; }
+.root :global(.sheet::after) { right: 14px; bottom: 10px; }
+.root :global(.sheet h1), .root :global(.sheet h2) { font-family: Georgia, serif; color: #671c2f; line-height: 1.16; text-align: center; }
+.root :global(.sheet h1) { font-size: 48px; letter-spacing: 2px; margin: 21px 0; text-shadow: none; text-transform: none; }
+.root :global(.sheet h2) { font-size: 28px; margin: 18px 0 20px; }
+.root :global(.sheet h3) { font-size: 17px; color: #8c3445; margin: 17px 0 6px; }
+.root :global(.sheet p) { font-size: 15px; line-height: 1.55; margin: 6px 0 10px; }
+.root :global(.sheet .kicker) { text-align: center; text-transform: uppercase; letter-spacing: 2px; font: 600 10px Arial; color: #9d6672; }
+.root :global(.editable) { outline: none; border-radius: 6px; padding: 5px; min-height: 350px; }
+.root :global(.editable:focus) { box-shadow: 0 0 0 2px #9e6b7a; background: #f9eedc; }
+.root :global(.editable .listline), .root :global(.bookText .listline), .root :global(.sheet .listline) { padding-left: 16px; }
+.root :global(.crest) { display: block; max-width: 270px; width: 72%; margin: 20px auto; }
+.root :global(.smallcrest) { max-width: 190px; }
+.root :global(.subtitle), .root :global(.motto), .root :global(.note-line) { text-align: center; }
+.root :global(.subtitle) { font-style: italic; }
+.root :global(.sheet .motto) { margin-top: 26px; color: #752f3b; font-weight: bold; letter-spacing: 1px; }
+.root :global(.sheet .note-line) { font-size: 12px; }
+.root :global(.toc) { margin: 28px 12px; }
+.root :global(.toc div) { border-bottom: 1px dotted #b79091; padding: 9px 0; color: #9b394d; font-weight: bold; }
+.root :global(.toc span) { margin-left: 16px; color: #46232a; }
+.root :global(.sheet .callout) { border: 1px solid #a77b81; background: #e8d4c1; padding: 13px; border-radius: 5px; }
+.root :global(.checkrow) { border-bottom: 1px solid #c7b09b; padding: 7px 0; }
+.root :global(.checkitem) { font-weight: bold; color: #762f42; font-size: 13px; }
+.root :global(input), .root :global(textarea), .root :global(select) { background: #fff9f0; color: #292020; border: 1px solid #bda399; border-radius: 4px; font: 14px Georgia; padding: 8px; width: 100%; }
+.root :global(.approval label) { display: block; font-weight: bold; color: #823444; margin: 12px 0; }
+.root :global(.approval input), .root :global(.approval select), .root :global(.approval textarea) { margin-top: 5px; }
+.root :global(.nav) { display: flex; justify-content: center; align-items: center; gap: 15px; padding: 15px; flex-wrap: wrap; }
+.root :global(.nav strong) { font: 13px Arial; color: #f0d8c2; }
+.root :global(.sheet.turning) { animation: flip .5s ease; }
+@keyframes flip { from { transform: rotateY(-8deg); opacity: .65; } to { transform: rotateY(0); opacity: 1; } }
+@keyframes openCover { from { transform: rotateY(-14deg); opacity: .75; } to { transform: rotateY(0); opacity: 1; } }
+
+/* new: clickable contents, tools and search, drawn with the book's own colours */
+.root :global(.toc button), .root :global(.textLink) { all: unset; cursor: pointer; display: block; width: 100%; font-weight: bold; color: #9b394d; }
+.root :global(.toc button:hover), .root :global(.textLink:hover), .root :global(.toc a:hover) { color: #671c2f; text-decoration: underline; }
+.root :global(.toc button:focus-visible), .root :global(.textLink:focus-visible), .root :global(summary:focus-visible) { outline: 2px solid #671c2f; outline-offset: 2px; }
+.root :global(.toc a) { color: #9b394d; display: block; }
+.root :global(.toolRow) { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; align-items: center; }
+.root :global(.editLink) { color: #8c3445; font: 600 12px Arial; }
+.root :global(.ackDone) { color: #2c5f2c; font-weight: bold; font-size: 13px; }
+.root :global(.policy) { border-bottom: 1px solid #c7b09b; padding: 8px 0; }
+.root :global(.policy summary) { cursor: pointer; font-weight: bold; color: #8c3445; font-size: 16px; padding: 4px 0; }
+.root :global(.checkline) { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid #c7b09b; cursor: pointer; }
+.root :global(.checkline input) { width: 18px; height: 18px; flex: none; margin-top: 2px; accent-color: #8e3041; }
+.root :global(.searchBar) { position: relative; max-width: 620px; margin: 0 auto; }
+.root :global(.searchBar label) { display: block; font: 600 12px Arial; color: #edc1aa; letter-spacing: 1px; margin-bottom: 4px; }
+.root :global(.results) { list-style: none; margin: 4px 0 0; padding: 6px; background: #f2e6d1; color: #281922; border: 1px solid #7f4c34; border-radius: 6px; position: absolute; z-index: 5; width: 100%; max-height: 340px; overflow-y: auto; box-shadow: 0 12px 30px #000; }
+.root :global(.results button) { all: unset; display: block; width: 100%; cursor: pointer; padding: 7px; border-bottom: 1px solid #c7b09b; color: #281922; font: 14px Georgia; }
+.root :global(.results button:hover), .root :global(.results button:focus-visible) { background: #e8d4c1; }
+.root :global(.noResults) { padding: 7px; }
+.root :global(.reportBox) { margin-top: 14px; }
+.reportInner { --err: #8c1d1d; --okc: #2c5f2c; background: var(--paper); color: var(--ink); border: 3px ridge #7f4c34; border-radius: 8px; padding: 16px 20px; max-width: 640px; margin: 0 auto; }
+.reportInner h3 { color: #8c3445; margin: 0 0 8px; }
+.editorPage { max-width: 760px; margin: 0 auto; }
+.editorPage :global(.sheet) { max-height: none; min-height: 400px; }
+
+@media (max-width: 760px) {
+  .root { padding: 12px 8px; }
+  .root :global(.book) { display: block; min-height: 520px; }
+  .root :global(.sheet) { min-height: 520px; max-height: 69vh; padding: 25px 22px; }
+  .root :global(.sheet:nth-child(2)) { display: none; }
+  .root :global(.book.closed) { display: block; }
+  .root :global(.cover) { height: 65vh; }
+  .root :global(.sheet h1) { font-size: 32px; }
+  .root :global(.sheet h2) { font-size: 23px; }
+  .root :global(.nav) { gap: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .root :global(.cover), .root :global(.sheet.turning) { animation: none; }
+}
+@media print {
+  .root { background: white; color: black; }
+  .root :global(.nav), .root :global(.searchBar) { display: none; }
+  .root :global(.book) { display: block; border: none; box-shadow: none; }
+  .root :global(.sheet) { height: auto; max-height: none; page-break-after: always; min-height: 0; overflow: visible; }
+  .root :global(.sheet:nth-child(2)) { display: block; }
+  .root :global(.cover) { height: 95vh; page-break-after: always; }
+}

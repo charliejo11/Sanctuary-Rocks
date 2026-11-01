@@ -1,0 +1,37 @@
+{
+  "managerOfTheWeek": {
+    "name": "To be announced",
+    "image": "",
+    "text": "Chosen each week by the management team and announced here."
+  },
+  "appreciation": [
+    {
+      "kind": "dj",
+      "heading": "DJ of the Week",
+      "name": "To be announced",
+      "image": "",
+      "text": "Voted by the crowd at the club. Announced every Monday."
+    },
+    {
+      "kind": "host",
+      "heading": "Host of the Week",
+      "name": "To be announced",
+      "image": "",
+      "text": "Voted by the crowd at the club. Announced every Monday."
+    },
+    {
+      "kind": "crew",
+      "heading": "Crew Shout Out",
+      "name": "Our Entire Crew",
+      "image": "",
+      "text": "Thank you for your time, energy, dedication and for always going above and beyond."
+    },
+    {
+      "kind": "heart",
+      "heading": "You Rock!",
+      "name": "To All Our Staff",
+      "image": "",
+      "text": "Every DJ, Host, Manager and Team Member, you are the heart of Sanctuary Rocks!"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+	// STAGING copy of the site, with Backstage Pass switched on against the staging API. Production uses wrangler.jsonc.
+	// Deploy: npx opennextjs-cloudflare build; npx opennextjs-cloudflare deploy --config wrangler.staging.jsonc
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"main": ".open-next/worker.js",
+	"name": "sanctuary-rocks-staging",
+	"compatibility_date": "2026-10-16",
+	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+	"assets": {
+		"directory": ".open-next/assets",
+		"binding": "ASSETS"
+	},
+	"images": {
+		"binding": "IMAGES"
+	},
+	"vars": {
+		"STAFF_API_URL": "https://sr2-api-staging.elfavina89.workers.dev"
+	}
+}
