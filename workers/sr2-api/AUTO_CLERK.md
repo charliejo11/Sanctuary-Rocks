@@ -1,7 +1,8 @@
 # Auto Clerk: automatic DJ and host covers
 
-Phase 1 is the backend: built, tested on staging, and **live in production since 2026-11-04** (Calendar import only:
-no Sheet secrets and no `CLERK_DISCORD` in production yet, so covers are previews and nothing is posted).
+Phase 1 is the backend: built, tested on staging, and **live in production since 2026-11-04**. Production reads the
+Calendar and mirrors the managers' workbook. `CLERK_DISCORD` isn't set there yet, so covers are previews and nothing
+is posted.
 
 ## What it does
 
@@ -71,7 +72,7 @@ Auto Clerk cover instantly, and **Approve** is refused for those covers. Ordinar
 | `CLERK_URGENT_HOURS` | 24 | an open cover is urgent below this |
 | `CLERK_REMIND_HOURS` | 24,6,2 | reminder posts |
 | `CLERK_ESCALATE_HOURS` | 12,3 | management pings |
-| `CLERK_WINDOW_DAYS` | 60 | shifts further ahead are ignored |
+| `CLERK_WINDOW_DAYS` | 30 | shifts further ahead are ignored |
 | `CLERK_PING` | role | `none` = no role mention on new covers |
 | `CLERK_DISCORD` | (off) | `on` = really post, together with `DISCORD_MODE = "live"` |
 
@@ -222,9 +223,19 @@ and the secrets set with `--env production`. Never in the workbook's own project
   - Website first (`npm run cf:deploy`, version `93410cd2`): `/api/lineup?clerk=1` with event ids.
   - Migrations `0013`-`0015` **before** the API. Without them, the portal's request screens fail (they read the new columns).
   - API `--env production`, version `61771c39`. The first Calendar import fills about 800 shifts over several minutes.
+  - The Sheet secrets were then set. **Each `wrangler secret put` makes a new version** ("Secret Change"):
+    `1a3b02de`, then `14bfd86c`.
+- **Review fixes** (commit `7dd50bd`, approved and done 2026-11-04):
+  - Staging `98c33dfe`: 124 tests, `clerk_staging_check` 26/26, `clerk_discord_staging_check` 22/22.
+  - Production API **`7a4e1340-fb00-468b-876d-8e74e459fef5`** (current), replacing `14bfd86c`. API only: no migration,
+    no website deploy. A read-only dry run predicted no data changes, 14/14 smoke tests passed, and the first import
+    after it changed nothing (0 added / changed / removed / matched).
 - **Rollback:**
-  - API: `npx wrangler rollback <version> --env <env> -c wrangler.toml`. Staging before the Auto Clerk was
-    `a7bd3272-c3ec-43dd-a678-f2452c0268c3`; production before it was `8804cf35-bfb8-4b8c-b2e3-3094df3398a1`.
+  - API: `npx wrangler rollback <version> --env <env> -c wrangler.toml`.
+  - **Production now: roll back to `14bfd86c-0aaf-4d47-a6bd-df9984d25bef`** (the code before the review fixes, with the
+    Sheet secrets). Not to `61771c39`: it was made before the Sheet secrets were set.
+  - Before the Auto Clerk: staging `a7bd3272-c3ec-43dd-a678-f2452c0268c3`, production
+    `8804cf35-bfb8-4b8c-b2e3-3094df3398a1`.
   - Website: production before the Calendar change was `87421678-f1fe-48ed-ae99-972081ad978b`.
   - Production D1 just before the migrations: time-travel bookmark
     `00000019-000002f2-00005119-6fee0252d4a05d7ecea6a69896c0cbb1` (a restore undoes everything written after it).
