@@ -4,13 +4,14 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import styles from "./backstage.module.css";
 
-// Live chart data from the SR 2.0 backend: votes cast on the Vote Board in
-// the club. The current week is still being voted on; the backend finalises
-// each week on Monday (America/Los_Angeles).
-const API = "https://sr2-api-dev.elfavina89.workers.dev";
+// Live chart data from the SR 2.0 backend: song likes from the Vote Board in
+// the club and the Now Playing icons. The current week is still being voted
+// on (refreshed every minute); the backend finalises each week on Monday
+// (America/Los_Angeles). Read through this site's own doorway (app/api/sr2).
+const API = "/api/sr2";
 
 type Credit = { dj_name: string };
-type Song = { rank: number; song_key: string; artist: string; title: string; positive: number; credited?: Credit[] };
+type Song = { rank: number; song_key: string; artist: string; title: string; positive: number; credited?: Credit[]; autodj?: number };
 type Climber = Song & { previous_rank: number; movement: number };
 type Charts = {
   week: string;
@@ -26,7 +27,8 @@ function previousWeek(week: string) {
   return d.toISOString().slice(0, 10);
 }
 
-const djOf = (s: Song) => s.credited?.[0]?.dj_name ?? "";
+// The verified DJ who played it; "AutoDJ" when only AutoDJ did. A DJ who wasn't logged in is never named.
+const djOf = (s: Song) => s.credited?.[0]?.dj_name ?? (s.autodj ? "AutoDJ" : "");
 
 const Crown = (
   <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -75,8 +77,18 @@ export default function BackstageCharts({ manager }: { manager: ManagerFallback 
         if (live) setFailed(true);
       }
     })();
+    // keep this week's chart current while the page is open
+    const t = setInterval(async () => {
+      try {
+        const c: Charts = await fetch(`${API}/public/charts`).then((r) => r.json());
+        if (live && c?.songs) setCharts(c);
+      } catch {
+        /* keep the last good chart */
+      }
+    }, 60000);
     return () => {
       live = false;
+      clearInterval(t);
     };
   }, []);
 
@@ -180,6 +192,7 @@ export default function BackstageCharts({ manager }: { manager: ManagerFallback 
                     <th scope="col">Song</th>
                     <th scope="col">Artist</th>
                     <th scope="col">DJ</th>
+                    <th scope="col">Likes</th>
                     <th scope="col">Trend</th>
                   </tr>
                 </thead>
@@ -195,6 +208,7 @@ export default function BackstageCharts({ manager }: { manager: ManagerFallback 
                         <td className={styles.song}>{s.title}</td>
                         <td>{s.artist}</td>
                         <td>{djOf(s)}</td>
+                        <td className={styles.likes}>{s.positive}</td>
                         <td>
                           <Trend now={s.rank} last={lw} />
                         </td>

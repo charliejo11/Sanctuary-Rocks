@@ -114,7 +114,9 @@ export function MySchedule({ me }: { me: Me }) {
       if (d.error) setScheduleError("The club calendar couldn't be read just now.");
     }).catch(() => setScheduleError("The club calendar couldn't be read just now."));
   }, []);
-  const key = nameKey(me.user.name);
+  const [calendarName, setCalendarName] = useState(me.user.calendar_name ?? "");
+  const [savedName, setSavedName] = useState(me.user.calendar_name ?? "");
+  const key = nameKey(savedName || me.user.name);
   const isMine = (s: LineupSet) => nameKey(s.djName ?? "") === key || nameKey(s.host ?? "") === key;
   const roleIn = (s: LineupSet) => (nameKey(s.djName ?? "") === key ? "dj" : nameKey(s.host ?? "") === key ? "host" : null);
   const mine = (sets ?? []).filter(isMine);
@@ -141,7 +143,11 @@ export function MySchedule({ me }: { me: Me }) {
       <section className={styles.card} aria-labelledby="mine">
         <h2 id="mine">My scheduled shifts</h2>
         {scheduleError ? <p className={styles.error}>{scheduleError}</p> : null}
-        {sets === null ? <Loading /> : mine.length ? <ul className={styles.list}>{mine.map(row)}</ul> : <p className={styles.muted}>No upcoming shifts match the name “{me.user.name}” on the calendar.</p>}
+        {sets === null ? <Loading /> : mine.length ? <ul className={styles.list}>{mine.map(row)}</ul> : <p className={styles.muted}>No upcoming shifts match the name “{savedName || me.user.name}” on the calendar.</p>}
+        <div className={styles.form}>
+          <label>My name on the calendar, if it&apos;s different from my Discord name<input value={calendarName} onChange={(e) => setCalendarName(e.target.value)} placeholder={me.user.name} maxLength={80} /></label>
+          <Action label="Save calendar name" onRun={async () => setSavedName((await api("me/calendar-name", { calendar_name: calendarName })).calendar_name ?? "")} />
+        </div>
       </section>
       <section className={styles.card} aria-labelledby="req">
         <h2 id="req">My requests</h2>

@@ -51,6 +51,16 @@ function Overview({ goTo, canEdit }: { goTo: (t: string) => void; canEdit: boole
 
 const ROLE_LIST = ["dj", "host", "management", "owner"];
 
+function CalendarName({ u, reload }: { u: any; reload: () => void }) {
+  const [name, setName] = useState(u.calendar_name ?? "");
+  return (
+    <div className={styles.row}>
+      <label className={styles.inlineLabel}>Calendar name<input value={name} placeholder={u.display_name} maxLength={80} onChange={(e) => setName(e.target.value)} /></label>
+      <Action label="Save" onRun={async () => { await api(`roster/${u.id}/calendar-name`, { calendar_name: name }); reload(); }} />
+    </div>
+  );
+}
+
 function RosterRow({ u, reload, canEdit }: { u: any; reload: () => void; canEdit: boolean }) {
   const [edit, setEdit] = useState(false);
   const [f, setF] = useState({ display_name: u.display_name, sl_uuid: u.sl_uuid ?? "", roles: u.roles as string[], active: !!u.active });
@@ -68,6 +78,7 @@ function RosterRow({ u, reload, canEdit }: { u: any; reload: () => void; canEdit
           <Action label="Make a recovery code" confirm={`Create a one-time sign-in code for ${u.display_name}?`} onRun={async () => setCode((await api(`roster/${u.id}/recovery`, {})).code)} />
         </div>
       ) : null}
+      <CalendarName u={u} reload={reload} />
       {code ? <p className={styles.note}>One-time code, valid 24 hours. It won&apos;t be shown again. Send it privately: <strong className={styles.code}>{code}</strong></p> : null}
       {edit ? (
         <div className={styles.form}>

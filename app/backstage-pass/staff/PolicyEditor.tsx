@@ -24,6 +24,7 @@ function Editor({ id, onClose }: { id: number; onClose: () => void }) {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const stamp = useRef<number>(0);
   const html = useRef("");
+  const queue = useRef<Promise<boolean>>(Promise.resolve(true));
 
   const load = useCallback(async () => {
     const d = await api(`policies/${id}`);
@@ -43,19 +44,27 @@ function Editor({ id, onClose }: { id: number; onClose: () => void }) {
     if (area.current && !preview && !viewing) area.current.innerHTML = html.current;
   }, [p?.id, preview, viewing]);
 
-  const push = useCallback(async (extra: object = {}) => {
-    setSave("Saving…");
-    try {
-      const r = await api(`policies/${id}/draft`, { html: html.current, expected_updated_at: stamp.current, ...extra });
-      stamp.current = r.updated_at;
-      html.current = r.html;
-      setDraft(r.html);
-      setSave(`Saved ${when(r.updated_at)}`);
-      return true;
-    } catch (e) {
-      setSave(e instanceof Error ? e.message : "Couldn't save");
-      return false;
-    }
+  // One save at a time, each with the stamp the last one returned. Clicking a setting right after typing fires two saves at
+  // once, and without this the second looks like someone else's edit.
+  const push = useCallback((extra: object = {}): Promise<boolean> => {
+    const run = queue.current.then(async () => {
+      setSave("Saving…");
+      const sent = html.current;
+      try {
+        const r = await api(`policies/${id}/draft`, { html: sent, expected_updated_at: stamp.current, ...extra });
+        stamp.current = r.updated_at;
+        // anything typed while this was on its way stays, and goes in the next save
+        if (html.current === sent) html.current = r.html;
+        setDraft(r.html);
+        setSave(`Saved ${when(r.updated_at)}`);
+        return true;
+      } catch (e) {
+        setSave(e instanceof Error ? e.message : "Couldn't save");
+        return false;
+      }
+    });
+    queue.current = run;
+    return run;
   }, [id]);
 
   const typed = () => {

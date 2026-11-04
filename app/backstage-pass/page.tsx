@@ -7,6 +7,8 @@ import { cinzel, oswald, robotoCondensed } from "../contact/fonts";
 import backstage from "../data/backstage.json";
 import { distressed } from "../gallery/fonts";
 import BackstageCharts from "./BackstageCharts";
+import ClubVotes from "./ClubVotes";
+import LiveWinner from "./LiveWinner";
 import NowPlaying from "./NowPlaying";
 import styles from "./backstage.module.css";
 
@@ -68,8 +70,9 @@ const GROUP_ART: Record<string, string> = {
 
 // Backstage Pass: the castle hero, last week's #1 / biggest climber / Manager
 // of the Week, the live Top 10 (from the Vote Board in the club), Staff
-// Appreciation, the visit / join strip and the shared footer. Staff
-// recognition is edited in app/data/backstage.json.
+// Appreciation (DJ / Host of the Week from the crowd vote), Club Votes, the
+// visit / join strip and the shared footer. The other recognition cards are
+// edited in app/data/backstage.json.
 export default function BackstagePassPage() {
   const shouts = backstage.appreciation as Shout[];
 
@@ -135,13 +138,21 @@ export default function BackstagePassPage() {
                       <img src={art} alt={s.image ? s.name : ""} loading="lazy" />
                     ) : null}
                   </div>
-                  <p className={styles.staffName}>{s.name}</p>
-                  <p className={styles.staffText}>{s.text}</p>
+                  {s.kind === "dj" || s.kind === "host" ? (
+                    <LiveWinner kind={s.kind} name={s.name} text={s.text} />
+                  ) : (
+                    <>
+                      <p className={styles.staffName}>{s.name}</p>
+                      <p className={styles.staffText}>{s.text}</p>
+                    </>
+                  )}
                 </li>
               );
             })}
           </ul>
         </section>
+
+        <ClubVotes />
       </div>
 
       {/* ------------------------------------------------------------ CTA strip */}

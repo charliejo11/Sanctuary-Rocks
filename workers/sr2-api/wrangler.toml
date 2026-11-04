@@ -37,10 +37,8 @@ migrations_dir = "migrations"
 
 [env.staging.vars]
 OWNER_USERNAMES = "charliejo11,moose.houston"
-# On at the project owner's request, 2026-11-01. discord_dest.transport is 'off' for both channels, so only events are sent,
-# and DISCORD_EVENT_DESTS keeps them to the staff server until VIP is approved.
-DISCORD_MODE = "live"
-DISCORD_EVENTS = "on"
+# Staging never sends. Production runs the Discord events.
+DISCORD_MODE = "dry-run"
 SITE_URL = "https://sanctuary-rocks-staging.elfavina89.workers.dev"
 # Discord sign-in: the staff server, and which of its tags open which part of Backstage Pass. Tags not listed get no access.
 # owner: @owner, tech wizard | management: @GM, @Sr Club Manager | dj: @DJs, @Cover-DJs | host: @Hosts, @Cover-Host
@@ -49,6 +47,12 @@ DISCORD_EVENT_DESTS = "staff"
 DISCORD_CLIENT_ID = "1566291698835783680"
 DISCORD_STAFF_GUILD_ID = "421390161620893710"
 DISCORD_ROLE_MAP = '{"421391530125950979":"owner","1562631109504663672":"owner","676629987184345108":"management","1523828687068200980":"management","421391780936810498":"dj","813936040372994092":"dj","421391980078170112":"host","862779998195679293":"host"}'
+# Auto Clerk in Discord, STAGING: placeholder cover channels (replace with the real channel ids when testing in Discord).
+# CLERK_TEST_PUBLIC_KEY lets scripts/clerk_discord_staging_check.mjs sign simulated interactions; it is a PUBLIC key
+# and is ignored whenever DISCORD_MODE is "live". Never add it to production.
+CLERK_DJ_CHANNEL = "staging-dj-covers"
+CLERK_HOST_CHANNEL = "staging-host-covers"
+CLERK_TEST_PUBLIC_KEY = "d481bc6b92df59aa62fa4d794ca9d85b8c5b8a37d32b129f4e1e485a517871e8"
 
 # PRODUCTION: the backend behind the live site's Backstage Pass. Its own worker and database.
 # Deploy:      npx wrangler deploy --env production -c wrangler.toml

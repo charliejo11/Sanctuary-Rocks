@@ -347,7 +347,51 @@ async function fetchLineupPayload() {
   return { updatedAt, nextSet: sets[0] ?? null, sets };
 }
 
-export async function GET() {
+// For the Auto Clerk (SR2 backend): the same sets, 60 days ahead and not cut to 24, plus each Calendar event's id and
+// whether it repeats, so every shift keeps one stable id. The normal lineup above is unchanged.
+const CLERK_DAYS = 35;          // a little past the Auto Clerk's 30-day window
+const CLERK_MAX_SETS = 600;     // ~12 sets a day; past this the read is cut off and marked so
+type ClerkSet = LineupSet & { uid: string | null; occurrence: string | null };
+let cachedClerk: { updatedAt: string; sets: ClerkSet[] } | null = null;
+let cachedClerkAt = 0;
+
+// `occurrence` keeps one occurrence of a repeating event recognisable: its original start. A single occurrence that was
+// changed ("this event only") replaces the one it stands for and keeps its key, so a shift keeps its id when Moose
+// moves it or puts another DJ on it. A one-off event has no occurrence key (its own id is enough).
+async function fetchClerkPayload() {
+  const now = new Date();
+  const horizon = new Date(now.getTime() + CLERK_DAYS * 24 * 60 * 60 * 1000);
+  const events = await withTimeout(getCalendarEvents(now), 20000, "Lineup calendar");
+  const replaced = new Set(events.filter((e) => e.uid && e.recurrenceId).map((e) => `${e.uid}@${e.recurrenceId!.getTime()}`));
+  const sets = events
+    .flatMap((event) => expandRecurringEvent(event, now, horizon, CLERK_MAX_SETS).map((occurrence) => ({
+      occurrence,
+      key: event.recurrenceId ? event.recurrenceId.toISOString() : event.rrule ? occurrence.start.toISOString() : null,
+      replacedBySingle: Boolean(event.rrule) && replaced.has(`${occurrence.uid}@${occurrence.start.getTime()}`),
+    })))
+    .filter(({ occurrence, replacedBySingle }) => !replacedBySingle && occurrence.end >= now && occurrence.start <= horizon)
+    .sort((left, right) => left.occurrence.start.getTime() - right.occurrence.start.getTime())
+    .slice(0, CLERK_MAX_SETS)
+    .map(({ occurrence, key }) => ({ ...toLineupSet(occurrence), uid: occurrence.uid ?? null, occurrence: key }));
+  return { updatedAt: new Date().toISOString(), sets };
+}
+
+async function clerkGET() {
+  try {
+    if (!cachedClerk || Date.now() - cachedClerkAt >= CACHE_TTL_MS) {
+      cachedClerk = await fetchClerkPayload();
+      cachedClerkAt = Date.now();
+    }
+    return Response.json(cachedClerk, { headers: { "Cache-Control": "no-store" } });
+  } catch (error) {
+    console.error("Lineup calendar (clerk) error:", error);
+    // never an empty list on a failed read: the Auto Clerk would take that as every shift being deleted
+    return Response.json({ error: toLineupError(error), sets: [] }, { status: 502, headers: { "Cache-Control": "no-store" } });
+  }
+}
+
+export async function GET(request: Request) {
+  if (new URL(request.url).searchParams.get("clerk") === "1") return clerkGET();
   if (cachedLineup && Date.now() - cachedAt < CACHE_TTL_MS) {
     return Response.json(cachedLineup, {
       headers: { "Cache-Control": "no-store" },

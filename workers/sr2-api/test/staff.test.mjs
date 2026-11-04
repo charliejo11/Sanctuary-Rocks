@@ -9,7 +9,7 @@ import { sanitizeHtml } from "../src/staff/sanitize.js";
 import { sha256, randomToken, handleStaff } from "../src/staff/portal.js";
 import { composeStage, syncStage, syncScheduledEvents, syncLiveEvent, calendarStage } from "../src/staff/stage.js";
 
-const MIG = ["0001_init", "0002_radio", "0003_trials", "0004_staff_portal", "0005_manual_seed"].map((f) => fileURLToPath(new URL(`../migrations/${f}.sql`, import.meta.url)));
+const MIG = ["0001_init", "0002_radio", "0003_trials", "0004_staff_portal", "0005_manual_seed", "0010_calendar_name", "0011_vote_board", "0012_autodj_in_song_chart", "0013_auto_clerk", "0014_clerk_discord", "0015_clerk_sheet"].map((f) => fileURLToPath(new URL(`../migrations/${f}.sql`, import.meta.url)));
 const ctx = { waitUntil() {} };
 const AV = (n) => `aaaaaaaa-0000-0000-0000-${String(n).padStart(12, "0")}`;
 
@@ -564,4 +564,18 @@ test("with nobody on a board, the event follows the calendar and never claims LI
   await syncLiveEvent(env, { dj: { name: "DJ Y" }, hosts: [], link: null }, "SL", f, at + 60e3);
   assert.equal(calls[0].name, "🔴 LIVE: DJ Y");
   assert.equal(calls.length, 1);
+});
+
+test("calendar names: your own, or anyone's if you're management, and they grant nothing", async () => {
+  const { call, people } = await setup();
+  assert.equal((await call("dj", "POST", "me/calendar-name", { calendar_name: "  Kaya  " })).data.calendar_name, "Kaya");
+  const me = (await call("dj", "GET", "me")).data.user;
+  assert.equal(me.calendar_name, "Kaya");
+  assert.deepEqual(me.roles, ["dj"]);
+  assert.equal((await call("dj", "POST", `roster/${people.host.id}/calendar-name`, { calendar_name: "x" })).status, 403);
+  assert.equal((await call(null, "POST", "me/calendar-name", { calendar_name: "x" })).status, 401);
+  assert.equal((await call("mgr", "POST", `roster/${people.host.id}/calendar-name`, { calendar_name: "Nawti" })).status, 200);
+  assert.equal((await call("host", "GET", "me")).data.user.calendar_name, "Nawti");
+  assert.equal((await call("mgr", "POST", "roster/99999/calendar-name", { calendar_name: "x" })).status, 404);
+  assert.equal((await call("dj", "POST", "me/calendar-name", { calendar_name: "" })).data.calendar_name, null);
 });

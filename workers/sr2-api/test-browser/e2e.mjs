@@ -338,6 +338,19 @@ check("both communities point at their own channel", new Set(dd.dests.map((x) =>
 check("no webhook or token is ever returned", !/discord\.com\/api\/webhooks|Bot /.test(JSON.stringify(dd)));
 await moose.screenshot({ path: `${DIR}discord.png`, fullPage: true });
 
+console.log("== Calendar names");
+await home(dj);
+await openPanel(dj, /^My Schedule/);
+await dj.getByLabel(/My name on the calendar/).fill("DJ Test Name");
+await dj.getByRole("button", { name: "Save calendar name" }).click();
+await dj.getByText(/match the name .DJ Test Name./).waitFor();
+check("a staff member can save their calendar name", (await apiGet(dj, "me")).body.user.calendar_name === "DJ Test Name");
+await mgr.goto(PAGE + "#management", { waitUntil: "networkidle" });
+await mgr.reload({ waitUntil: "networkidle" });
+await mgr.getByRole("button", { name: "Staff Roster" }).click();
+await mgr.getByLabel("Calendar name").first().waitFor();
+check("management can see calendar names in the roster", (await mgr.getByLabel("Calendar name").count()) >= 2);
+
 console.log("== Moose's edit spots and club links");
 await moose.goto(PAGE + "#manual:ch2", { waitUntil: "networkidle" });
 await moose.reload({ waitUntil: "networkidle" });

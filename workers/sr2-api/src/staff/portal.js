@@ -7,6 +7,8 @@
 import { sanitizeHtml } from "./sanitize.js";
 import { composeStage, syncStage } from "./stage.js";
 import { UUID_RE } from "../lib/auth.js";
+import { clerkRoutes, claim as clerkClaim, cancelCallout } from "./clerk.js";
+import { discordRoutes } from "./clerk_discord.js";
 
 const COOKIE = "__Host-sr_staff";
 const STATE_COOKIE = "__Host-sr_oauth";
@@ -79,7 +81,7 @@ async function currentUser(request, env) {
   if (!s) return null;
   const u = await one(env.DB, "SELECT * FROM portal_users WHERE id = ? AND active = 1", s.user_id);
   if (!u) return null;
-  return { id: u.id, display_name: u.display_name, sl_uuid: u.sl_uuid, discord_name: u.discord_name, roles: parseList(u.roles), csrf: s.csrf, via: s.via, session: await sha256(token) };
+  return { id: u.id, display_name: u.display_name, calendar_name: u.calendar_name, sl_uuid: u.sl_uuid, discord_name: u.discord_name, roles: parseList(u.roles), csrf: s.csrf, via: s.via, session: await sha256(token) };
 }
 
 // ------------------------------------------------------------------ Discord login
@@ -161,12 +163,26 @@ const H = {};
 
 H.me = async (ctx) => {
   const { user, env } = ctx;
-  return { user: { id: user.id, name: user.display_name, roles: user.roles, sl_linked: !!user.sl_uuid, discord: user.discord_name, via: user.via }, csrf: user.csrf, discord_ready: discordConfigured(env) };
+  return { user: { id: user.id, name: user.display_name, calendar_name: user.calendar_name ?? null, roles: user.roles, sl_linked: !!user.sl_uuid, discord: user.discord_name, via: user.via }, csrf: user.csrf, discord_ready: discordConfigured(env) };
 };
 
 H.logout = async ({ user, env }) => {
   await run(env.DB, "DELETE FROM portal_sessions WHERE token_hash = ?", user.session);
   return json({ ok: true }, 200, { "set-cookie": setCookie(COOKIE, "", 0) });
+};
+
+// Only decides which calendar shifts My Schedule shows as someone's own, so people may set their own. Management may set anyone's.
+H.calendarNameMine = async ({ user, env, body }) => {
+  const name = str(body.calendar_name, 80) || null;
+  await run(env.DB, "UPDATE portal_users SET calendar_name = ? WHERE id = ?", name, user.id);
+  return { ok: true, calendar_name: name };
+};
+H.calendarNameOf = async ({ user, env, params, body }) => {
+  const name = str(body.calendar_name, 80) || null;
+  const done = await run(env.DB, "UPDATE portal_users SET calendar_name = ? WHERE id = ?", name, +params[0]);
+  need(done.meta.changes === 1, 404, "not_found");
+  await audit(env, user, "calendar_name", { id: +params[0] });
+  return { ok: true, calendar_name: name };
 };
 
 H.linkCode = async ({ user, env }) => {
@@ -198,9 +214,14 @@ H.requestCreate = async ({ user, env, body }) => {
   return { ok: true, id: r.meta.last_row_id };
 };
 
+// Auto Clerk covers (auto = 1) go through the Auto Clerk: claiming is instant and nothing waits for approval.
+const clerkActor = (user) => ({ user: { id: user.id, roles: user.roles, name: user.display_name }, source: "portal" });
+const clerkAnswer = (res) => { need(res.ok, res.status ?? 409, res.error, res.message); return { ok: true }; };
+
 H.requestCancel = async ({ user, env, params }) => {
   const r = await one(env.DB, "SELECT * FROM shift_requests WHERE id = ?", +params[0]);
   need(r, 404, "not_found");
+  if (r.auto) return clerkAnswer(await cancelCallout(env, clerkActor(user), r.id, { manager: isMgmt(user) }));
   need(r.requester_id === user.id || isMgmt(user), 403, "forbidden");
   need(r.status === "pending", 409, "already_decided", "That request has already been decided.");
   await run(env.DB, "UPDATE shift_requests SET status = 'cancelled' WHERE id = ?", r.id);
@@ -211,6 +232,7 @@ H.requestCancel = async ({ user, env, params }) => {
 H.requestVolunteer = async ({ user, env, params }) => {
   const r = await one(env.DB, "SELECT * FROM shift_requests WHERE id = ?", +params[0]);
   need(r && r.kind === "coverage", 404, "not_found");
+  if (r.auto) return clerkAnswer(await clerkClaim(env, clerkActor(user), r.id));
   need(r.requester_id !== user.id, 400, "own_request");
   need(!r.role || has(user, [r.role]), 403, "forbidden", "That shift needs a different role.");
   const done = await run(env.DB, "UPDATE shift_requests SET volunteer_id = ? WHERE id = ? AND status = 'pending' AND volunteer_id IS NULL", user.id, r.id);
@@ -221,7 +243,8 @@ H.requestVolunteer = async ({ user, env, params }) => {
 
 H.requestDecide = async ({ user, env, params, body }) => {
   need(["approved", "declined"].includes(body.status), 400, "bad_status");
-  const done = await run(env.DB, "UPDATE shift_requests SET status = ?, decided_by = ?, decided_at = ?, note = ? WHERE id = ? AND status = 'pending'", body.status, user.id, Date.now(), str(body.note, 500) || null, +params[0]);
+  need(!(await one(env.DB, "SELECT 1 FROM shift_requests WHERE id = ? AND auto = 1", +params[0])), 409, "automatic", "Auto Clerk covers don't need approval: the first eligible claim takes the shift. Use Assign to override.");
+  const done = await run(env.DB, "UPDATE shift_requests SET status = ?, decided_by = ?, decided_at = ?, note = ? WHERE id = ? AND status = 'pending' AND auto = 0", body.status, user.id, Date.now(), str(body.note, 500) || null, +params[0]);
   need(done.meta.changes === 1, 409, "already_decided", "That request has already been decided.");
   await audit(env, user, "request_decide", { id: +params[0], status: body.status });
   return { ok: true };
@@ -584,7 +607,7 @@ H.overview = async ({ env, deps }) => {
 };
 
 H.roster = async ({ env, user }) => {
-  const users = await all(env.DB, "SELECT id, display_name, discord_name, sl_uuid, roles, active, last_login_at FROM portal_users ORDER BY active DESC, display_name");
+  const users = await all(env.DB, "SELECT id, display_name, calendar_name, discord_name, sl_uuid, roles, active, last_login_at FROM portal_users ORDER BY active DESC, display_name");
   return { users: users.map((u) => ({ ...u, roles: parseList(u.roles) })), can_edit: user.roles.includes("owner") };
 };
 
@@ -786,7 +809,7 @@ H.boardClear = async ({ user, env, deps, body }) => {
 // ------------------------------------------------------------------ routes: [method, pattern, roles, handler]
 // roles null = any signed-in, active user.
 const ROUTES = [
-  ["GET", /^me$/, null, H.me], ["POST", /^auth\/logout$/, null, H.logout], ["POST", /^me\/link-code$/, null, H.linkCode],
+  ["GET", /^me$/, null, H.me], ["POST", /^auth\/logout$/, null, H.logout], ["POST", /^me\/link-code$/, null, H.linkCode], ["POST", /^me\/calendar-name$/, null, H.calendarNameMine],
   ["GET", /^requests$/, null, H.requests], ["POST", /^requests$/, null, H.requestCreate], ["POST", /^requests\/(\d+)\/cancel$/, null, H.requestCancel],
   ["POST", /^requests\/(\d+)\/volunteer$/, null, H.requestVolunteer], ["POST", /^requests\/(\d+)\/decide$/, MGMT, H.requestDecide],
   ["GET", /^my-sets$/, null, H.mySets],
@@ -798,11 +821,13 @@ const ROUTES = [
   ["GET", /^policies$/, OWNER, H.policies], ["POST", /^policies$/, OWNER, H.policyCreate], ["GET", /^policies\/(\d+)$/, OWNER, H.policyGet], ["GET", /^policies\/(\d+)\/versions\/(\d+)$/, OWNER, H.policyVersion],
   ["POST", /^policies\/(\d+)\/draft$/, OWNER, H.policyDraft], ["POST", /^policies\/(\d+)\/status$/, OWNER, H.policyStatus], ["POST", /^policies\/(\d+)\/publish$/, OWNER, H.policyPublish], ["POST", /^policies\/(\d+)\/restore$/, OWNER, H.policyRestore],
   ["GET", /^questions$/, OWNER, H.questions], ["POST", /^questions$/, OWNER, H.questionSave], ["POST", /^questions\/(\d+)$/, OWNER, H.questionSave],
-  ["GET", /^overview$/, MGMT, H.overview], ["GET", /^roster$/, MGMT, H.roster], ["GET", /^roster\/discord$/, MGMT, H.rosterDiscord], ["POST", /^roster$/, OWNER, H.rosterSave], ["POST", /^roster\/(\d+)$/, OWNER, H.rosterSave], ["POST", /^roster\/(\d+)\/recovery$/, OWNER, H.recoveryCreate],
+  ["GET", /^overview$/, MGMT, H.overview], ["GET", /^roster$/, MGMT, H.roster], ["GET", /^roster\/discord$/, MGMT, H.rosterDiscord], ["POST", /^roster$/, OWNER, H.rosterSave], ["POST", /^roster\/(\d+)$/, OWNER, H.rosterSave], ["POST", /^roster\/(\d+)\/calendar-name$/, MGMT, H.calendarNameOf], ["POST", /^roster\/(\d+)\/recovery$/, OWNER, H.recoveryCreate],
   ["GET", /^audit$/, OWNER, H.auditLog], ["GET", /^donations$/, MGMT, H.donations], ["POST", /^donations$/, OWNER, H.donationManual],
   ["GET", /^votes$/, MGMT, H.voteReport], ["POST", /^votes$/, MGMT, H.votePeriod],
   ["GET", /^discord$/, OWNER, H.discordGet], ["GET", /^discord\/check\/(staff|vip)$/, OWNER, H.discordCheck], ["POST", /^discord\/post-event\/(staff|vip)$/, OWNER, H.discordPostEvent], ["POST", /^discord\/sync$/, OWNER, H.discordSync], ["POST", /^discord\/(staff|vip)$/, OWNER, H.discordSave],
   ["GET", /^settings$/, MGMT, H.settings], ["POST", /^settings$/, OWNER, H.settingSave], ["POST", /^board\/clear$/, MGMT, H.boardClear],
+  ...clerkRoutes({ need, isMgmt, MGMT }),                              // the Auto Clerk (staff/clerk.js)
+  ...discordRoutes({ need, OWNER }),                                   // its Discord slash commands (staff/clerk_discord.js)
 ];
 
 export async function handleStaff(request, env, deps, fetchImpl = fetch) {

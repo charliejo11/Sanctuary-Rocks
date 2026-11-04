@@ -43,9 +43,13 @@ function groupBy(rows, key) {
   return m;
 }
 
-/** Top songs: one entry per song_key across ALL DJs, ranked by positive reactions. */
+/**
+ * Top songs: one entry per song_key across ALL plays, live DJ sets and AutoDJ alike, ranked by positive reactions
+ * (the same `votes` rows as the Now Playing hearts and the Vote Board's LIKE). Only verified DJ plays (dj_uuid set)
+ * are credited to a DJ; `autodj` counts plays with no DJ in the stream title at all.
+ */
 export function songChart(plays, votes, cfg = DEFAULTS) {
-  const eligible = plays.filter((p) => p.chart_ok && p.song_key && p.dj_uuid);
+  const eligible = plays.filter((p) => p.chart_ok && p.song_key);
   const vv = validVotes(eligible, votes);
   const votesByPlay = groupBy(vv, "play_id");
   const out = [];
@@ -54,6 +58,7 @@ export function songChart(plays, votes, cfg = DEFAULTS) {
     const t = tally(allVotes);
     const credits = new Map();
     for (const p of ps) {
+      if (!p.dj_uuid) continue;
       const c = credits.get(p.dj_uuid) ?? { dj_uuid: p.dj_uuid, dj_name: p.dj_name, plays: 0, positive: 0 };
       c.plays++;
       c.positive += tally(votesByPlay.get(p.id) ?? []).positive;
@@ -61,13 +66,14 @@ export function songChart(plays, votes, cfg = DEFAULTS) {
     }
     const first = ps.reduce((a, b) => (a.started_at <= b.started_at ? a : b));
     out.push({
-      song_key: key, artist: first.artist, title: first.title, plays: ps.length,
+      song_key: key, artist: first.artist, title: first.title, plays: ps.length, autodj: ps.filter((p) => !p.dj_tag && !p.dj_uuid).length,
       ...t, per_play: t.positive / ps.length,
       credited: [...credits.values()].sort((a, b) => b.plays - a.plays || b.positive - a.positive || a.dj_name.localeCompare(b.dj_name)),
     });
   }
   out.sort((a, b) => b.positive - a.positive || b.per_play - a.per_play || b.plays - a.plays || a.song_key.localeCompare(b.song_key));
-  return out.map((s, i) => ({ rank: i + 1, ...s }));
+  // the chart is what listeners enjoyed: a song needs at least one valid like (now that every AutoDJ track is eligible)
+  return out.filter((s) => s.positive > 0).map((s, i) => ({ rank: i + 1, ...s }));
 }
 
 /** Secondary song view: positive reactions per play (min 2 plays so one lucky play can't top it). */

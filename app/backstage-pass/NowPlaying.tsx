@@ -6,8 +6,9 @@ import styles from "./backstage.module.css";
 // Now Playing: the DJ on air and the song they're spinning, live from the SR 2.0
 // backend (which reads the club stream every minute), with the Vote Board's
 // four reactions. One vote per visitor per song; picking another reaction
-// changes it. Refreshes every 15 seconds.
-const API = "https://sr2-api-dev.elfavina89.workers.dev";
+// changes it. Refreshes every 15 seconds. Reads this site's own backend through
+// the same-origin doorway (app/api/sr2), so staging and live never mix.
+const API = "/api/sr2";
 
 type Reaction = "love" | "rock" | "badass" | "nope";
 type Tally = Record<Reaction, number> & { total: number };

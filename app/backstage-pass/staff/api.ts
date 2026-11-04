@@ -1,6 +1,6 @@
 // Small client for the staff API. The CSRF token comes from /me and is only useful alongside the session cookie.
 export type Me = {
-  user: { id: number; name: string; roles: string[]; sl_linked: boolean; discord: string | null; via: string };
+  user: { id: number; name: string; calendar_name: string | null; roles: string[]; sl_linked: boolean; discord: string | null; via: string };
   csrf: string;
   discord_ready: boolean;
 };
@@ -39,4 +39,6 @@ export const when = (ms: number | string | null | undefined) =>
 export const day = (ms: number | string | null | undefined) =>
   ms ? new Intl.DateTimeFormat("en-US", { timeZone: SLT, month: "short", day: "numeric", year: "numeric" }).format(new Date(ms)) : "—";
 export const can = (me: Me, ...roles: string[]) => me.user.roles.includes("owner") || roles.some((r) => me.user.roles.includes(r));
-export const nameKey = (s: string) => s.toLowerCase().replace(/^(dj|host)\s+/, "").replace(/[^a-z0-9]/g, "");
+// NFKC turns decorated lettering like 𝔻𝕒𝕟𝕘𝕖𝕣 into plain letters, so fancy names still match the calendar. Wording like "Host TBD" and any
+// "(login name)" after a name is ignored.
+export const nameKey = (s: string) => s.normalize("NFKC").toLowerCase().replace(/\(.*?\)/g, " ").trim().replace(/^(dj|host)\s+/, "").replace(/\btbd\b/g, "").replace(/[^\p{L}\p{N}]/gu, "");

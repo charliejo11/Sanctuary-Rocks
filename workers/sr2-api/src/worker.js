@@ -14,6 +14,9 @@ import * as D from "./lib/discord.js";
 import { handleStaff, stageNow } from "./staff/portal.js";
 import { makeBoardActions } from "./staff/board.js";
 import { syncStage, syncScheduledEvents, syncLiveEvent, calendarStage } from "./staff/stage.js";
+import { makeVoteBoard } from "./lib/voteboard.js";
+import { clerkActions, clerkTick } from "./staff/clerk.js";
+import { discordInteractionsHttp, discordTestMessageHttp, pollChannels } from "./staff/clerk_discord.js";
 
 const STREAM = "http://sor.digistream.info:10206";
 const TRIAL_STREAM = "http://sor1.digistream.info:10206";   // the BACKUP stream: used for DJ trials
@@ -122,7 +125,9 @@ async function startPlay(env, p, now, source) {
     attribution = "mismatch"; setId = set.id;
   }
   const key = p.isSong ? songKey(p.artist, p.title) : null;
-  const chartOk = attribution === "ok" && key ? 1 : 0;      // trial sets never enter the charts
+  // Every real song counts in the song chart, AutoDJ included (user, 2026-11-04); trial sets never enter the charts.
+  // A DJ is only CREDITED with a play when attribution is "ok" (dj_uuid set).
+  const chartOk = attribution !== "trial" && key ? 1 : 0;
   const pid = await playbackId(p.raw, now);
   const res = await run(db,
     `INSERT INTO plays(playback_id, raw_title, artist, title, song_key, dj_tag, set_id, dj_uuid, dj_name, attribution, chart_ok, source, started_at, week)
@@ -398,7 +403,7 @@ const ACTIONS = {
     const p = await one(db, "SELECT * FROM plays WHERE playback_id = ?", d.playback_id);
     if (!p) return { ok: false, error: "not_found" };
     const key = songKey(d.artist, d.title);
-    await run(db, "UPDATE plays SET artist = ?, title = ?, song_key = ?, chart_ok = CASE WHEN attribution = 'ok' AND ? IS NOT NULL THEN 1 ELSE 0 END WHERE id = ?", d.artist, d.title, key, key, p.id);
+    await run(db, "UPDATE plays SET artist = ?, title = ?, song_key = ?, chart_ok = CASE WHEN attribution != 'trial' AND ? IS NOT NULL THEN 1 ELSE 0 END WHERE id = ?", d.artist, d.title, key, key, p.id);
     await audit(db, d.by, "song_correct", { playback_id: d.playback_id, from: [p.artist, p.title], to: [d.artist, d.title] });
     return { ok: true };
   },
@@ -526,7 +531,7 @@ async function mowShortlist(db, wk) {
 // ------------------------------------------------------------------ weekly data + finalisation
 async function weekData(db, wk) {
   const start = weekStartMs(wk), end = weekStartMs(shiftWeek(wk, 1));
-  const plays = await all(db, "SELECT id, song_key, artist, title, dj_uuid, dj_name, started_at, ended_at, chart_ok FROM plays WHERE week = ?", wk);
+  const plays = await all(db, "SELECT id, song_key, artist, title, dj_uuid, dj_name, dj_tag, attribution, started_at, ended_at, chart_ok FROM plays WHERE week = ?", wk);
   const votes = plays.length ? await all(db, "SELECT v.play_id, v.voter_uuid, v.reaction FROM votes v JOIN plays p ON p.id = v.play_id WHERE p.week = ?", wk) : [];
   const clip = (r) => ({ ...r, started_at: Math.max(r.started_at, start), ended_at: Math.min(r.ended_at ?? Date.now(), end) });
   const sets = (await all(db, "SELECT id, dj_uuid, dj_name, started_at, ended_at FROM dj_sets WHERE started_at < ? AND (ended_at IS NULL OR ended_at > ?)", end, start)).map(clip);
@@ -567,6 +572,7 @@ export async function finaliseWeek(env, now = Date.now()) {
   const t = Date.now();
   await db.batch(Object.entries(res).map(([kind, data]) =>
     db.prepare("INSERT OR IGNORE INTO weekly_snapshots(week, kind, data, created_at) VALUES (?,?,?,?)").bind(wk, kind, JSON.stringify(data), t)));
+  await voteBoard.finaliseVotesWeek(db, wk).catch(() => {});   // never holds up the song chart (e.g. before migration 0011)
   await run(db, "INSERT OR IGNORE INTO mow_awards(week, status, shortlist) VALUES (?, 'awaiting', ?)", wk, JSON.stringify(await mowShortlist(db, wk)));
   await kvSet(db, "discord_queue", JSON.stringify({ week: wk, kinds: ["songs", "djs", "hosts"], queued_at: t }));
   await discord(env, D.weeklyWinners(res));
@@ -630,7 +636,9 @@ async function webVote(request, env) {
     return { ok: false, error: "bad_request" };
   }
   if (!REACTIONS.includes(d.reaction)) return { ok: false, error: "bad_request" };
-  const ip = request.headers.get("cf-connecting-ip") || request.headers.get("x-forwarded-for") || "";
+  // through the site's same-origin doorway the visitor's address arrives in x-sr-client-ip, trusted only with the proxy secret
+  const viaProxy = env.STAFF_PROXY_SECRET && request.headers.get("x-sr-proxy") === env.STAFF_PROXY_SECRET;
+  const ip = (viaProxy && request.headers.get("x-sr-client-ip")) || request.headers.get("cf-connecting-ip") || request.headers.get("x-forwarded-for") || "";
   if (!ip) return { ok: false, error: "no_client" };
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${env.SL_SECRET}|web|${ip}`));
   const voter = "web:" + [...new Uint8Array(digest)].slice(0, 16).map((b) => b.toString(16).padStart(2, "0")).join("");
@@ -653,6 +661,11 @@ const closeOpenSets = async (env, by) => {
 };
 const boardActions = makeBoardActions({ ACTIONS, kvSet, closeOpenSets });
 Object.assign(ACTIONS, boardActions.actions);
+// the club's 4-button Vote Board (lib/voteboard.js): DJ / Host votes, song likes + requests, staff shoutouts
+const voteBoard = makeVoteBoard({ one, all, run, audit, currentPlay, playTally, checkMilestone, isManager });
+Object.assign(ACTIONS, voteBoard.actions);
+// the Auto Clerk's in-world actions (staff/clerk.js): my shifts, call out, claim, cancel - linked avatars only
+Object.assign(ACTIONS, clerkActions);
 const staffDeps = { ACTIONS, boardActions };
 // any action that can change who is on stage refreshes the Discord status message (dry-run stores a preview only)
 const STAGE_ACTIONS = new Set(["dj_login", "dj_clear", "host_login", "host_logout", "staff_board_state"]);
@@ -731,9 +744,13 @@ export default {
     const url = new URL(request.url);
     try {
       if (url.pathname.startsWith("/staff/")) return await handleStaff(request, env, staffDeps);
+      // Auto Clerk in Discord: signed slash commands / buttons, and (staging only) simulated channel messages
+      if (request.method === "POST" && url.pathname === "/discord/interactions") return await discordInteractionsHttp(request, env, ctx);
+      if (request.method === "POST" && url.pathname === "/discord/test-message") return await discordTestMessageHttp(request, env);
       if (request.method === "GET" && url.pathname === "/public/live") return json(await publicLive(env), 200, CORS);
       if (request.method === "GET" && url.pathname === "/public/charts") return json(await publicCharts(env, url), 200, CORS);
       if (request.method === "GET" && url.pathname === "/public/archive") return json(await publicArchive(env), 200, CORS);
+      if (request.method === "GET" && url.pathname === "/public/votes") return json(await voteBoard.publicVotes(env, url, photoUrl), 200, CORS);
       if (request.method === "POST" && url.pathname === "/public/vote") return json(await webVote(request, env), 200, { "access-control-allow-origin": "*", "cache-control": "no-store" });
       if (request.method === "OPTIONS" && url.pathname === "/public/vote")
         return new Response(null, { status: 204, headers: { "access-control-allow-origin": "*", "access-control-allow-methods": "POST", "access-control-allow-headers": "content-type", "access-control-max-age": "86400" } });
@@ -761,8 +778,11 @@ export default {
     if (event.cron === "* * * * *") {
       ctx.waitUntil(pollStream(env).then(() => trackStreamDown(env)).catch(() => {}));
       ctx.waitUntil(refreshStage(env).catch(() => {}));     // recovers a failed or deleted status message
+      ctx.waitUntil(clerkTick(env).catch(() => {}));         // Auto Clerk: Sheet import, reminders, escalation, outbox
+      ctx.waitUntil(pollChannels(env).catch(() => {}));      // Auto Clerk: callouts written as ordinary Discord messages
     } else {
       ctx.waitUntil(finaliseWeek(env));
+      ctx.waitUntil(voteBoard.finaliseMonth(env).catch(() => {}));
       ctx.waitUntil(run(env.DB, "DELETE FROM nonces WHERE ts < ?", Math.floor(Date.now() / 1000) - 600));
       ctx.waitUntil(syncSheets(env).catch(() => {}));
       if (env.DISCORD_EVENTS === "on") ctx.waitUntil(upcomingEvents(env).then((ev) => syncScheduledEvents(env, ev, env.VENUE_URL ?? "Sanctuary Rocks, Second Life")).catch(() => {}));

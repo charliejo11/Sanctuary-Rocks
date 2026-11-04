@@ -40,6 +40,33 @@ export function weekStartMs(key) {
   throw new Error("cannot resolve week start for " + key);
 }
 
+const pad = (n) => String(n).padStart(2, "0");
+
+/** The SLT calendar month of a moment: "2026-11". */
+export function monthKey(ms) {
+  const p = sltParts(ms);
+  return `${p.y}-${pad(p.m)}`;
+}
+
+/** The SLT calendar day of a moment: "2026-11-02". */
+export function dayKey(ms) {
+  const p = sltParts(ms);
+  return `${p.y}-${pad(p.m)}-${pad(p.d)}`;
+}
+
+/** The month before / after a month key. */
+export function shiftMonth(key, months) {
+  const [y, m] = key.split("-").map(Number);
+  const d = new Date(Date.UTC(y, m - 1 + months, 1));
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}`;
+}
+
+/** "November 2026" */
+export function monthLabel(key) {
+  const [y, m] = key.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, 15)).toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
+}
+
 /** "Oct 12 – Oct 18, 2026" */
 export function weekLabel(key) {
   const s = new Date(key + "T12:00:00Z");

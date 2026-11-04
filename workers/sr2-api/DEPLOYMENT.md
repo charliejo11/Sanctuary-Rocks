@@ -108,3 +108,46 @@ rollback. For a restore, use `npx wrangler d1 time-travel restore <database> --t
 
 **Full checkpoint.** `Documents\Sanctuary_Rocks_Build\SR2_System\Backups\2026-10-31_before_staff_system` holds a git bundle,
 a zip of the working tree, a dev database dump, deployment lists and asset hashes from before this work.
+
+## Vote Board (added 2026-11-02)
+
+The club's 4-button Vote Board (DJs, Hosts, Songs, Staff Shoutouts) uses the signed `/sl/vb_*` actions in
+`src/lib/voteboard.js`, and the website reads `GET /public/votes`. Migration `0011_vote_board.sql` only adds tables
+(`vote_events`, `monthly_snapshots`). In-world install and test list: `SR2_System\LSL\Vote_Board_4Button\INSTALL.md`.
+
+Migration `0012_autodj_in_song_chart.sql` (2026-11-04) lets AutoDJ songs into the Top 10. It sets `chart_ok = 1` on every
+real song outside a DJ trial. Finished weeks are frozen snapshots, so only the current week changes. DJ credit still needs a
+verified, logged-in DJ, and a song needs at least one like to be listed. Undo, if ever needed (the old rule):
+`UPDATE plays SET chart_ok = 0 WHERE attribution != 'ok';`.
+
+The public Backstage Pass page now reads its backend through the site's own `/api/sr2/*` route, which uses
+`STAFF_API_URL`. Staging reads staging, and the live site reads production. Before this change, the live page read `sr2-api-dev`.
+
+**Staging**
+```
+cd workers/sr2-api
+node --test test/*.test.mjs
+npx wrangler d1 migrations apply sr2-staging --env staging --remote -c wrangler.toml
+npx wrangler secret put SL_SECRET --env staging -c wrangler.toml      # once: the test board's secret
+npx wrangler deploy --env staging -c wrangler.toml
+node scripts/vote_board_staging_check.mjs <private secret file>        # then: ... --cleanup
+cd ../..
+npx opennextjs-cloudflare build
+npx opennextjs-cloudflare deploy --config wrangler.staging.jsonc
+```
+
+**Production** (only after the in-world test list passes and the go-live is approved): the same commands with
+`sr2-prod` / `--env production`, then `npm run cf:deploy` for the site. Point the board's `SR2 Secret` at `sr2-api-prod`.
+
+**Rollback**
+- Website: `npx wrangler rollback <version id>`. The Backstage Pass page goes back to reading `sr2-api-dev`.
+- API: `npx wrangler rollback <version id> --env <env> -c wrangler.toml`. The staging version before the Vote Board is
+  `0322f8e9-656c-4e76-9b87-d5356064bce8`. Older code ignores the new tables, so the database needs no rollback.
+- In-world: put `SR_VOTE_CONTROLLER` back (see INSTALL.md).
+- Files from before the change: `SR2_System\Backups\2026-11-02_before_vote_board`.
+
+## Auto Clerk (added 2026-11-04)
+
+Automatic DJ and host covers. The design, settings, the credentials still needed, and the deploy order are in
+`AUTO_CLERK.md`. Staging only so far. In production, migration `0013_auto_clerk.sql` must be applied before the API is
+deployed.
