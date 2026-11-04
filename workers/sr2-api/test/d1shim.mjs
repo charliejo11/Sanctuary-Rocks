@@ -11,7 +11,10 @@ export function makeD1(migrationPath) {
   };
   const stmt = (sql, args = []) => ({
     sql, args,
-    bind: (...a) => stmt(sql, a),
+    bind: (...a) => {
+      if (a.length > 100) throw new Error("D1_ERROR: too many SQL variables (D1 allows 100 bound parameters)");
+      return stmt(sql, a);
+    },
     first: async () => db.prepare(sql).get(...args) ?? null,
     all: async () => ({ results: db.prepare(sql).all(...args) }),
     run: async () => runSync(sql, args),

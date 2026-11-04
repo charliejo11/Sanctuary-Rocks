@@ -69,6 +69,24 @@ test("Sheet import: names match staff accounts, bad rows are reported (not guess
   assert.equal((await q("SELECT COUNT(*) n FROM clerk_shifts WHERE removed_at IS NULL"))[0].n, 4);
 });
 
+test("an unchanged entry follows its name: a calendar name set later matches it; a cover already claimed stays", async () => {
+  const { env, people, q } = await setup();
+  const now = Date.now(), t = now + 3 * 24 * H;
+  const rows = [row("S1", t, 2, "DJ", "DJ Frenchie"), row("S2", t + 4 * H, 2, "DJ", "DJ Raven")];
+  await applySchedule(env, rows, now);
+  const { cover_id } = await callout(env, people.raven.actor, { shift_id: "S2" }, now);
+  await claim(env, people.blaze.actor, cover_id, now);
+  await env.DB.prepare("UPDATE portal_users SET calendar_name = 'DJ Frenchie' WHERE id = ?").bind(people.kai.id).run();
+  await env.DB.prepare("UPDATE portal_users SET active = 0 WHERE id = ?").bind(people.raven.id).run();
+  const res = await applySchedule(env, rows, now + 10 * 60e3);
+  assert.deepEqual([res.matched, res.changed, res.added], [2, 0, 0]);
+  const s = Object.fromEntries((await q("SELECT id, sheet_user_id, assignee_user_id FROM clerk_shifts")).map((x) => [x.id, x]));
+  assert.deepEqual([s.S1.sheet_user_id, s.S1.assignee_user_id], [people.kai.id, people.kai.id]);
+  assert.deepEqual([s.S2.sheet_user_id, s.S2.assignee_user_id], [null, people.blaze.id]);   // Blaze covers it still
+  assert.equal((await q("SELECT COUNT(*) n FROM clerk_log WHERE action = 'import_matched'"))[0].n, 2);
+  assert.equal((await applySchedule(env, rows, now + 20 * 60e3)).matched, 0);     // nothing twice
+});
+
 // ------------------------------------------------------------------ callouts
 test("callout: only the scheduled person, no approval, retry-safe; the right people are eligible", async () => {
   const { env, people, q } = await setup();
@@ -83,6 +101,9 @@ test("callout: only the scheduled person, no approval, retry-safe; the right peo
   const again = await callout(env, people.raven.actor, { shift_id: "S1", idem }, now);
   assert.ok(again.replay && again.cover_id === c1.cover_id);
   assert.equal((await callout(env, people.raven.actor, { shift_id: "S1", idem: "callout-2-abcdef" }, now)).error, "already_open");
+  const clash = await callout(env, people.blaze.actor, { shift_id: "S3", idem }, now);       // someone else's key: never Raven's cover
+  assert.deepEqual([clash.ok, clash.error, clash.cover_id], [false, "try_again", undefined]);
+  assert.equal((await q("SELECT status FROM clerk_shifts WHERE id = 'S3'"))[0].status, "scheduled");
   const req = (await q("SELECT * FROM shift_requests WHERE id = ?", c1.cover_id))[0];
   assert.deepEqual([req.kind, req.status, req.clerk_state, req.auto, req.requester_id], ["coverage", "pending", "open", 1, people.raven.id]);
   assert.equal((await q("SELECT status FROM clerk_shifts WHERE id = 'S1'"))[0].status, "needs_cover");
@@ -424,6 +445,12 @@ test("Sheet requests: Assign cover / Cancel callout are applied once, a bad name
   const r3 = await syncSheet(env, sheet, now + 4 * 60e3, { force: true });
   assert.ok(r3.requests[0].ok);
   assert.equal((await q("SELECT status FROM clerk_shifts WHERE id = 'S2'"))[0].status, "scheduled");
+  // later the same three cells are typed again (a new "Pending" mark): it is a new request, applied once
+  await overrideAssign(env, people.mia.actor, { shift_id: "S1", user_id: people.kai.id, reason: "swap" }, now + 5 * 60e3);
+  pending = [{ shift_id: "S1", action: "Assign cover", assign_to: "Blaze", reason: "Blaze offered in DM", requested_by: "moose@example.com", requested_at: "Nov 9, 8:15 PM SLT" }];
+  assert.ok((await syncSheet(env, sheet, now + 6 * 60e3, { force: true })).requests[0].ok);
+  assert.equal((await syncSheet(env, sheet, now + 8 * 60e3, { force: true })).requests[0].skipped, "already handled");
+  assert.equal((await q("SELECT u.display_name n FROM clerk_shifts s JOIN portal_users u ON u.id = s.assignee_user_id WHERE s.id = 'S1'"))[0].n, "Blaze");
 });
 
 test("Calendar placeholders are open slots, not people: 'Sanctuary Rocks DJ', 'DJ TBD', 'Host Tbd Yes', 'DJ Tbc'", async () => {

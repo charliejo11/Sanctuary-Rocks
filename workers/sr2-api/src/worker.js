@@ -174,8 +174,8 @@ async function playTally(db, playId) {
 // ------------------------------------------------------------------ reports
 async function setReport(db, set, endedAt) {
   const plays = await all(db, "SELECT * FROM plays WHERE set_id = ? AND attribution IN ('ok','trial') ORDER BY started_at", set.id);
-  const ids = plays.map((p) => p.id);
-  const votes = ids.length ? await all(db, `SELECT * FROM votes WHERE play_id IN (${ids.map(() => "?").join(",")})`, ...ids) : [];
+  // a subquery, not one bound id per play: D1 refuses more than 100 parameters, and a long set passes that
+  const votes = plays.length ? await all(db, "SELECT v.* FROM votes v JOIN plays p ON p.id = v.play_id WHERE p.set_id = ? AND p.attribution IN ('ok','trial')", set.id) : [];
   const valid = votes.filter((v) => v.voter_uuid !== set.dj_uuid);
   const pos = valid.filter((v) => POSITIVE.has(v.reaction)).length;
   let best = null;
@@ -205,9 +205,7 @@ async function closeSet(db, set, now, reason, by) {
 async function shiftReport(db, shift, endedAt) {
   const ap = await all(db, "SELECT voter_uuid FROM host_appreciations WHERE shift_id = ?", shift.id);
   const sets = await all(db, "SELECT dj_name FROM dj_sets WHERE started_at < ? AND (ended_at IS NULL OR ended_at > ?)", endedAt, shift.started_at);
-  const playIds = await all(db, "SELECT id FROM plays WHERE started_at >= ? AND started_at < ?", shift.started_at, endedAt);
-  const guests = playIds.length
-    ? (await one(db, `SELECT COUNT(DISTINCT voter_uuid) n FROM votes WHERE play_id IN (${playIds.map(() => "?").join(",")})`, ...playIds.map((p) => p.id))).n : 0;
+  const guests = (await one(db, "SELECT COUNT(DISTINCT voter_uuid) n FROM votes WHERE play_id IN (SELECT id FROM plays WHERE started_at >= ? AND started_at < ?)", shift.started_at, endedAt)).n;
   return {
     host: shift.host_name, started_at: shift.started_at, ended_at: endedAt,
     minutes: Math.round((endedAt - shift.started_at) / 60000),

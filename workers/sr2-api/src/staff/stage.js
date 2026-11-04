@@ -108,7 +108,8 @@ export async function syncStage(env, stage, fetchImpl = fetch) {
 export async function syncScheduledEvents(env, events, location, fetchImpl = fetch) {
   const report = { created: 0, edited: 0, failed: 0, skipped: "" };
   if (env.DISCORD_MODE !== "live" || env.DISCORD_EVENTS !== "on" || !env.DISCORD_BOT_TOKEN) { report.skipped = "not enabled"; return report; }
-  const { results: dests } = await env.DB.prepare("SELECT * FROM discord_dest WHERE transport = 'bot' AND guild_id IS NOT NULL").all();
+  const allowed = String(env.DISCORD_EVENT_DESTS ?? "").split(",").map((s) => s.trim());     // same rule as syncLiveEvent
+  const dests = (await env.DB.prepare("SELECT * FROM discord_dest WHERE transport = 'bot' AND guild_id IS NOT NULL").all()).results.filter((d) => allowed.includes(d.name));
   const headers = { authorization: `Bot ${env.DISCORD_BOT_TOKEN}`, "content-type": "application/json" };
   for (const dest of dests) for (const ev of events) {
     const body = {

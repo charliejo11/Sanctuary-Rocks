@@ -52,6 +52,25 @@ test("NO logout: the next DJ takes over, the old set closes with a report; re-lo
   assert.equal(st.dj.name, "DJ CharlieJo");
 });
 
+test("a long set and a long host shift (more than 100 songs) still close with their reports", async () => {
+  const e = env();
+  await setupStaff(e);
+  const t0 = Date.now() - 12 * 3600e3;
+  const a = await ACTIONS.dj_login(e, { uuid: MOOSE, name: "DJ Moose" });
+  await e.DB.prepare("UPDATE dj_sets SET started_at = ? WHERE id = ?").bind(t0, a.set).run();
+  assert.ok((await ACTIONS.host_login(e, { uuid: TEA, name: "Tea" })).ok);
+  await e.DB.prepare("UPDATE host_shifts SET started_at = ?").bind(t0).run();
+  for (let i = 1; i <= 120; i++) await pollStream(e, t0 + i * 5 * 60e3, stream(`DJ Moose @ Sanctuary Rocks - Band ${i} - Song ${i}`));
+  await ACTIONS.vote(e, { voter: G(1), reaction: "love" });
+  const out = await ACTIONS.host_logout(e, { uuid: TEA });
+  assert.ok(out.ok, JSON.stringify(out));
+  assert.equal(JSON.parse((await e.DB.prepare("SELECT report FROM host_shifts").first()).report).guests_participating, 1);
+  assert.ok((await ACTIONS.dj_login(e, { uuid: CHARLIE, name: "DJ CharlieJo" })).ok);   // handoff closes the 120-song set
+  const rep = JSON.parse((await e.DB.prepare("SELECT report FROM dj_sets WHERE id = ?").bind(a.set).first()).report);
+  assert.equal(rep.songs_played, 120);
+  assert.equal(rep.positive, 1);
+});
+
 test("song detection: duplicates ignored, missing metadata never resets, replays get a new round", async () => {
   const e = env();
   await setupStaff(e);

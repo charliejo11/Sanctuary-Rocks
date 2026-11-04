@@ -12,7 +12,7 @@ function safeHref(value) {
   // browsers ignore control characters and whitespace inside a scheme: strip them before judging it
   const v = value.replace(/&#x?[0-9a-f]+;?/gi, (m) => {
     const n = /x/i.test(m) ? parseInt(m.replace(/[^0-9a-f]/gi, "").slice(0), 16) : parseInt(m.replace(/\D/g, ""), 10);
-    return Number.isFinite(n) ? String.fromCodePoint(n) : "";
+    return Number.isFinite(n) && n <= 0x10ffff ? String.fromCodePoint(n) : "";   // out of range: dropped, not a crash
   }).replace(/[\u0000- \u007f-\u009f]/g, "");
   if (/^https?:\/\//i.test(v) || /^secondlife:\/\//i.test(v) || /^\/(?!\/)/.test(v) || /^#/.test(v)) return value.trim();
   return null;

@@ -185,8 +185,9 @@ function readPending_(sh) {
   v.forEach(function (r) {
     var action = norm_(r[COL_ACTION - 1]);
     if (!action || /^(Applied|Rejected)/.test(r[COL_RESULT - 1])) return;
-    var m = String(r[COL_RESULT - 1]).match(/^Pending - ([^,]+),/);
-    out.push({ shift_id: r[0], action: action, assign_to: norm_(r[COL_ASSIGN - 1]), reason: norm_(r[COL_REASON - 1]), requested_by: m ? m[1] : "" });
+    var m = String(r[COL_RESULT - 1]).match(/^Pending - ([^,]+), (.+)$/);
+    out.push({ shift_id: r[0], action: action, assign_to: norm_(r[COL_ASSIGN - 1]), reason: norm_(r[COL_REASON - 1]),
+      requested_by: m ? m[1] : "", requested_at: m ? m[2] : "" });
   });
   return out;
 }

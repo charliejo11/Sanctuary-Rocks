@@ -211,8 +211,9 @@ export async function callout(env, actor, d, now = Date.now()) {
     ]);
   } catch (e) {
     if (!/UNIQUE/i.test(String(e?.message))) throw e;
-    const prev = idem && await one(db, "SELECT id, shift_id FROM shift_requests WHERE idem = ?", idem);   // a retry that raced its first copy
-    if (prev) return { ok: true, replay: true, cover_id: prev.id, shift_id: prev.shift_id };
+    const prev = idem && await one(db, "SELECT id, shift_id, requester_id FROM shift_requests WHERE idem = ?", idem);   // a retry that raced its first copy
+    if (prev && prev.requester_id === actor.user.id) return { ok: true, replay: true, cover_id: prev.id, shift_id: prev.shift_id };
+    if (prev) return fail(409, "try_again", "That didn't go through. Please try again.");   // someone else's key: never their cover
     return fail(409, "already_open", "This shift is already waiting for a cover.");
   }
   const cover = await one(db, ACTIVE_COVER, s.id);
@@ -343,7 +344,7 @@ export async function applySchedule(env, rows, now = Date.now(), opts = {}) {
   let lastStart = 0;
   const users = await activeUsers(db);
   const errors = [], seen = new Set();
-  let added = 0, changed = 0, removed = 0, partial = false;
+  let added = 0, changed = 0, removed = 0, matched = 0, partial = false;
   const horizon = now + cfg.window_days * 24 * H;
   // everything is read up front (a few queries, however long the schedule) and written in batches; one run writes at
   // most CLERK_IMPORT_MAX_WRITES statements and the rest follows a minute later, so a big first import never times out
@@ -363,7 +364,18 @@ export async function applySchedule(env, rows, now = Date.now(), opts = {}) {
     if (p.staff && !who) errors.push({ row: raw?.row ?? i + 2, shift_id: p.id, error: `"${p.staff}" doesn't match one staff account (set their calendar name in Backstage Pass)`, staff: p.staff });
     else if (who && !who.roles.includes(p.role)) errors.push({ row: raw?.row ?? i + 2, shift_id: p.id, error: `${who.display_name} doesn't have the ${ROLE_WORD[p.role]} role` });
     const cur = existing.get(p.id);
-    if (cur && cur.sheet_hash === p.hash && !cur.removed_at) continue;
+    if (cur && cur.sheet_hash === p.hash && !cur.removed_at) {
+      // same entry, but its name now means another account (a calendar name was set, an account was switched off):
+      // the scheduled person follows; someone put on it by a cover or an override stays
+      if ((cur.sheet_user_id ?? null) === (who?.id ?? null)) continue;
+      if (writes >= cfg.import_max_writes) { partial = true; continue; }
+      await push([db.prepare("UPDATE clerk_shifts SET sheet_user_id = ?1, assignee_user_id = CASE WHEN assignee_user_id IS ?2 THEN ?1 ELSE assignee_user_id END, updated_at = ?3 WHERE id = ?4")
+          .bind(who?.id ?? null, cur.sheet_user_id ?? null, now, p.id),
+        logStmt(db, { at: now, shift_id: p.id, action: "import_matched", source, from: cur.sheet_user_id, to: who?.id ?? null, status: cur.status, detail: { staff: p.staff || null } }),
+        sheetStmt(db, p.id, null, now)]);
+      matched++;
+      continue;
+    }
     if (writes >= cfg.import_max_writes) { partial = true; continue; }
     if (!cur) {
       await push([db.prepare(`INSERT INTO clerk_shifts(id, role, event, start_at, end_at, tz, local_label, sheet_assignee, sheet_user_id, assignee_user_id, status, sheet_hash, imported_at, updated_at)
@@ -411,7 +423,7 @@ export async function applySchedule(env, rows, now = Date.now(), opts = {}) {
     }
     await flush();
   } else errors.push({ row: null, shift_id: null, error: `${sourceName} returned no shifts, so nothing was removed` });
-  const summary = { at: now, rows: rows.length, added, changed, removed, errors: errors.slice(0, 50) };
+  const summary = { at: now, rows: rows.length, added, changed, removed, matched, errors: errors.slice(0, 50) };
   await kvSet(db, "clerk_import", JSON.stringify(summary));
   return summary;
 }
@@ -604,7 +616,8 @@ export async function boardView(env, now = Date.now()) {
     outbox_pending: { total: pending?.n ?? 0, sheet: pending?.sheet ?? 0, discord: pending?.discord ?? 0 },
     sheet_connected: !!(env.SCHEDULE_SYNC_URL && env.SCHEDULE_SYNC_SECRET), source: clerkConfig(env).source,
     sheet_error: await kvGet(db, "clerk_sheet_error"), sheet_synced_at: +((await kvGet(db, "clerk_sheet_at")) ?? 0) || null,
-    discord: env.DISCORD_MODE === "live" && env.CLERK_DISCORD === "on" && env.CLERK_DISCORD_WEBHOOK ? "live" : "preview",
+    // the same test deliverDiscord makes: a bot with a cover channel, or the webhook
+    discord: env.DISCORD_MODE === "live" && env.CLERK_DISCORD === "on" && ((env.DISCORD_BOT_TOKEN && (env.CLERK_DJ_CHANNEL || env.CLERK_HOST_CHANNEL || env.CLERK_STAFF_CHANNEL)) || env.CLERK_DISCORD_WEBHOOK) ? "live" : "preview",
   };
 }
 
@@ -752,7 +765,8 @@ export const requestSig = (action, assignTo, reason) => JSON.stringify([clean(ac
 async function applySheetRequest(env, r, now) {
   const db = env.DB;
   const action = clean(r.action, 40), assignTo = clean(r.assign_to, 80), reason = clean(r.reason, 300), shiftId = clean(r.shift_id, 64);
-  const key = await sha10(shiftId + "|" + requestSig(action, assignTo, reason));
+  // the time of the "Pending" mark makes the same request typed again later a new one (older scripts don't send it)
+  const key = await sha10(shiftId + "|" + requestSig(action, assignTo, reason) + (r.requested_at ? "|" + clean(r.requested_at, 40) : ""));
   const claimed = await run(db, "INSERT OR IGNORE INTO clerk_sheet_requests(key, shift_id, action, assign_to, reason, requested_by, seen_at) VALUES (?,?,?,?,?,?,?)",
     key, shiftId, action, assignTo || null, reason || null, clean(r.requested_by, 120) || null, now);
   if (claimed.meta.changes === 0) return { skipped: "already handled" };

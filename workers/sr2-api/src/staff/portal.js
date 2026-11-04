@@ -423,9 +423,10 @@ H.recognitionDecide = async ({ user, env, params, body }) => {
   return { ok: true };
 };
 
-// ---- the Roadie Manual, as staff see it: published text only
+// ---- the Roadie Manual, as staff see it: the last published text, until the section is archived (a status change
+// while it is being reworked doesn't take it away from staff)
 H.manual = async ({ user, env }) => {
-  const rows = await all(env.DB, "SELECT id, slug, chapter, ord, published_title title, published_html html, visible_roles, ack_required, version, published_at FROM policies WHERE status = 'published' AND published_html IS NOT NULL ORDER BY chapter, ord");
+  const rows = await all(env.DB, "SELECT id, slug, chapter, ord, published_title title, published_html html, visible_roles, ack_required, version, published_at FROM policies WHERE status != 'archived' AND published_html IS NOT NULL ORDER BY chapter, ord");
   const policies = rows.filter((p) => canSee(user, p.visible_roles)).map(({ visible_roles, ...p }) => p);
   const acks = await all(env.DB, "SELECT policy_id, version FROM policy_acks WHERE user_id = ?", user.id);
   const progress = await all(env.DB, "SELECT item FROM manual_progress WHERE user_id = ?", user.id);
@@ -448,7 +449,7 @@ H.manualProgress = async ({ user, env, body }) => {
 };
 
 H.manualAck = async ({ user, env, body }) => {
-  const p = await one(env.DB, "SELECT id, version, visible_roles FROM policies WHERE id = ? AND status = 'published'", int(body.policy_id));
+  const p = await one(env.DB, "SELECT id, version, visible_roles FROM policies WHERE id = ? AND status != 'archived' AND published_html IS NOT NULL", int(body.policy_id));
   need(p && canSee(user, p.visible_roles), 404, "not_found");
   await run(env.DB, "INSERT OR IGNORE INTO policy_acks(policy_id, user_id, version, at) VALUES (?,?,?,?)", p.id, user.id, p.version, Date.now());
   return { ok: true };
@@ -660,6 +661,9 @@ H.rosterSave = async ({ user, env, body, params }) => {
     if (u.id === user.id) need(roles.includes("owner") && active, 400, "self_lockout", "You can't remove your own owner access.");
     await run(env.DB, "UPDATE portal_users SET display_name = ?, roles = ?, sl_uuid = ?, active = ? WHERE id = ?", name || u.display_name, JSON.stringify(roles), uuid, active, u.id);
     if (!active) await run(env.DB, "DELETE FROM portal_sessions WHERE user_id = ?", u.id);
+    // in-world rights follow the account: a switched-off account, or an avatar it no longer uses, loses them on the boards
+    if (u.sl_uuid && (!active || u.sl_uuid !== uuid))
+      await run(env.DB, "UPDATE staff SET active = 0 WHERE uuid = ? AND NOT EXISTS (SELECT 1 FROM portal_users WHERE sl_uuid = ? AND active = 1)", u.sl_uuid, u.sl_uuid);
     if (active) await syncBoardStaff(env, uuid, name || u.display_name, roles);
     await audit(env, user, "roster_save", { id: u.id, roles, active });
     return { ok: true, id: u.id };

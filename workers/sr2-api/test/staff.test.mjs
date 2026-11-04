@@ -62,6 +62,20 @@ test("a user with no role, or a deactivated one, gets nothing they shouldn't", a
   assert.equal((await env.DB.prepare("SELECT COUNT(*) n FROM portal_sessions WHERE user_id = ?").bind(people.dj.id).first()).n, 0);
 });
 
+test("switching an account off, or moving it to another avatar, takes the old avatar's board rights away", async () => {
+  const { call, people, env } = await setup();
+  const staff = async (uuid) => ({ ...(await env.DB.prepare("SELECT is_manager, active FROM staff WHERE uuid = ?").bind(uuid).first()) });
+  assert.equal((await call("moose", "POST", `roster/${people.mgr.id}`, { display_name: "mgr", roles: ["management"], sl_uuid: AV(3) })).status, 200);
+  assert.deepEqual(await staff(AV(3)), { is_manager: 1, active: 1 });
+  assert.ok((await ACTIONS.dj_clear(env, { by: AV(3) })).ok);                       // a manager on the boards...
+  assert.equal((await call("moose", "POST", `roster/${people.mgr.id}`, { display_name: "mgr", roles: ["management"], sl_uuid: AV(3), active: false })).status, 200);
+  assert.equal((await staff(AV(3))).active, 0);
+  assert.equal((await ACTIONS.dj_clear(env, { by: AV(3) })).error, "forbidden");      // ...and not any more
+  await call("moose", "POST", `roster/${people.host.id}`, { display_name: "host", roles: ["host"], sl_uuid: AV(2) });
+  await call("moose", "POST", `roster/${people.host.id}`, { display_name: "host", roles: ["host"], sl_uuid: AV(7) });
+  assert.deepEqual([(await staff(AV(2))).active, (await staff(AV(7))).active], [0, 1]);
+});
+
 test("POST needs the session's CSRF token and a same-site origin", async () => {
   const { call, people } = await setup();
   const res = await call("dj", "POST", "issues", { title: "x" }, { "x-sr-csrf": "wrong" });
@@ -167,12 +181,17 @@ test("policy lifecycle: autosave stays private, publish is explicit, versions re
   assert.equal((await call("host", "GET", "manual")).data.policies.length, 1);
   assert.deepEqual((await call("host", "GET", "manual")).data.acks, []);
   assert.equal((await call("mgr", "GET", "manual")).data.policies.length, 1);
+  // flagging it for rework keeps the published text with staff, and they can still acknowledge it
+  await call("moose", "POST", `policies/${id}/status`, { status: "needs_review" });
+  assert.equal((await call("host", "GET", "manual")).data.policies.length, 1);
+  assert.ok((await call("host", "POST", "manual/ack", { policy_id: id })).data.ok);
   await call("moose", "POST", `policies/${id}/status`, { status: "archived" });
   assert.deepEqual((await call("host", "GET", "manual")).data.policies, []);
 });
 
 test("sanitizer: formatting survives, scripts and handlers never do", () => {
   assert.equal(sanitizeHtml('<p class="listline">✦ Hi <b>there</b></p>'), '<p class="listline">✦ Hi <b>there</b></p>');
+  assert.doesNotMatch(sanitizeHtml('<a href="&#99999999;javascript:alert(1)">x</a>'), /href/);   // out-of-range entity: no crash, no link
   for (const bad of ["<script>alert(1)</script>", '<img src=x onerror=alert(1)>', '<a href="javascript:alert(1)">x</a>', '<a href="java&#115;cript:alert(1)">x</a>', '<a href=" jav\tascript:alert(1)">x</a>', '<p onclick="alert(1)" style="x">x</p>',
     '<iframe src="https://evil"></iframe>', "<svg onload=alert(1)>", '<a href="data:text/html,x">x</a>', "<scr<script>ipt>alert(1)</script>", '<p class="evil">x</p>', "<style>*{}</style>", '<div><img/src=x onerror=alert(1)></div>'])
     assert.ok(!/<(script|img|iframe|svg|style|div)|onerror=|onclick=|onload=|javascript:|href="data|class="evil|style=/i.test(sanitizeHtml(bad)), `${bad} -> ${sanitizeHtml(bad)}`);
@@ -390,15 +409,16 @@ test("the stage message reads as designed", () => {
   assert.deepEqual(composeStage({ hosts: [] }).allowed_mentions, { parse: [] });
 });
 
-test("Discord scheduled events: bot only, created once then edited", async () => {
-  const { env } = await setup({ DISCORD_MODE: "live", DISCORD_BOT_TOKEN: "t", DISCORD_EVENTS: "on" });
+test("Discord scheduled events: bot only, approved servers only, created once then edited", async () => {
+  const { env } = await setup({ DISCORD_MODE: "live", DISCORD_BOT_TOKEN: "t", DISCORD_EVENTS: "on", DISCORD_EVENT_DESTS: "staff" });
   await env.DB.prepare("UPDATE discord_dest SET transport = 'bot', guild_id = '1', channel_id = '2' WHERE name = 'staff'").run();
+  await env.DB.prepare("UPDATE discord_dest SET transport = 'bot', guild_id = '9', channel_id = '8' WHERE name = 'vip'").run();   // VIP isn't approved
   const log = [];
-  const f = async (url, init) => { log.push(init.method); return Response.json({ id: "e1" }); };
+  const f = async (url, init) => { log.push(`${init.method} ${url.split("/guilds/")[1].split("/")[0]}`); return Response.json({ id: "e1" }); };
   const ev = [{ key: "k", title: "Show", start: Date.now() + 1e6, end: Date.now() + 2e6, description: "d" }];
   assert.equal((await syncScheduledEvents(env, ev, "SL", f)).created, 1);
   assert.equal((await syncScheduledEvents(env, ev, "SL", f)).edited, 1);
-  assert.deepEqual(log, ["POST", "PATCH"]);
+  assert.deepEqual(log, ["POST 1", "PATCH 1"]);
   assert.equal((await syncScheduledEvents({ ...env, DISCORD_EVENTS: "off" }, ev, "SL", f)).skipped, "not enabled");
 });
 

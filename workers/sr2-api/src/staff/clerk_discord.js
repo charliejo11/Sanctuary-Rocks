@@ -169,7 +169,7 @@ export async function handleInteraction(env, i, ctx = null, now = Date.now()) {
       const idx = Number.parseInt(b, 10);
       const shiftId = pp.ids[idx];
       if (shiftId == null) return ephemeral("That shift isn't in the list any more.");
-      const r = await callout(env, actor, { shift_id: shiftId, reason: pp.prompt.reason, idem: `dcp-${pp.prompt.id}-${idx}` }, now);
+      const r = await callout(env, actor, { shift_id: shiftId, reason: pp.prompt.reason, idem: `dcp-${String(pp.prompt.id).padStart(4, "0")}-${idx}` }, now);   // 8+ characters, or callout ignores it
       if (!r.ok) return update(r.message ?? "That didn't work.");
       await run(db, "UPDATE clerk_prompts SET answered_at = COALESCE(answered_at, ?), cover_id = ? WHERE id = ?", now, r.cover_id, pp.prompt.id);
       flush();

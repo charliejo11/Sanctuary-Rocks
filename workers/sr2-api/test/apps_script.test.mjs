@@ -41,7 +41,8 @@ test("SR Schedule: management's columns are never written; a newer Pending reque
   sh.grid[1].splice(15, 4, "Assign cover", "Blaze", "Blaze offered", "Pending - moose@example.com, Nov 5, 9:00 AM SLT");
   sh.grid[2].splice(15, 4, "Assign cover", "Kai", "Kai is free", "Pending - moose@example.com, Nov 5, 9:01 AM SLT");
   const pending = readPending_(sh);
-  assert.deepEqual(pending.map((p) => [p.shift_id, p.assign_to, p.requested_by]), [["S1", "Blaze", "moose@example.com"], ["S2", "Kai", "moose@example.com"]]);
+  assert.deepEqual(pending.map((p) => [p.shift_id, p.assign_to, p.requested_by, p.requested_at]),
+    [["S1", "Blaze", "moose@example.com", "Nov 5, 9:00 AM SLT"], ["S2", "Kai", "moose@example.com", "Nov 5, 9:01 AM SLT"]]);
   // the club system answered S1's request (same cells) and an OLDER request on S2 (different cells)
   writeSchedule_(sh, [row("S1", "Covered", "Applied Nov 5: Blaze assigned", requestSig("Assign cover", "Blaze", "Blaze offered")),
     row("S2", "Needs Cover", "Applied Nov 4: Luna assigned", requestSig("Assign cover", "Luna", "earlier"))]);
