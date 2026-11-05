@@ -96,9 +96,10 @@ function promptBody(pid, shifts, lead = "") {
     return { content: `${lead}Call out of **${shiftText(shifts[0])}**? A cover goes up for the ${ROLE_WORD[shifts[0].role]}s as soon as you confirm.`,
       components: [{ type: 1, components: [{ type: 2, style: 4, label: "Yes, I can't make it", custom_id: `clerk:ok:${pid}:0` }, { type: 2, style: 2, label: "No", custom_id: `clerk:no:${pid}` }] }] };
   }
-  return { content: `${lead}Which shift can't you make?`,
+  const list = shifts.slice(0, 25);                                                // Discord's limit for one menu
+  return { content: `${lead}Which shift can't you make? You can pick more than one.`,
     components: [
-      { type: 1, components: [{ type: 3, custom_id: `clerk:pick:${pid}`, placeholder: "Choose the shift", options: shifts.map((s, i) => ({ label: cut(shiftText(s), 100), value: String(i) })) }] },
+      { type: 1, components: [{ type: 3, custom_id: `clerk:pick:${pid}`, placeholder: "Choose the shift(s)", min_values: 1, max_values: list.length, options: list.map((s, i) => ({ label: cut(shiftText(s), 100), value: String(i) })) }] },
       { type: 1, components: [{ type: 2, style: 2, label: "Never mind", custom_id: `clerk:no:${pid}` }] },
     ] };
 }
@@ -164,23 +165,33 @@ export async function handleInteraction(env, i, ctx = null, now = Date.now(), { 
       return update("OK - nothing changed. You're still on your shift.");
     }
     if (kind === "pick") {
-      const idx = Number.parseInt(i.data.values?.[0], 10);
-      const s = pp.shifts[idx];
-      if (!s) return ephemeral("That shift isn't in the list any more.");
-      const body = promptBody(pp.prompt.id, [s]);
-      body.components[0].components[0].custom_id = `clerk:ok:${pp.prompt.id}:${idx}`;
-      return update(body.content, body.components);
+      const idxs = [...new Set((i.data.values ?? []).map((v) => Number.parseInt(v, 10)))].filter((x) => pp.shifts[x]).sort((x, y) => x - y);
+      if (!idxs.length) return ephemeral("That shift isn't in the list any more.");
+      if (idxs.length === 1) {
+        const body = promptBody(pp.prompt.id, [pp.shifts[idxs[0]]]);
+        body.components[0].components[0].custom_id = `clerk:ok:${pp.prompt.id}:${idxs[0]}`;
+        return update(body.content, body.components);
+      }
+      return update(`Call out of these ${idxs.length} shifts?\n${idxs.map((x) => `- **${shiftText(pp.shifts[x])}**`).join("\n")}\nA cover goes up for each one as soon as you confirm.`,
+        [{ type: 1, components: [{ type: 2, style: 4, label: "Yes, I can't make them", custom_id: `clerk:ok:${pp.prompt.id}:${idxs.join(".")}` }, { type: 2, style: 2, label: "No", custom_id: `clerk:no:${pp.prompt.id}` }] }]);
     }
     if (kind === "ok") {
-      const idx = Number.parseInt(b, 10);
-      const shiftId = pp.ids[idx];
-      if (shiftId == null) return ephemeral("That shift isn't in the list any more.");
-      const r = await callout(env, actor, { shift_id: shiftId, reason: pp.prompt.reason, idem: `dcp-${String(pp.prompt.id).padStart(4, "0")}-${idx}` }, now);   // 8+ characters, or callout ignores it
-      if (!r.ok) return update(r.message ?? "That didn't work.");
-      await run(db, "UPDATE clerk_prompts SET answered_at = COALESCE(answered_at, ?), cover_id = ? WHERE id = ?", now, r.cover_id, pp.prompt.id);
-      flush();
-      const s = pp.shifts[idx];
-      return update(`Called out of **${s ? shiftText(s) : shiftId}**${r.urgent ? " - it's URGENT, so management has been told too" : ""}. The cover is posted; the first eligible ${ROLE_WORD[s?.role] ?? "staff member"} to claim it takes it.`);
+      const idxs = String(b ?? "").split(".").map((x) => Number.parseInt(x, 10));
+      if (!idxs.length || idxs.some((x) => pp.ids[x] == null)) return ephemeral("That shift isn't in the list any more.");
+      const lines = [];
+      let done = 0;
+      for (const idx of idxs) {
+        const shiftId = pp.ids[idx], s = pp.shifts[idx];
+        const r = await callout(env, actor, { shift_id: shiftId, reason: pp.prompt.reason, idem: `dcp-${String(pp.prompt.id).padStart(4, "0")}-${idx}` }, now);   // 8+ characters, or callout ignores it
+        if (!r.ok) { lines.push(`**${s ? shiftText(s) : shiftId}**: ${r.message ?? "that didn't work."}`); continue; }
+        await run(db, "UPDATE clerk_prompts SET answered_at = COALESCE(answered_at, ?), cover_id = ? WHERE id = ?", now, r.cover_id, pp.prompt.id);
+        done++;
+        lines.push(`Called out of **${s ? shiftText(s) : shiftId}**${r.urgent ? " - it's URGENT, so management has been told too" : ""}.`);
+      }
+      if (done) flush();
+      if (idxs.length === 1 && !done) return update(lines[0].replace(/^\*\*.*?\*\*: /, ""));
+      const role = ROLE_WORD[pp.shifts[idxs[0]]?.role] ?? "staff member";
+      return update(`${lines.join("\n")}${done ? `${lines.length === 1 ? " " : "\n"}${done === 1 ? "The cover is" : "The covers are"} posted; the first eligible ${role} to claim ${done === 1 ? "it takes it" : "each one takes it"}.` : ""}`);
     }
   }
   return ephemeral("I didn't understand that.");
@@ -197,7 +208,8 @@ function claimReply(r, flush, asUpdate) {
 const INTENT = [
   /\b(can'?t|cannot|can ?not|won'?t be able to|unable to|not able to|not gonna|not going to)\s+(make|do|cover|attend|play|host|dj|spin|be there|come|work)\b/i,
   /\bcall(ing|ed)?[\s-]*(out|off)\b|\bcallout\b/i,
-  /\b(need|needs|needing|looking for)\s+(a\s+|someone\s+(to\s+)?)?(cover|sub|replacement|someone to cover)\b/i,
+  /\b(need|needs|needing|looking for)\s+(a\s+|some\s+|someone\s+(to\s+)?)?(covers?|covering|subs?|replacements?|someone to cover)\b/i,
+  /\b(need|needs|needing)\s+(my|a|the)\s+(set|shift|slot)s?\s+covered\b/i,
   /\b(can|could|would)\s+(someone|anyone|somebody|any ?one)\s+(please\s+)?(cover|take|sub|fill in)\b/i,
 ];
 const OFFER = /\b(i|i'?ll|i can|i could|i will)\s+(can\s+)?(cover|take it|sub)\b/i;
@@ -223,8 +235,11 @@ export function parseWhen(text, now = Date.now()) {
   if (/\b(today|tonight|tonite|this evening)\b/.test(t)) dates.add(today);
   if (/\b(tomorrow|tmrw|tmr|tmw|2morrow)\b/.test(t)) dates.add(addDays(today, 1));
   const wd = new Date(today + "T12:00:00Z").getUTCDay();
+  const dayWord = (d) => `(?:${d}|${d.slice(0, 3)}${d === "tuesday" ? "|tues" : d === "thursday" ? "|thur|thurs" : d === "wednesday" ? "|weds" : ""})s?`;
+  // a day with a date after it ("thursday 12th", "wed nov 11th") means that date, not the coming weekday
+  const dated = (d) => new RegExp(`\\b${dayWord(d)},?\\s+(?:the\\s+)?(?:\\d{1,2}(?:st|nd|rd|th)?\\b(?!\\s*(?::|am|pm|\\/|-))|(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\\.?\\s+\\d)`, "g");
   DAYS.forEach((d, i) => {
-    if (new RegExp(`\\b(${d}|${d.slice(0, 3)}${d === "tuesday" ? "|tues" : d === "thursday" ? "|thur|thurs" : d === "wednesday" ? "|weds" : ""})s?\\b`).test(t)) dates.add(addDays(today, (i - wd + 7) % 7));
+    if (new RegExp(`\\b${dayWord(d)}\\b`).test(t.replace(dated(d), " "))) dates.add(addDays(today, (i - wd + 7) % 7));
   });
   const year = Number(today.slice(0, 4));
   const pushDate = (m, d, y) => {
@@ -236,7 +251,9 @@ export function parseWhen(text, now = Date.now()) {
   for (const m of t.matchAll(/\b(\d{1,2})\/(\d{1,2})(?:\/(\d{4}))?\b/g)) pushDate(+m[1], +m[2], m[3] ? +m[3] : null);
   for (const m of t.matchAll(/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?\s+(\d{1,2})(?:st|nd|rd|th)?\b/g)) pushDate(MONTHS.indexOf(m[1].slice(0, 3)) + 1, +m[2], null);
   for (const m of t.matchAll(/\b(\d{1,2})(?:st|nd|rd|th)?\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\b/g)) pushDate(MONTHS.indexOf(m[2].slice(0, 3)) + 1, +m[1], null);
-  for (const m of t.matchAll(/\bthe\s+(\d{1,2})(st|nd|rd|th)\b/g)) {               // "the 7th": the next 7th
+  const nextDay = new RegExp(`\\b(?:the|${DAYS.map(dayWord).join("|")}),?\\s+(?:the\\s+)?(\\d{1,2})(st|nd|rd|th)?\\b(?!\\s*(?::|am|pm|\\/|-))`, "g");
+  for (const m of t.matchAll(nextDay)) {                                            // "the 7th", "thursday 12th": the next 7th / 12th
+    if (!m[2] && /^the\b/.test(m[0])) continue;                                   // "the 7" is not a date
     const d = +m[1], mo = Number(today.slice(5, 7));
     const key = `${year}-${String(mo).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
     if (key >= today) pushDate(mo, d, year); else if (mo === 12) pushDate(1, d, year + 1); else pushDate(mo + 1, d, year);
@@ -295,6 +312,7 @@ export async function handleChannelMessage(env, msg, now = Date.now(), { simulat
   return done(hits.length === 1 ? "asked to confirm" : "asked which shift", { matched: hits.length, prompt_id: pid, reply: await say(body.content, body.components, pid) });
 }
 
+const DISCORD_EPOCH = 1420070400000, STALE_MS = 30 * 60e3;
 /** Reads new messages in the approved channels (REST, once a minute). The first run only marks where to start. */
 export async function pollChannels(env, fetchImpl = fetch, now = Date.now()) {
   if (env.CLERK_NL !== "on" || !clerkBot(env)) return { skipped: true };
@@ -303,16 +321,20 @@ export async function pollChannels(env, fetchImpl = fetch, now = Date.now()) {
     const k = `clerk_nl_cursor:${ch}`;
     const cursor = (await one(env.DB, "SELECT v FROM kv WHERE k = ?", k))?.v;
     const setCursor = (v) => run(env.DB, "INSERT INTO kv(k, v, updated_at) VALUES (?,?,?) ON CONFLICT(k) DO UPDATE SET v = excluded.v, updated_at = excluded.updated_at", k, v, now);
-    if (!cursor) {
+    if (!cursor || cursor === "0") {
+      // Discord answers an empty list (not an error) when the bot can see a channel but lacks Read Message History,
+      // so an empty start is not stored: it is tried again next minute and shows in the status
       const latest = await discordApi(fetchImpl, clerkBot(env), "GET", `/channels/${ch}/messages?limit=1`);
-      await setCursor(latest?.[0]?.id ?? "0");
+      if (!latest?.[0]?.id) { out[ch] = "error: no messages visible - give the bot Read Message History here"; continue; }
+      await setCursor(latest[0].id);
       out[ch] = "started";
       continue;
     }
     const msgs = await discordApi(fetchImpl, clerkBot(env), "GET", `/channels/${ch}/messages?after=${cursor}&limit=50`);
     const sorted = (msgs ?? []).slice().sort((a, b) => (BigInt(a.id) < BigInt(b.id) ? -1 : 1));
     for (const m of sorted) {
-      await handleChannelMessage(env, { ...m, channel_id: m.channel_id ?? ch }, now);
+      // a message from long ago (the bot was away, a channel was just fixed) is skipped: a late answer would confuse people
+      if (Number(BigInt(m.id) >> 22n) + DISCORD_EPOCH >= now - STALE_MS) await handleChannelMessage(env, { ...m, channel_id: m.channel_id ?? ch }, now);
       await setCursor(m.id);                                                      // advance only past what was handled
     }
     out[ch] = sorted.length;

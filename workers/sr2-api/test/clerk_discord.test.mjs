@@ -8,7 +8,7 @@ import { makeD1 } from "./d1shim.mjs";
 import worker from "../src/worker.js";
 import { sha256, randomToken } from "../src/staff/portal.js";
 import { applySchedule, clerkTick, flushOutbox, clerkBot, clerkPublicKey } from "../src/staff/clerk.js";
-import { handleChannelMessage, pollChannels, registerCommands, verifyDiscord, matchShifts, parseWhen, discordSetupCheck, ensureCommands } from "../src/staff/clerk_discord.js";
+import { handleChannelMessage, pollChannels, registerCommands, verifyDiscord, matchShifts, parseWhen, detectCallout, discordSetupCheck, ensureCommands } from "../src/staff/clerk_discord.js";
 
 const MIG = ["0001_init", "0002_radio", "0003_trials", "0004_staff_portal", "0005_manual_seed", "0010_calendar_name", "0011_vote_board", "0012_autodj_in_song_chart", "0013_auto_clerk", "0014_clerk_discord", "0015_clerk_sheet"]
   .map((f) => fileURLToPath(new URL(`../migrations/${f}.sql`, import.meta.url)));
@@ -74,6 +74,9 @@ async function setup(extra = {}) {
   return { env, p, ix, portal, q, say, sign };
 }
 const confirmId = (reply) => reply.components[0].components[0].custom_id;
+// a real Discord message id: it carries the time the message was sent
+const T0 = Date.now();
+const sf = (n, ms = T0) => String((BigInt(ms - 1420070400000) << 22n) + BigInt(n));
 
 // ------------------------------------------------------------------ trust
 test("only Discord-signed requests count; staff server, approved channels and live Discord roles are required", async () => {
@@ -292,20 +295,68 @@ test("a managers' channel: the cover pings only the team; URGENT and UNCOVERED a
 test("channel reader: starts at the newest message, then handles each new message once, in order", async () => {
   const { env, p, q } = await setup({ CLERK_NL: "on", DISCORD_BOT_TOKEN: "bot" });
   await applySchedule(env, [row("S1", at(2), 2, "DJ", "Raven")]);
-  let pages = { C_DJ: [[{ id: "50" }]], C_HOST: [[]] };
+  let pages = { C_DJ: [[{ id: sf(50) }]], C_HOST: [[]] };
   const fake = async (url) => {
     const ch = url.match(/channels\/(\w+)\//)[1];
     return new Response(JSON.stringify(pages[ch].shift() ?? []));
   };
   await pollChannels(env, fake);
-  assert.equal((await q("SELECT v FROM kv WHERE k = 'clerk_nl_cursor:C_DJ'"))[0].v, "50");
-  pages = { C_DJ: [[{ id: "52", content: "great set last night!", author: { id: "200" } }, { id: "51", content: "calling out of my set, sorry", author: { id: p.raven.discord } }]], C_HOST: [[]] };
+  assert.equal((await q("SELECT v FROM kv WHERE k = 'clerk_nl_cursor:C_DJ'"))[0].v, sf(50));
+  pages = { C_DJ: [[{ id: sf(52), content: "great set last night!", author: { id: "200" } }, { id: sf(51), content: "calling out of my set, sorry", author: { id: p.raven.discord } }]], C_HOST: [[]] };
   await pollChannels(env, fake);
-  assert.equal((await q("SELECT v FROM kv WHERE k = 'clerk_nl_cursor:C_DJ'"))[0].v, "52");
-  assert.deepEqual((await q("SELECT message_id, result FROM clerk_discord_seen ORDER BY message_id")), [{ message_id: "51", result: "asked to confirm" }, { message_id: "52", result: "no intent" }]);
-  pages = { C_DJ: [[{ id: "51", content: "calling out of my set, sorry (edited)", author: { id: p.raven.discord } }]], C_HOST: [[]] };
+  assert.equal((await q("SELECT v FROM kv WHERE k = 'clerk_nl_cursor:C_DJ'"))[0].v, sf(52));
+  assert.deepEqual((await q("SELECT message_id, result FROM clerk_discord_seen ORDER BY message_id")), [{ message_id: sf(51), result: "asked to confirm" }, { message_id: sf(52), result: "no intent" }]);
+  pages = { C_DJ: [[{ id: sf(51), content: "calling out of my set, sorry (edited)", author: { id: p.raven.discord } }]], C_HOST: [[]] };
   await pollChannels(env, fake);
   assert.equal((await q("SELECT COUNT(*) n FROM clerk_outbox WHERE key LIKE 'discord:nl:%'"))[0].n, 1);
+});
+
+test("channel reader: a channel with no visible messages (no Read Message History) is retried, never read from the start", async () => {
+  const { env, p, q } = await setup({ CLERK_NL: "on", DISCORD_BOT_TOKEN: "bot" });
+  await applySchedule(env, [row("S1", at(2), 2, "DJ", "Raven")]);
+  const urls = [];
+  let pages = { C_DJ: [[]], C_HOST: [[]] };
+  const fake = async (url) => { urls.push(url); return new Response(JSON.stringify(pages[url.match(/channels\/(\w+)\//)[1]].shift() ?? [])); };
+  const out = await pollChannels(env, fake);
+  assert.match(out.C_DJ, /Read Message History/);
+  assert.equal((await q("SELECT COUNT(*) n FROM kv WHERE k = 'clerk_nl_cursor:C_DJ'"))[0].n, 0);   // nothing stored...
+  await env.DB.prepare("INSERT INTO kv(k, v, updated_at) VALUES ('clerk_nl_cursor:C_DJ', '0', 1)").run();   // ...and an old "0" counts as no start
+  // the right is fixed: the channel's old messages come back, but the bot starts at the newest and answers none of them
+  pages = { C_DJ: [[{ id: sf(9) }]], C_HOST: [[]] };
+  urls.length = 0;
+  assert.equal((await pollChannels(env, fake)).C_DJ, "started");
+  assert.ok(urls.some((u) => /C_DJ\/messages\?limit=1$/.test(u)) && !urls.some((u) => /after=0/.test(u)));
+  // a message from hours ago (the bot was away) is passed over; a new one is answered
+  pages = { C_DJ: [[{ id: sf(10, T0 - 3 * H), content: "calling out of my set", author: { id: p.raven.discord } }, { id: sf(11), content: "calling out of my set, sorry", author: { id: p.raven.discord } }]], C_HOST: [[]] };
+  await pollChannels(env, fake);
+  assert.deepEqual(await q("SELECT message_id FROM clerk_discord_seen"), [{ message_id: sf(11) }]);
+  assert.equal((await q("SELECT v FROM kv WHERE k = 'clerk_nl_cursor:C_DJ'"))[0].v, sf(11));
+});
+
+test("one message, several shifts: \"need covers for my 4am set wednesday nov 11th and 4am set thursday 12th\"", async () => {
+  const { env, ix, q, say } = await setup();
+  const now = Date.parse("2026-11-05T15:17:00Z");                                  // Thursday Nov 5, 7:17 AM SLT
+  assert.equal(detectCallout("@GM @DJs due to a vacation, i need covers for my 4am set wednesday nov 11th and 4am set thursday 12th. thanks for covering, Daan"), true);
+  assert.deepEqual(parseWhen("i need covers for my 4am set wednesday nov 11th and 4am set thursday 12th", now).dates, ["2026-11-11", "2026-11-12"]);
+  assert.deepEqual(parseWhen("can't make thursday", now).dates, ["2026-11-05"]);    // a day on its own is still the coming one
+  assert.deepEqual(parseWhen("can't make saturday 8 pm", now).dates, ["2026-11-07"]);
+  assert.equal(detectCallout("need my set covered friday"), true);
+  assert.equal(detectCallout("thanks for covering last night!"), false);
+  // the same thing in a real message: a menu that takes both, and one Yes calls out of both
+  const a = at(6, 4), b = at(7, 4);
+  await applySchedule(env, [row("S1", a, 2, "DJ", "Raven"), row("S2", b, 2, "DJ", "Raven"), row("S3", at(9, 4), 2, "DJ", "Raven")]);
+  const day = (ms) => new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", weekday: "long", month: "short", day: "numeric" }).format(new Date(ms)).replace(",", "");
+  const r = await say("raven", `due to a vacation i need covers for my 4am set ${day(a)} and 4am set ${day(b)}`);
+  assert.equal(r.result, "asked which shift");
+  const menu = r.reply.components[0].components[0];
+  assert.deepEqual([menu.options.length, menu.min_values, menu.max_values], [2, 1, 2]);
+  const both = await ix.raw(ix.base("raven", 3, { custom_id: menu.custom_id, component_type: 3, values: ["0", "1"] }));
+  assert.match(both.data.content, /^Call out of these 2 shifts\?/);
+  const done = await ix.button("raven", both.data.components[0].components[0].custom_id);
+  assert.match(done.data.content, /^Called out of \*\*DJ.*\nCalled out of \*\*DJ.*\nThe covers are posted/s);
+  assert.deepEqual((await q("SELECT shift_id FROM shift_requests ORDER BY shift_id")).map((x) => x.shift_id), ["S1", "S2"]);
+  assert.equal((await ix.button("raven", both.data.components[0].components[0].custom_id)).type, 7);   // a double click...
+  assert.equal((await q("SELECT COUNT(*) n FROM shift_requests"))[0].n, 2);                           // ...still two covers
 });
 
 test("setup: /callout and /claim are installed in the staff server only", async () => {
