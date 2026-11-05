@@ -8,7 +8,7 @@ import { makeD1 } from "./d1shim.mjs";
 import worker from "../src/worker.js";
 import { sha256, randomToken } from "../src/staff/portal.js";
 import { applySchedule, clerkTick, flushOutbox, clerkBot, clerkPublicKey } from "../src/staff/clerk.js";
-import { handleChannelMessage, pollChannels, registerCommands, verifyDiscord, matchShifts, parseWhen, discordSetupCheck } from "../src/staff/clerk_discord.js";
+import { handleChannelMessage, pollChannels, registerCommands, verifyDiscord, matchShifts, parseWhen, discordSetupCheck, ensureCommands } from "../src/staff/clerk_discord.js";
 
 const MIG = ["0001_init", "0002_radio", "0003_trials", "0004_staff_portal", "0005_manual_seed", "0010_calendar_name", "0011_vote_board", "0012_autodj_in_song_chart", "0013_auto_clerk", "0014_clerk_discord", "0015_clerk_sheet"]
   .map((f) => fileURLToPath(new URL(`../migrations/${f}.sql`, import.meta.url)));
@@ -443,4 +443,21 @@ test("TEST cleanup deletes only the bot's own TEST-labelled posts, and only on t
   assert.ok(r.commands_removed);
   const { env: live } = await setup({ DISCORD_BOT_TOKEN: "b" });
   assert.equal((await purgeTestPosts(live, {}, async () => { throw new Error("must not call Discord"); })).error, "not_test");
+});
+
+test("commands install themselves once Discord is on, and again only when something changes", async () => {
+  const puts = [];
+  const fake = async (url, init) => { puts.push(JSON.parse(init.body)); return new Response(JSON.stringify([{ name: "callout" }, { name: "claim" }])); };
+  const { env: off } = await setup({ DISCORD_BOT_TOKEN: "b", DISCORD_CLIENT_ID: "APP" });
+  assert.ok((await ensureCommands(off, fake)).skipped);
+  const { env } = await setup({ DISCORD_BOT_TOKEN: "b", DISCORD_CLIENT_ID: "APP", CLERK_DISCORD: "on" });
+  assert.ok((await ensureCommands(env, fake)).ok);
+  assert.equal((await ensureCommands(env, fake)).skipped, "current");
+  env.CLERK_COMMANDS_PERMISSIONS = "8";
+  assert.ok((await ensureCommands(env, fake)).ok);
+  assert.equal(puts.length, 2);
+  assert.equal(puts[1][0].default_member_permissions, "8");
+  const failing = { ...env, CLERK_COMMANDS_PERMISSIONS: "32" };
+  await assert.rejects(ensureCommands(failing, async () => new Response("no", { status: 403 })));
+  assert.ok((await ensureCommands(failing, fake)).ok);                                  // a failed try is retried next minute
 });

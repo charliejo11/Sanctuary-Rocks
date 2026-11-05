@@ -16,7 +16,7 @@ import { makeBoardActions } from "./staff/board.js";
 import { syncStage, syncScheduledEvents, syncLiveEvent, calendarStage } from "./staff/stage.js";
 import { makeVoteBoard } from "./lib/voteboard.js";
 import { clerkActions, clerkTick } from "./staff/clerk.js";
-import { discordInteractionsHttp, discordTestMessageHttp, pollChannels } from "./staff/clerk_discord.js";
+import { discordInteractionsHttp, discordTestMessageHttp, pollChannels, ensureCommands } from "./staff/clerk_discord.js";
 
 const STREAM = "http://sor.digistream.info:10206";
 const TRIAL_STREAM = "http://sor1.digistream.info:10206";   // the BACKUP stream: used for DJ trials
@@ -778,6 +778,7 @@ export default {
       ctx.waitUntil(refreshStage(env).catch(() => {}));     // recovers a failed or deleted status message
       ctx.waitUntil(clerkTick(env).catch(() => {}));         // Auto Clerk: Sheet import, reminders, escalation, outbox
       ctx.waitUntil(pollChannels(env).catch(() => {}));      // Auto Clerk: callouts written as ordinary Discord messages
+      ctx.waitUntil(ensureCommands(env).catch(() => {}));    // Auto Clerk: /callout + /claim installed once Discord is on
     } else {
       ctx.waitUntil(finaliseWeek(env));
       ctx.waitUntil(voteBoard.finaliseMonth(env).catch(() => {}));

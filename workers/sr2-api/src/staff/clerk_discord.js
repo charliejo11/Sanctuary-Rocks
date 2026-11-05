@@ -342,6 +342,16 @@ export async function registerCommands(env, fetchImpl = fetch) {
   return { ok: true, commands: (r ?? []).map((c) => c.name), visible_to: perms ? `permission ${perms} only` : "everyone in the staff server" };
 }
 
+/** Minute cron: once the clerk posts in Discord, (re)installs the commands whenever the app, server or definitions change. */
+export async function ensureCommands(env, fetchImpl = fetch, now = Date.now()) {
+  if (env.CLERK_DISCORD !== "on") return { skipped: true };
+  const want = JSON.stringify([clerkAppId(env), staffGuild(env), env.CLERK_COMMANDS_PERMISSIONS ?? null, COMMANDS]);
+  if ((await one(env.DB, "SELECT v FROM kv WHERE k = 'clerk_commands'"))?.v === want) return { skipped: "current" };
+  const r = await registerCommands(env, fetchImpl);
+  if (r.ok) await run(env.DB, "INSERT INTO kv(k, v, updated_at) VALUES ('clerk_commands', ?, ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v, updated_at = excluded.updated_at", want, now);
+  return r;
+}
+
 // ------------------------------------------------------------------ setup check (read only)
 const P = { view: 1n << 10n, send: 1n << 11n, embed: 1n << 14n, history: 1n << 16n, mention_all: 1n << 17n, admin: 1n << 3n };
 /** The bot's permissions in one channel: Discord's own order (base roles, then @everyone / role / member overwrites). */
