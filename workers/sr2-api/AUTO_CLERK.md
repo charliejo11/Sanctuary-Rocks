@@ -119,24 +119,40 @@ Backstage Pass and the Staff Board (`src/staff/clerk_discord.js`).
 has to stay open. A Cloudflare Worker can't hold one. So the bot reads the approved channels through Discord's REST API
 once a minute instead. That needs the bot's **Message Content** intent.
 
-**To switch it on (staging first):**
-1. **Developer Portal, app 1566291698835783680, Bot:** turn on **Message Content Intent**.
-2. **In each cover channel:** give the bot View Channel, Send Messages and Read Message History.
-3. **Developer Portal, General Information:** set **Interactions Endpoint URL** to
-   `https://sr2-api-staging.elfavina89.workers.dev/discord/interactions`, and put its **Public Key** in `DISCORD_PUBLIC_KEY`.
-   - An app has only ONE endpoint URL, and staging and production share this app. A separate test app and test
-     server for staging is the cleanest option.
-4. **Set the channel ids** in `wrangler.toml`: `CLERK_DJ_CHANNEL` and `CLERK_HOST_CHANNEL` (and `CLERK_STAFF_CHANNEL`,
-   optional). `CLERK_CHANNELS` overrides the list of approved channels.
-5. **Install `/callout` and `/claim` in the staff server:** Backstage Pass (owner) → `POST /staff/clerk/discord/commands`.
-6. **Switch on:**
-   - `CLERK_DISCORD = "on"`: really post. Production already has `DISCORD_MODE = "live"`; staging stays a preview.
-   - `CLERK_NL = "on"`: read ordinary messages.
+**Its own Discord app (decided 2026-11-04):** the Auto Clerk speaks as **SR Auto Clerk** (app 1567664647753171035),
+not as the club's "Sanctuary Rocks" app, so staff sign-in and the club bot are never touched. `CLERK_APP_ID`,
+`CLERK_PUBLIC_KEY` and the secret `CLERK_BOT_TOKEN` select it. Once `CLERK_APP_ID` is set the clerk never falls back to
+the club's token or key. The app is private, has Message Content on, and was added to Sanctuary Staff with no permissions.
+
+**Production channels:**
+
+| Setting | Channel |
+| --- | --- |
+| `CLERK_DJ_CHANNEL`, `CLERK_HOST_CHANNEL` | #sr-cover-staff: every cover post, with its Claim Cover button |
+| `CLERK_NL_CHANNELS` (+ `CLERK_CHANNELS`) | #sr-cover-staff, #sr-djs, #sr-hosts: callouts are understood there; buttons and commands work there |
+| `CLERK_MGMT_CHANNEL` | #club-managers-channel: URGENT callouts, still-open escalations and UNCOVERED, pinging @GM and @Sr Club Manager |
+
+Without `CLERK_MGMT_CHANNEL` the management alerts stay with the cover, as replies to it.
+
+**To switch it on:**
+1. **Developer Portal, SR Auto Clerk, Bot:** Reset Token, then `npx wrangler secret put CLERK_BOT_TOKEN --env production -c wrangler.toml`.
+2. **General Information:** Interactions Endpoint URL = `https://sr2-api-prod.elfavina89.workers.dev/discord/interactions`.
+3. **Each of the four channels:** give SR Auto Clerk View Channel, Send Messages, Read Message History and Embed Links.
+4. **Check:** Backstage Pass (owner) `GET /staff/clerk/discord/check`: key, intent, roles and the bot's rights per channel.
+5. **Install `/callout` and `/claim`:** `POST /staff/clerk/discord/commands`.
+6. **Switch on:** `CLERK_DISCORD = "on"` (production already has `DISCORD_MODE = "live"`) and `CLERK_NL = "on"`.
 
 **Without a bot channel:** a webhook (`CLERK_DISCORD_WEBHOOK`) can still post the notices, but **without buttons**, and
 it can't edit an announcement to COVERED.
 
-**Staging testing:** `scripts/clerk_discord_staging_check.mjs <test key file>` signs simulated interactions with a test
+**Staging testing (TEST system):** staging runs with `CLERK_TEST_ONLY = "on"` (only TEST- shifts can be called out,
+claimed, cancelled or assigned) and `CLERK_PING_SILENT = "on"` (mentions shown, nobody notified). For a live Discord test,
+`CLERK_DISCORD_TEST_SEND = "on"` lets only the clerk post while `DISCORD_MODE` stays dry-run; `CLERK_TESTERS` (Discord
+user ids) makes it ignore everyone else, and every post starts with "🧪 TEST - please ignore". Afterwards
+`POST /staff/clerk/discord/purge-test` (`{"commands": true}`) deletes the bot's own TEST posts and its commands. The live test
+passed in #staff-lounge on 2026-11-04 (message callout, confirm, claim, COVERED, refusals, UNCOVERED escalation).
+
+**Simulated checks:** `scripts/clerk_discord_staging_check.mjs <test key file>` signs simulated interactions with a test
 key. Its public half is `CLERK_TEST_PUBLIC_KEY` in the staging vars, which is ignored whenever Discord is live. The script
 also feeds simulated messages through `/discord/test-message`, which is off unless that key is set. 22 checks, plus a
 verified cleanup.

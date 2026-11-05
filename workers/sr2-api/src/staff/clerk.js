@@ -151,15 +151,21 @@ const discordStmt = (db, key, payload, now, when = null) => db.prepare(`INSERT O
 function roleIds(env, name) {
   try { return Object.entries(JSON.parse(env.DISCORD_ROLE_MAP ?? "{}")).filter(([, r]) => r === name).map(([id]) => id); } catch { return []; }
 }
+// CLERK_PING_SILENT = "on" (staging tests): the mentions still show who would be pinged, but nobody is notified
 function notice(env, text, { roles = [], users = [] } = {}) {
   const ping = [...roles.map((r) => `<@&${r}>`), ...users.filter(Boolean).map((u) => `<@${u}>`)].join(" ");
-  return { content: (ping ? `${ping}\n` : "") + text, allowed_mentions: { parse: [], roles, users: users.filter(Boolean) } };
+  const silent = env.CLERK_PING_SILENT === "on";
+  return { content: (ping ? `${ping}\n` : "") + text, allowed_mentions: { parse: [], roles: silent ? [] : roles, users: silent ? [] : users.filter(Boolean) } };
 }
 // A Discord notice in the outbox. The bot posts it in the DJ or Host cover channel (CLERK_DJ_CHANNEL / CLERK_HOST_CHANNEL);
 //   store         : remember the posted message on the cover, so it can be edited later (the announcement)
 //   reply_to_cover: post it as a reply to the cover's announcement
 //   only_if_open  : drop it if the cover is no longer open when its turn comes (claimed, cancelled...)
 const post = (role, coverId, body, extra = {}) => ({ op: "post", role: role ?? null, cover_id: coverId ?? null, ...extra, body });
+// A notice for management. With CLERK_MGMT_CHANNEL it goes to the managers' channel (pointing at the cover channel);
+// without it, it stays with the cover as before.
+const mgmtPost = (env, role, coverId, body, extra = {}) => !env.CLERK_MGMT_CHANNEL ? post(role, coverId, body, extra)
+  : post(role, coverId, { ...body, content: body.content + (channelFor(env, role) ? ` Cover post: <#${channelFor(env, role)}>` : "") }, { ...extra, channel: env.CLERK_MGMT_CHANNEL, reply_to_cover: false });
 export const claimButton = (coverId) => [{ type: 1, components: [{ type: 2, style: 3, label: "Claim Cover", custom_id: `clerk:claim:${coverId}` }] }];
 
 /**
@@ -185,6 +191,11 @@ const hoursLeft = (start, now) => Math.max(0, Math.round((start - now) / H * 10)
 const ACTIVE_COVER = "SELECT * FROM shift_requests WHERE shift_id = ? AND auto = 1 AND clerk_state = 'open'";
 
 /** The person holding a shift calls out: an open cover, no manager needed. Retry-safe with `idem`. */
+// CLERK_TEST_ONLY = "on" (staging): only TEST- shifts can be called out, claimed, cancelled or assigned, so a real staff
+// message that reaches the test system can never change anything
+export const testOnly = (env) => env.CLERK_TEST_ONLY === "on";
+const notTest = () => fail(403, "test_only", "This is the Auto Clerk TEST system: it only handles TEST shifts.");
+
 export async function callout(env, actor, d, now = Date.now()) {
   const db = env.DB, cfg = clerkConfig(env);
   const idem = typeof d.idem === "string" && /^[0-9a-zA-Z-]{8,64}$/.test(d.idem) ? d.idem : null;
@@ -194,6 +205,7 @@ export async function callout(env, actor, d, now = Date.now()) {
   }
   const s = await one(db, "SELECT * FROM clerk_shifts WHERE id = ? AND removed_at IS NULL", clean(d.shift_id, 64));
   if (!s) return fail(404, "not_found", "That shift isn't on the schedule.");
+  if (testOnly(env) && !s.id.startsWith("TEST-")) return notTest();
   if (s.assignee_user_id !== actor.user.id) return fail(403, "not_yours", "Only the person scheduled for this shift can call out of it.");
   if (s.start_at <= now) return fail(409, "started", "That shift has already started - please tell a manager directly.");
   if (s.status === "needs_cover") return fail(409, "already_open", "This shift is already waiting for a cover.");
@@ -226,11 +238,15 @@ export async function callout(env, actor, d, now = Date.now()) {
 async function queueOpenNotice(env, cover, s, users, now) {
   const cfg = clerkConfig(env);
   const urgent = s.start_at - now < cfg.urgent_hours * H;
-  const roles = [...(cfg.ping === "role" ? roleIds(env, s.role) : []), ...(urgent ? roleIds(env, "management") : [])];
+  const mgmtHere = urgent && !env.CLERK_MGMT_CHANNEL;                               // urgent: management is told here, or in its own channel
+  const roles = [...(cfg.ping === "role" ? roleIds(env, s.role) : []), ...(mgmtHere ? roleIds(env, "management") : [])];
   const text = `${urgent ? "URGENT - " : ""}**Cover needed: ${ROLE_WORD[s.role]} shift**, ${s.local_label}${s.event ? ` (${plain(s.event)})` : ""}\n`
     + `${plain(nameOf(users, cover.requester_id))} can't make it. Starts in ${hoursLeft(s.start_at, now)} h. First to claim it gets it: the button below, \`/claim\`, or Backstage Pass.${portalLink(env)}`;
   const body = { ...notice(env, text, { roles }), components: claimButton(cover.id) };
   await discordStmt(env.DB, `discord:${cover.id}:open`, post(s.role, cover.id, body, { store: true, only_if_open: true }), now).run();
+  if (urgent && env.CLERK_MGMT_CHANNEL) await discordStmt(env.DB, `discord:${cover.id}:urgent`, mgmtPost(env, s.role, cover.id, notice(env,
+    `**URGENT callout:** ${plain(nameOf(users, cover.requester_id))} can't make the ${ROLE_WORD[s.role]} shift ${s.local_label} - it starts in ${hoursLeft(s.start_at, now)} h. The cover is posted.`,
+    { roles: roleIds(env, "management") }), { only_if_open: true }), now).run();
 }
 
 /** An eligible DJ / host takes an open cover. One atomic step decides it, with the schedule-conflict check inside it. */
@@ -238,6 +254,7 @@ export async function claim(env, actor, coverId, now = Date.now()) {
   const db = env.DB;
   const c = await one(db, "SELECT * FROM shift_requests WHERE id = ? AND auto = 1", Number.parseInt(coverId, 10) || 0);
   if (!c) return fail(404, "not_found", "That cover isn't open.");
+  if (testOnly(env) && !String(c.shift_id).startsWith("TEST-")) return notTest();
   if (c.clerk_state === "covered" && c.volunteer_id === actor.user.id) return { ok: true, replay: true, cover_id: c.id, shift_id: c.shift_id };
   const reject = async (status, error, message) => {
     await logStmt(db, { at: now, shift_id: c.shift_id, cover_id: c.id, action: "rejected_claim", actor, from: c.requester_id, to: actor.user.id, status: c.clerk_state, detail: { error } }).run();
@@ -282,6 +299,7 @@ export async function cancelCallout(env, actor, coverId, { manager = false } = {
   const db = env.DB;
   const c = await one(db, "SELECT * FROM shift_requests WHERE id = ? AND auto = 1", Number.parseInt(coverId, 10) || 0);
   if (!c) return fail(404, "not_found", "That cover doesn't exist.");
+  if (testOnly(env) && !String(c.shift_id).startsWith("TEST-")) return notTest();
   if (c.requester_id !== actor.user.id && !manager) return fail(403, "forbidden", "Only the person who called out (or a manager) can cancel it.");
   const r = await run(db, "UPDATE shift_requests SET clerk_state = 'cancelled', status = 'cancelled', decided_at = ? WHERE id = ? AND clerk_state = 'open'", now, c.id);
   if (r.meta.changes !== 1) return fail(409, "closed", "That cover isn't open any more.");
@@ -302,6 +320,7 @@ export async function overrideAssign(env, actor, d, now = Date.now()) {
   const db = env.DB;
   const s = await one(db, "SELECT * FROM clerk_shifts WHERE id = ? AND removed_at IS NULL", clean(d.shift_id, 64));
   if (!s) return fail(404, "not_found", "That shift isn't on the schedule.");
+  if (testOnly(env) && !s.id.startsWith("TEST-")) return notTest();
   const users = await activeUsers(db);
   const to = users.find((u) => u.id === Number.parseInt(d.user_id, 10));
   if (!to) return fail(400, "bad_user", "Choose an active staff member.");
@@ -458,7 +477,7 @@ export async function clerkTick(env, fetchImpl = fetch, now = Date.now()) {
         logStmt(db, { at: now, shift_id: s.id, cover_id: c.id, action: "uncovered", source: "system", from: c.requester_id, status: "uncovered" }, madeIt),
         sheetStmt(db, s.id, { status: "UNCOVERED", covered_by: "" }, now, madeIt),
         ...closeStmts(db, c.id, `~~Cover needed: ${ROLE_WORD[s.role]} shift, ${s.local_label}~~\n**UNCOVERED** - nobody took it in time.`, now, madeIt),
-        discordStmt(db, `discord:${c.id}:uncovered`, post(s.role, c.id, notice(env, `**UNCOVERED:** the ${ROLE_WORD[s.role]} shift ${s.local_label} started with nobody covering for ${plain(nameOf(users, c.requester_id))}. Management, please step in.`,
+        discordStmt(db, `discord:${c.id}:uncovered`, mgmtPost(env, s.role, c.id, notice(env, `**UNCOVERED:** the ${ROLE_WORD[s.role]} shift ${s.local_label} started with nobody covering for ${plain(nameOf(users, c.requester_id))}. Management, please step in.`,
           { roles: roleIds(env, "management") }), { reply_to_cover: true }), now, madeIt),
       ]);
       continue;
@@ -487,7 +506,7 @@ export async function clerkTick(env, fetchImpl = fetch, now = Date.now()) {
       add.push(step);
       // called out after this point AND already urgent then: that first post pinged management itself
       if (c.created_at > s.start_at - h * H && c.created_at > s.start_at - cfg.urgent_hours * H) continue;
-      stmts.push(discordStmt(db, `discord:${c.id}:${step}`, post(s.role, c.id, notice(env, `**Management:** still no cover for the ${ROLE_WORD[s.role]} shift ${s.local_label} (${plain(nameOf(users, c.requester_id))} called out). Starts in ${hoursLeft(s.start_at, now)} h.`,
+      stmts.push(discordStmt(db, `discord:${c.id}:${step}`, mgmtPost(env, s.role, c.id, notice(env, `**Management:** still no cover for the ${ROLE_WORD[s.role]} shift ${s.local_label} (${plain(nameOf(users, c.requester_id))} called out). Starts in ${hoursLeft(s.start_at, now)} h.`,
         { roles: roleIds(env, "management") }), nudge), now, stillOpen));
       stmts.push(logStmt(db, { at: now, shift_id: s.id, cover_id: c.id, action: "escalate", source: "system", status: "open", detail: { hours: h } }, stillOpen));
     }
@@ -507,6 +526,23 @@ const backoff = (tries) => Math.min(60, 2 ** tries) * 60e3;                     
 export const channelFor = (env, role) => (role === "host" ? env.CLERK_HOST_CHANNEL : role === "dj" ? env.CLERK_DJ_CHANNEL : null) || env.CLERK_STAFF_CHANNEL || null;
 
 /** Discord REST with the bot token (server side only). Throws on failure, so the outbox retries. */
+/**
+ * Whether the Auto Clerk really posts in Discord: CLERK_DISCORD = "on" with DISCORD_MODE = "live" (production), or, for a
+ * controlled test on staging, CLERK_DISCORD_TEST_SEND = "on". That switch lets ONLY the Auto Clerk post (in its own cover
+ * channels); every other Discord feature on staging stays a preview, because DISCORD_MODE stays "dry-run".
+ */
+/**
+ * The Discord app the Auto Clerk speaks as. CLERK_BOT_TOKEN / CLERK_APP_ID / CLERK_PUBLIC_KEY give it its own app (the
+ * staging test bot); unset, it uses the club's app (DISCORD_BOT_TOKEN / DISCORD_CLIENT_ID / DISCORD_PUBLIC_KEY).
+ * Once CLERK_APP_ID is set it never falls back to the club's token or key, even while CLERK_BOT_TOKEN is missing.
+ * Sign-in and every other Discord feature always use the club's app.
+ */
+const ownApp = (env) => !!env.CLERK_APP_ID;
+export const clerkBot = (env) => ownApp(env) ? env.CLERK_BOT_TOKEN : env.DISCORD_BOT_TOKEN;
+export const clerkAppId = (env) => ownApp(env) ? env.CLERK_APP_ID : env.DISCORD_CLIENT_ID;
+export const clerkPublicKey = (env) => ownApp(env) ? env.CLERK_PUBLIC_KEY : env.DISCORD_PUBLIC_KEY;
+export const clerkSends = (env) => env.CLERK_DISCORD === "on" && (env.DISCORD_MODE === "live" || env.CLERK_DISCORD_TEST_SEND === "on");
+
 export async function discordApi(fetchImpl, token, method, path, body) {
   const r = await fetchImpl(`https://discord.com/api/v10${path}`, { method, headers: { authorization: `Bot ${token}`, "content-type": "application/json" }, body: body === undefined ? undefined : JSON.stringify(body) });
   if (!r.ok) throw new Error(`Discord HTTP ${r.status} ${(await r.text()).slice(0, 100)}`);
@@ -514,20 +550,24 @@ export async function discordApi(fetchImpl, token, method, path, body) {
 }
 
 /**
- * One outbox notice. Nothing leaves unless DISCORD_MODE is "live" and CLERK_DISCORD is "on" (staging only previews).
+ * One outbox notice. Nothing leaves unless clerkSends(env) (staging only previews, unless its controlled test is on).
  * The bot posts in the role's cover channel (with the Claim button) and remembers the announcement so it can be edited;
  * without a bot channel it falls back to the webhook, which can't carry buttons.
  */
+// The TEST system labels everything it posts, so nobody in a shared channel mistakes a test for a real cover
+export const TEST_TAG = "🧪 **TEST - please ignore**\n";
+const testTag = (env, body) => testOnly(env) && typeof body.content === "string" && !body.content.startsWith(TEST_TAG) ? { ...body, content: TEST_TAG + body.content } : body;
 async function deliverDiscord(env, p, fetchImpl) {
   const db = env.DB;
-  const body = p.op ? p.body : p;                                                  // older rows: a plain webhook message
+  const raw = p.op ? p.body : p;                                                   // older rows: a plain webhook message
   const cover = p.cover_id ? await one(db, "SELECT clerk_state, discord_channel_id, discord_msg_id FROM shift_requests WHERE id = ?", p.cover_id) : null;
   if (p.only_if_open && cover && cover.clerk_state !== "open") return "stale";       // claimed / cancelled before its turn
-  if (!(env.DISCORD_MODE === "live" && env.CLERK_DISCORD === "on")) {
+  if (!clerkSends(env)) {
     await kvSet(db, "clerk_discord_preview", JSON.stringify(p));
     return "preview";
   }
-  const bot = env.DISCORD_BOT_TOKEN;
+  const bot = clerkBot(env);
+  const body = testTag(env, raw);
   if (p.op === "edit") {
     if (!cover?.discord_msg_id || !bot) return "nothing to edit";
     await discordApi(fetchImpl, bot, "PATCH", `/channels/${cover.discord_channel_id}/messages/${cover.discord_msg_id}`, body);
@@ -616,8 +656,9 @@ export async function boardView(env, now = Date.now()) {
     outbox_pending: { total: pending?.n ?? 0, sheet: pending?.sheet ?? 0, discord: pending?.discord ?? 0 },
     sheet_connected: !!(env.SCHEDULE_SYNC_URL && env.SCHEDULE_SYNC_SECRET), source: clerkConfig(env).source,
     sheet_error: await kvGet(db, "clerk_sheet_error"), sheet_synced_at: +((await kvGet(db, "clerk_sheet_at")) ?? 0) || null,
+    sheet_stats: JSON.parse((await kvGet(db, "clerk_sheet_stats")) ?? "null"),
     // the same test deliverDiscord makes: a bot with a cover channel, or the webhook
-    discord: env.DISCORD_MODE === "live" && env.CLERK_DISCORD === "on" && ((env.DISCORD_BOT_TOKEN && (env.CLERK_DJ_CHANNEL || env.CLERK_HOST_CHANNEL || env.CLERK_STAFF_CHANNEL)) || env.CLERK_DISCORD_WEBHOOK) ? "live" : "preview",
+    discord: clerkSends(env) && ((clerkBot(env) && (env.CLERK_DJ_CHANNEL || env.CLERK_HOST_CHANNEL || env.CLERK_STAFF_CHANNEL)) || env.CLERK_DISCORD_WEBHOOK) ? "live" : "preview",
   };
 }
 
@@ -808,9 +849,10 @@ export async function syncSheet(env, fetchImpl = fetch, now = Date.now(), { forc
     await kvSet(db, "clerk_sheet_cursor", mirror.cursor);
     if (dirty) await run(db, "DELETE FROM kv WHERE k = 'clerk_sheet_dirty' AND v = ?", dirty);    // unless it changed meanwhile
     await run(db, "DELETE FROM kv WHERE k = 'clerk_sheet_error'");
+    if (body.stats) await kvSet(db, "clerk_sheet_stats", JSON.stringify({ at: now, purged: body.purged ?? 0, tabs: body.stats }));   // newer scripts report this
     const applied = [];
     for (const req of body.pending ?? []) applied.push(await applySheetRequest(env, req, now));
-    return { ok: true, rows: Object.fromEntries(Object.entries(mirror.tabs).map(([k, v]) => [k, v.length])), requests: applied };
+    return { ok: true, rows: Object.fromEntries(Object.entries(mirror.tabs).map(([k, v]) => [k, v.length])), requests: applied, purged: body.purged ?? null, sheet: body.stats ?? null };
   } catch (e) {
     await kvSet(db, "clerk_sheet_error", String(e?.message ?? e).slice(0, 200));
     return { failed: String(e?.message ?? e).slice(0, 120) };

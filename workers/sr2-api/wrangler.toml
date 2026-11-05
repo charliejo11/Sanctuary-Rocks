@@ -47,12 +47,25 @@ DISCORD_EVENT_DESTS = "staff"
 DISCORD_CLIENT_ID = "1566291698835783680"
 DISCORD_STAFF_GUILD_ID = "421390161620893710"
 DISCORD_ROLE_MAP = '{"421391530125950979":"owner","1562631109504663672":"owner","676629987184345108":"management","1523828687068200980":"management","421391780936810498":"dj","813936040372994092":"dj","421391980078170112":"host","862779998195679293":"host"}'
-# Auto Clerk in Discord, STAGING: placeholder cover channels (replace with the real channel ids when testing in Discord).
+# Auto Clerk in Discord, STAGING: the controlled test runs in #staff-lounge (the project owner's choice, 2026-11-04).
+# Only CLERK_TESTERS (Discord user ids) get answers there; every post is labelled TEST and its pings notify nobody.
 # CLERK_TEST_PUBLIC_KEY lets scripts/clerk_discord_staging_check.mjs sign simulated interactions; it is a PUBLIC key
 # and is ignored whenever DISCORD_MODE is "live". Never add it to production.
-CLERK_DJ_CHANNEL = "staging-dj-covers"
-CLERK_HOST_CHANNEL = "staging-host-covers"
+CLERK_DJ_CHANNEL = "682329780598997019"
+CLERK_HOST_CHANNEL = "682329780598997019"
+CLERK_STAFF_CHANNEL = "682329780598997019"
+# CLERK_TESTERS = "<Discord user ids>"   (set it again for the next live test; left out of the public repo)
+CLERK_DISCORD = "off"                     # the live test is finished (2026-11-04); "on" + the two below re-run it
+CLERK_DISCORD_TEST_SEND = "off"
+CLERK_NL = "off"
 CLERK_TEST_PUBLIC_KEY = "d481bc6b92df59aa62fa4d794ca9d85b8c5b8a37d32b129f4e1e485a517871e8"
+# Staging is a TEST system: only TEST- shifts can be called out / claimed, and pings name the roles without notifying.
+# Its Discord tests use a SEPARATE app ("SR Auto Clerk TEST": CLERK_APP_ID, CLERK_PUBLIC_KEY, secret CLERK_BOT_TOKEN);
+# the club's own Discord app, its sign-in, commands and endpoint are never used for them.
+CLERK_TEST_ONLY = "on"
+CLERK_PING_SILENT = "on"
+# The test app became the production "SR Auto Clerk" (2026-11-04), so staging has no Discord app of its own now.
+# A future Discord test needs a new test app: CLERK_APP_ID, CLERK_PUBLIC_KEY, secret CLERK_BOT_TOKEN, CLERK_COMMANDS_PERMISSIONS = "8".
 
 # PRODUCTION: the backend behind the live site's Backstage Pass. Its own worker and database.
 # Deploy:      npx wrangler deploy --env production -c wrangler.toml
@@ -78,3 +91,16 @@ SITE_URL = "https://sanctuary-rocks.elfavina89.workers.dev"
 DISCORD_CLIENT_ID = "1566291698835783680"
 DISCORD_STAFF_GUILD_ID = "421390161620893710"
 DISCORD_ROLE_MAP = '{"421391530125950979":"owner","1562631109504663672":"owner","676629987184345108":"management","1523828687068200980":"management","421391780936810498":"dj","813936040372994092":"dj","421391980078170112":"host","862779998195679293":"host"}'
+# Auto Clerk in Discord (approved 2026-11-04). It speaks as its OWN app "SR Auto Clerk" (the former test app), so the club's
+# app, its sign-in and endpoint are never touched. Secret: CLERK_BOT_TOKEN. Covers: #sr-cover-staff; callouts are also read in
+# #sr-djs and #sr-hosts; URGENT / still-open / UNCOVERED alerts go to #club-managers-channel.
+CLERK_APP_ID = "1567664647753171035"
+CLERK_PUBLIC_KEY = "dc73f113f2ca1cccd6d3ee1c094894175d7967f75d1540ce5f588bf81070edda"
+CLERK_DJ_CHANNEL = "1522672230918520972"
+CLERK_HOST_CHANNEL = "1522672230918520972"
+CLERK_MGMT_CHANNEL = "1146569007336521729"
+CLERK_CHANNELS = "1522672230918520972,421393278500601857,421394242103935017"
+CLERK_NL_CHANNELS = "1522672230918520972,421393278500601857,421394242103935017"
+# Off until the bot's token, endpoint and channel access are checked; then both "on".
+CLERK_DISCORD = "off"
+CLERK_NL = "off"

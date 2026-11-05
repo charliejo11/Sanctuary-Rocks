@@ -170,7 +170,8 @@ function doPost(e) {
     if (tabs.covers) upsert_(sheets.covers, tabs.covers, TABS.covers.headers.length);
     if (tabs.changes) upsert_(sheets.changes, tabs.changes, TABS.changes.headers.length);
     if (tabs.log) upsert_(sheets.log, tabs.log, TABS.log.headers.length);
-    return out({ ok: true, pending: pending });
+    var purged = purgeTest_(sheets, tabs);
+    return out({ ok: true, pending: pending, purged: purged, stats: stats_(sheets) });
   } finally {
     lock.releaseLock();
   }
@@ -188,6 +189,51 @@ function readPending_(sh) {
     var m = String(r[COL_RESULT - 1]).match(/^Pending - ([^,]+), (.+)$/);
     out.push({ shift_id: r[0], action: action, assign_to: norm_(r[COL_ASSIGN - 1]), reason: norm_(r[COL_REASON - 1]),
       requested_by: m ? m[1] : "", requested_at: m ? m[2] : "" });
+  });
+  return out;
+}
+
+/**
+ * Rows left by the club system's TEST checks, once the club system has removed them: shifts whose id starts with
+ * "TEST-" (real shifts are "CAL-...") and Staff Registry rows named "TEST ..." whose account is gone. Nothing else is
+ * ever deleted, and a TEST shift still in this sync's SR Schedule (a check in progress) is kept.
+ */
+function purgeTest_(sheets, tabs) {
+  if (!tabs.schedule || !tabs.registry) return 0;
+  var liveShift = {}, liveStaff = {}, removed = 0;
+  tabs.schedule.forEach(function (r) { liveShift[String(r[0])] = true; });
+  tabs.registry.forEach(function (r) { liveStaff[String(r[0])] = true; });
+  var drop = function (sh, isOld) {
+    var last = sh.getLastRow();
+    if (last < 2) return;
+    var v = sh.getRange(2, 1, last - 1, sh.getLastColumn()).getDisplayValues();
+    for (var i = v.length - 1; i >= 0; i--) if (isOld(v[i])) { sh.deleteRow(i + 2); removed++; }   // bottom up: rows above keep their place
+  };
+  var oldShift = function (col) { return function (r) { var id = String(r[col]); return id.indexOf("TEST-") === 0 && !liveShift[id]; }; };
+  drop(sheets.schedule, oldShift(0));
+  drop(sheets.callouts, oldShift(1));
+  drop(sheets.covers, oldShift(1));
+  drop(sheets.changes, oldShift(3));
+  drop(sheets.log, oldShift(4));
+  drop(sheets.registry, function (r) { return String(r[1]).indexOf("TEST ") === 0 && !liveStaff[String(r[0])]; });
+  return removed;
+}
+
+/** Each tab's size after a sync, so the club system can check it without opening the workbook: rows, repeated ids, TEST rows. */
+function stats_(sheets) {
+  var out = {};
+  ORDER.forEach(function (k) {
+    var sh = sheets[k], last = sh.getLastRow(), ids = last > 1 ? sh.getRange(2, 1, last - 1, 1).getDisplayValues() : [];
+    var seen = {}, dup = 0, test = 0;
+    var shiftCol = { schedule: 0, callouts: 1, covers: 1, changes: 3, log: 4 }[k];
+    var rows = shiftCol == null || last < 2 ? null : sh.getRange(2, shiftCol + 1, last - 1, 1).getDisplayValues();
+    ids.forEach(function (r, i) {
+      var id = String(r[0]);
+      if (id && seen[id]) dup++;
+      seen[id] = true;
+      if (rows ? String(rows[i][0]).indexOf("TEST-") === 0 : false) test++;
+    });
+    out[k] = { rows: ids.length, duplicate_ids: dup, test_rows: test };
   });
   return out;
 }

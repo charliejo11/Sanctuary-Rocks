@@ -7,8 +7,8 @@ import { fileURLToPath } from "node:url";
 import { makeD1 } from "./d1shim.mjs";
 import worker from "../src/worker.js";
 import { sha256, randomToken } from "../src/staff/portal.js";
-import { applySchedule, clerkTick, flushOutbox } from "../src/staff/clerk.js";
-import { handleChannelMessage, pollChannels, registerCommands, verifyDiscord, matchShifts, parseWhen } from "../src/staff/clerk_discord.js";
+import { applySchedule, clerkTick, flushOutbox, clerkBot, clerkPublicKey } from "../src/staff/clerk.js";
+import { handleChannelMessage, pollChannels, registerCommands, verifyDiscord, matchShifts, parseWhen, discordSetupCheck } from "../src/staff/clerk_discord.js";
 
 const MIG = ["0001_init", "0002_radio", "0003_trials", "0004_staff_portal", "0005_manual_seed", "0010_calendar_name", "0011_vote_board", "0012_autodj_in_song_chart", "0013_auto_clerk", "0014_clerk_discord", "0015_clerk_sheet"]
   .map((f) => fileURLToPath(new URL(`../migrations/${f}.sql`, import.meta.url)));
@@ -269,6 +269,25 @@ test("unfilled at the start: UNCOVERED, the announcement says so, management is 
   assert.deepEqual(JSON.parse((await q("SELECT payload FROM clerk_outbox WHERE key = ?", `discord:${co.cover_id}:uncovered`))[0].payload).body.allowed_mentions.roles, ["R_MGMT"]);
 });
 
+test("a managers' channel: the cover pings only the team; URGENT and UNCOVERED alerts go to management's channel", async () => {
+  const { env, q, portal } = await setup({ CLERK_MGMT_CHANNEL: "C_MGMT" });
+  await applySchedule(env, [row("S1", Date.now() + 2 * H, 2, "DJ", "Raven")]);
+  const { data: co } = await portal("raven", "POST", "clerk/callout", { shift_id: "S1" });
+  const payload = async (step) => JSON.parse((await q("SELECT payload FROM clerk_outbox WHERE key = ?", `discord:${co.cover_id}:${step}`))[0]?.payload ?? "null");
+  const open = await payload("open");
+  assert.equal(open.role, "dj");
+  assert.deepEqual(open.body.allowed_mentions.roles, ["R_DJ"]);                      // no management ping on the cover itself
+  const urgent = await payload("urgent");
+  assert.equal(urgent.channel, "C_MGMT");
+  assert.deepEqual(urgent.body.allowed_mentions.roles, ["R_MGMT"]);
+  assert.match(urgent.body.content, /URGENT callout:.*Cover post: <#C_DJ>/s);
+  await clerkTick(env, async () => new Response("{}"), Date.now() + 3 * H);
+  const unc = await payload("uncovered");
+  assert.equal(unc.channel, "C_MGMT");
+  assert.ok(!unc.reply_to_cover);
+  assert.deepEqual(unc.body.allowed_mentions.roles, ["R_MGMT"]);
+});
+
 // ------------------------------------------------------------------ the channel reader + setup
 test("channel reader: starts at the newest message, then handles each new message once, in order", async () => {
   const { env, p, q } = await setup({ CLERK_NL: "on", DISCORD_BOT_TOKEN: "bot" });
@@ -293,10 +312,53 @@ test("setup: /callout and /claim are installed in the staff server only", async 
   const { env } = await setup({ DISCORD_BOT_TOKEN: "bot", DISCORD_CLIENT_ID: "APP" });
   let seen;
   const r = await registerCommands(env, async (url, init) => { seen = { url, init }; return new Response(JSON.stringify(JSON.parse(init.body))); });
-  assert.deepEqual(r, { ok: true, commands: ["callout", "claim"] });
+  assert.deepEqual(r, { ok: true, commands: ["callout", "claim"], visible_to: "everyone in the staff server" });
   assert.match(seen.url, /\/applications\/APP\/guilds\/G1\/commands$/);
   assert.equal(seen.init.method, "PUT");
   assert.equal(seen.init.headers.authorization, "Bot bot");
+  // while testing: only administrators see them
+  const t = await registerCommands({ ...env, CLERK_COMMANDS_PERMISSIONS: "8" }, async (url, init) => { seen = { url, init }; return new Response(init.body); });
+  assert.equal(t.visible_to, "permission 8 only");
+  assert.deepEqual(JSON.parse(seen.init.body).map((c) => c.default_member_permissions), ["8", "8"]);
+});
+
+test("setup check: reads (never writes) the app key, intent, roles and the bot's rights per channel, staff server only", async () => {
+  const { env } = await setup({ DISCORD_BOT_TOKEN: "bot", CLERK_DJ_CHANNEL: "C_TEST" });
+  const VIEW = 1 << 10, SEND = 1 << 11, EMBED = 1 << 14, HIST = 1 << 16;
+  const api = {
+    "/applications/@me": { id: "APP", name: "SR Bot", verify_key: "abc123", interactions_endpoint_url: null, flags: 1 << 19 },
+    "/users/@me": { id: "BOT", username: "srbot" },
+    "/guilds/G1/roles": [{ id: "G1", name: "@everyone", permissions: String(VIEW | SEND | HIST), mentionable: false }, { id: "R_DJ", name: "DJs", permissions: "0", mentionable: true },
+      { id: "R_BOT", name: "Bot", permissions: String(EMBED), mentionable: false }],
+    "/guilds/G1/members/BOT": { roles: ["R_BOT"] },
+    "/guilds/G1/channels": [{ id: "CAT", type: 4, name: "Staff" }, { id: "C_OPEN", type: 0, name: "general", parent_id: "CAT", position: 1, permission_overwrites: [] },
+      { id: "C_TEST", type: 0, name: "auto-clerk-test", parent_id: "CAT", position: 2, permission_overwrites: [{ id: "G1", type: 0, allow: "0", deny: String(VIEW) }, { id: "BOT", type: 1, allow: String(VIEW), deny: "0" }] },
+      { id: "C_HIDDEN", type: 0, name: "mgmt", position: 3, permission_overwrites: [{ id: "G1", type: 0, allow: "0", deny: String(VIEW) }] }],
+    "/applications/APP/guilds/G1/commands": [{ name: "callout", default_member_permissions: "8" }],
+  };
+  const methods = new Set();
+  const r = await discordSetupCheck(env, async (url, init) => { methods.add(init.method); return new Response(JSON.stringify(api[url.replace("https://discord.com/api/v10", "")] ?? {})); });
+  assert.deepEqual([...methods], ["GET"]);
+  assert.deepEqual([r.ok, r.app.public_key, r.app.message_content_intent, r.bot.in_staff_server], [true, "abc123", true, true]);
+  assert.deepEqual(r.roles.map((x) => [x.name, x.maps_to, x.mentionable]), [["DJs", "dj", true]]);
+  const ch = Object.fromEntries(r.channels.map((c) => [c.name, c]));
+  assert.deepEqual(ch.general.bot_can, { view: true, send: true, embed: true, history: true });
+  assert.deepEqual([ch["auto-clerk-test"].private, ch["auto-clerk-test"].bot_can.view, ch["auto-clerk-test"].auto_clerk], [true, true, ["dj"]]);
+  assert.equal(ch.mgmt.bot_can.view, false);
+  assert.deepEqual(r.commands, [{ name: "callout", restricted_to: "8" }]);
+});
+
+test("staging's controlled test: CLERK_DISCORD_TEST_SEND lets only the Auto Clerk post; without it, previews", async () => {
+  const sent = [];
+  const fake = async (url) => { sent.push(url); return new Response(JSON.stringify({ id: "M1" })); };
+  for (const [extra, posts] of [[{}, 0], [{ CLERK_DISCORD_TEST_SEND: "on" }, 1]]) {
+    sent.length = 0;
+    const { env, portal } = await setup({ DISCORD_MODE: "dry-run", CLERK_DISCORD: "on", DISCORD_BOT_TOKEN: "bot", ...extra });
+    await applySchedule(env, [row("S1", Date.now() + 30 * H, 2, "DJ", "Raven")]);
+    await portal("raven", "POST", "clerk/callout", { shift_id: "S1" });
+    await flushOutbox(env, fake);
+    assert.equal(sent.filter((u) => u.endsWith("/channels/C_DJ/messages")).length, posts);
+  }
 });
 
 test("dates in messages are read in SLT and matched to real shifts only", () => {
@@ -307,4 +369,78 @@ test("dates in messages are read in SLT and matched to real shifts only", () => 
   assert.equal(matchShifts(shifts, parseWhen("can't do saturday at 8pm", now)).length, 1);
   assert.equal(matchShifts(shifts, parseWhen("can't do saturday", now)).length, 2);
   assert.equal(matchShifts(shifts, parseWhen("can't do sunday", now)).length, 0);
+});
+
+// ------------------------------------------------------------------ the staging TEST system
+test("TEST system: only TEST- shifts can be called out or offered; pings show the roles but notify nobody", async () => {
+  const { env, ix, portal, q } = await setup({ CLERK_TEST_ONLY: "on", CLERK_PING_SILENT: "on" });
+  await applySchedule(env, [row("CAL-real-DJ", at(2), 2, "DJ", "Raven"), row("TEST-1", at(3), 2, "DJ", "Raven")]);
+  assert.equal((await portal("raven", "POST", "clerk/callout", { shift_id: "CAL-real-DJ" })).data.error, "test_only");
+  const offered = await ix.auto("raven", "callout", "shift");
+  assert.deepEqual(offered.data.choices.map((c) => c.value), ["TEST-1"]);           // the real shift is never offered
+  const { data: co } = await portal("raven", "POST", "clerk/callout", { shift_id: "TEST-1" });
+  assert.ok(co.ok);
+  const body = JSON.parse((await q("SELECT payload FROM clerk_outbox WHERE key = ?", `discord:${co.cover_id}:open`))[0].payload).body;
+  assert.match(body.content, /^<@&R_DJ>/);                                           // the post says who it is for...
+  assert.deepEqual(body.allowed_mentions, { parse: [], roles: [], users: [] });     // ...but nobody is notified
+  assert.equal((await q("SELECT status FROM clerk_shifts WHERE id = 'CAL-real-DJ'"))[0].status, "scheduled");
+});
+
+test("TEST system in a shared channel: only the listed testers get answers, and every post is labelled TEST", async () => {
+  const otherPub = hex(await crypto.subtle.exportKey("raw", other.publicKey));
+  const { env, ix, portal, q, say } = await setup({ CLERK_TEST_ONLY: "on", CLERK_PING_SILENT: "on", CLERK_TESTERS: "100", CLERK_DISCORD: "on", CLERK_DISCORD_TEST_SEND: "on", DISCORD_BOT_TOKEN: "b", CLERK_TEST_PUBLIC_KEY: otherPub });
+  await applySchedule(env, [row("TEST-1", at(3), 2, "DJ", "Raven"), row("TEST-2", at(4), 2, "DJ", "Blaze")]);
+  assert.equal((await say("blaze", "can't make my set, sorry")).ignored, "not a tester");      // real staff in the channel: silence
+  assert.equal((await q("SELECT COUNT(*) n FROM clerk_discord_seen"))[0].n, 0);
+  assert.match((await ix.cmd("blaze", "callout")).data.content, /TEST bot/);
+  assert.deepEqual((await ix.auto("blaze", "callout", "shift")).data.choices, []);
+  const simulated = await ix.raw(ix.base("blaze", 2, { name: "callout", options: [] }), { key: other.privateKey });
+  assert.doesNotMatch(JSON.stringify(simulated), /TEST bot/);                        // the test key's simulations still run
+  assert.notEqual((await handleChannelMessage(env, { id: "SIM1", channel_id: "C_DJ", content: "can't make my set, sorry", author: { id: "200" } }, Date.now(), { simulated: true })).ignored, "not a tester");
+  assert.ok((await portal("raven", "POST", "clerk/callout", { shift_id: "TEST-1" })).data.ok);
+  const sent = [];
+  await flushOutbox(env, async (url, init) => { sent.push({ url, body: JSON.parse(init.body) }); return new Response(JSON.stringify({ id: "MSG1" })); });
+  const ann = sent.find((s) => s.body.components?.[0]?.components?.[0]?.label === "Claim Cover");
+  assert.ok(sent.every((s) => s.body.content.startsWith("🧪 **TEST - please ignore**\n")));
+  assert.match(ann.body.content, /^🧪 \*\*TEST - please ignore\*\*\n<@&R_DJ>/);
+  assert.deepEqual(ann.body.allowed_mentions.roles, []);
+});
+
+test("a separate Auto Clerk app: its own key, bot and app id; the club's app is not used for it", async () => {
+  const otherPub = hex(await crypto.subtle.exportKey("raw", other.publicKey));
+  const { env, ix } = await setup({ DISCORD_PUBLIC_KEY: otherPub, CLERK_PUBLIC_KEY: PUB, DISCORD_BOT_TOKEN: "club-bot", DISCORD_CLIENT_ID: "CLUB_APP", CLERK_BOT_TOKEN: "test-bot", CLERK_APP_ID: "TEST_APP" });
+  await applySchedule(env, [row("S1", at(2), 2, "DJ", "Raven")]);
+  assert.equal((await ix.auto("raven", "callout", "shift")).type, 8);              // signed by the TEST app's key: accepted
+  let seen;
+  await registerCommands(env, async (url, init) => { seen = { url, auth: init.headers.authorization }; return new Response(init.body); });
+  assert.match(seen.url, /\/applications\/TEST_APP\/guilds\/G1\/commands$/);
+  assert.equal(seen.auth, "Bot test-bot");
+  const { env: clubOnly, ix: ix2 } = await setup({ DISCORD_PUBLIC_KEY: otherPub });    // the club's key alone: our test signature fails
+  assert.equal((await ix2.auto("raven", "callout", "shift")).status, 401);
+  assert.ok(clubOnly);
+  const { env: noToken } = await setup({ DISCORD_BOT_TOKEN: "club-bot", DISCORD_PUBLIC_KEY: otherPub, CLERK_APP_ID: "TEST_APP" });
+  assert.equal(clerkBot(noToken), undefined);                                         // its token not set yet: never the club's
+  assert.equal(clerkPublicKey(noToken), undefined);
+  assert.equal((await registerCommands(noToken, async () => { throw new Error("must not call Discord"); })).error, "not_configured");
+});
+
+test("TEST cleanup deletes only the bot's own TEST-labelled posts, and only on the TEST system", async () => {
+  const { purgeTestPosts } = await import("../src/staff/clerk_discord.js");
+  const { env } = await setup({ CLERK_TEST_ONLY: "on", DISCORD_BOT_TOKEN: "b", DISCORD_CLIENT_ID: "APP" });
+  const deleted = [], put = [];
+  const fake = async (url, init) => {
+    if (url.endsWith("/users/@me")) return new Response(JSON.stringify({ id: "BOT" }));
+    if (init.method === "DELETE") { deleted.push(url.split("/").pop()); return new Response(null, { status: 204 }); }
+    if (init.method === "PUT") { put.push(url); return new Response("[]"); }
+    return new Response(JSON.stringify([
+      { id: "m1", author: { id: "BOT" }, content: "🧪 **TEST - please ignore**\n<@&R_DJ> Cover needed" },
+      { id: "m2", author: { id: "BOT" }, content: "a real post by the bot" },
+      { id: "m3", author: { id: "100" }, content: "🧪 **TEST - please ignore**\ncopied by a person" }]));
+  };
+  const r = await purgeTestPosts(env, { commands: true }, fake);
+  assert.deepEqual([...new Set(deleted)], ["m1"]);                                   // the same channel is listed for DJ + Host
+  assert.equal(put.length, 1);
+  assert.ok(r.commands_removed);
+  const { env: live } = await setup({ DISCORD_BOT_TOKEN: "b" });
+  assert.equal((await purgeTestPosts(live, {}, async () => { throw new Error("must not call Discord"); })).error, "not_test");
 });

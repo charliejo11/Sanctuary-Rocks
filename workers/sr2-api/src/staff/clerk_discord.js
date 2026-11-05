@@ -9,7 +9,7 @@
 // Everything ends in the same callout() / claim() as Backstage Pass and the Staff Board (staff/clerk.js), so the database
 // decides once and every interface shows the same state.
 //
-// Trust: an interaction counts only if Discord's Ed25519 signature checks out (DISCORD_PUBLIC_KEY). The person is the
+// Trust: an interaction counts only if Discord's Ed25519 signature checks out (the Auto Clerk app's public key). The person is the
 // signed Discord user id, matched to an active Backstage Pass account (discord_id from Discord sign-in). Their roles must
 // be on that account AND carried by their Discord roles right now (signed member.roles mapped via DISCORD_ROLE_MAP).
 // Display names and anything typed are never trusted. Only the staff server and the approved channels are accepted.
@@ -17,7 +17,7 @@
 // Ordinary messages need the bot's Message Content intent (Developer Portal toggle). Workers can't keep Discord's Gateway
 // connection open, so the approved channels are read through the REST API once a minute instead (CLERK_NL = "on").
 
-import { callout, claim, eligibleFor, flushOutbox, discordApi, shiftLabel, clerkConfig } from "./clerk.js";
+import { callout, claim, eligibleFor, flushOutbox, discordApi, shiftLabel, clerkConfig, clerkBot, clerkAppId, clerkPublicKey, testOnly, TEST_TAG } from "./clerk.js";
 
 const one = (db, sql, ...a) => db.prepare(sql).bind(...a).first();
 const all = async (db, sql, ...a) => (await db.prepare(sql).bind(...a).all()).results;
@@ -67,8 +67,13 @@ const update = (content, components = []) => ({ type: 7, data: { content, compon
 const plain = (s) => String(s ?? "").replace(/[*_~`|>@\\]/g, "");
 const cut = (s, n) => (s.length > n ? s.slice(0, n - 1) + "…" : s);
 
-async function myShifts(db, userId, now) {
-  return all(db, "SELECT * FROM clerk_shifts WHERE assignee_user_id = ? AND removed_at IS NULL AND start_at > ? AND status IN ('scheduled','covered') ORDER BY start_at LIMIT 25", userId, now);
+// On the TEST system with CLERK_TESTERS set (Discord user ids), real Discord traffic from anyone else is ignored, so a
+// test in a busy staff channel never answers real staff. Simulated traffic (signed with the test key) is always allowed.
+const tester = (env, discordId, simulated) => simulated || !testOnly(env) || !list(env.CLERK_TESTERS).length || list(env.CLERK_TESTERS).includes(discordId);
+
+// on the TEST system (CLERK_TEST_ONLY) only TEST- shifts are offered
+async function myShifts(db, userId, now, onlyTest = false) {
+  return all(db, `SELECT * FROM clerk_shifts WHERE assignee_user_id = ? AND removed_at IS NULL AND start_at > ? AND status IN ('scheduled','covered')${onlyTest ? " AND id LIKE 'TEST-%'" : ""} ORDER BY start_at LIMIT 25`, userId, now);
 }
 async function claimableCovers(db, actor, now) {
   const rows = await all(db, `SELECT s.*, c.id cover_id, c.requester_id FROM shift_requests c JOIN clerk_shifts s ON s.id = c.shift_id
@@ -109,8 +114,9 @@ async function promptFor(env, pid, discordUser, now) {
 }
 
 // ------------------------------------------------------------------ interactions
-export async function handleInteraction(env, i, ctx = null, now = Date.now()) {
+export async function handleInteraction(env, i, ctx = null, now = Date.now(), { simulated = false } = {}) {
   if (i.type === 1) return { type: 1 };                                             // PING
+  if (!tester(env, i.member?.user?.id ?? i.user?.id, simulated)) return i.type === 4 ? { type: 8, data: { choices: [] } } : ephemeral("This is the Auto Clerk TEST bot - it only answers the people running the test. Nothing was changed.");
   const who = await discordActor(env, i);
   if (who.error) return i.type === 4 ? { type: 8, data: { choices: [] } } : ephemeral(who.error);
   if (!approvedChannels(env).has(i.channel_id ?? i.channel?.id)) return i.type === 4 ? { type: 8, data: { choices: [] } } : ephemeral("Use the DJ / Host cover channels for this.");
@@ -123,12 +129,12 @@ export async function handleInteraction(env, i, ctx = null, now = Date.now()) {
     const f = i.data.options?.find((o) => o.focused);
     const typed = String(f?.value ?? "").toLowerCase();
     const rows = f?.name === "cover" ? (await claimableCovers(db, actor, now)).map((s) => ({ name: cut(shiftText(s), 100), value: String(s.cover_id) }))
-      : (await myShifts(db, actor.user.id, now)).map((s) => ({ name: cut(shiftText(s), 100), value: s.id }));
+      : (await myShifts(db, actor.user.id, now, testOnly(env))).map((s) => ({ name: cut(shiftText(s), 100), value: s.id }));
     return { type: 8, data: { choices: rows.filter((c) => c.name.toLowerCase().includes(typed)).slice(0, 25) } };
   }
 
   if (i.type === 2 && i.data.name === "callout") {
-    const shifts = await myShifts(db, actor.user.id, now);
+    const shifts = await myShifts(db, actor.user.id, now, testOnly(env));
     if (!shifts.length) return ephemeral("You don't have any upcoming shifts on the schedule. If that's wrong, tell a manager.");
     const wanted = opt("shift")?.value;
     const pick = wanted ? shifts.filter((s) => s.id === wanted) : shifts;
@@ -260,10 +266,11 @@ export function matchShifts(shifts, when) {
 }
 
 /** One ordinary message from an approved channel. Each message id is handled once (an edit keeps the id). */
-export async function handleChannelMessage(env, msg, now = Date.now()) {
+export async function handleChannelMessage(env, msg, now = Date.now(), { simulated = false } = {}) {
   const db = env.DB;
   if (msg.author?.bot || msg.webhook_id) return { ignored: "bot" };
   if (!nlChannels(env).includes(msg.channel_id)) return { ignored: "channel" };
+  if (!tester(env, msg.author?.id, simulated)) return { ignored: "not a tester" };
   const first = await run(db, "INSERT OR IGNORE INTO clerk_discord_seen(message_id, channel_id, author_id, at) VALUES (?,?,?,?)", msg.id, msg.channel_id, msg.author?.id ?? null, now);
   if (first.meta.changes === 0) return { ignored: "seen" };
   const done = async (result, extra = {}) => { await run(db, "UPDATE clerk_discord_seen SET result = ? WHERE message_id = ?", result, msg.id); return { result, ...extra }; };
@@ -277,7 +284,7 @@ export async function handleChannelMessage(env, msg, now = Date.now()) {
   const u = await one(db, "SELECT id, display_name FROM portal_users WHERE discord_id = ? AND active = 1", msg.author?.id ?? "");
   if (!u) return done("not linked", { reply: await say("I can't match your Discord account to a Backstage Pass staff account yet. Sign in to Backstage Pass with Discord once, then try again.") });
   const actor = { user: { id: u.id, roles: [], name: u.display_name }, source: "discord", discord: msg.author.id };
-  const shifts = (await myShifts(db, u.id, now)).filter((s) => s.start_at < now + clerkConfig(env).window_days * 24 * H);
+  const shifts = (await myShifts(db, u.id, now, testOnly(env))).filter((s) => s.start_at < now + clerkConfig(env).window_days * 24 * H);
   if (!shifts.length) return done("no shifts", { reply: await say("You don't have any upcoming shifts on the schedule, so there's nothing to call out of. If that's wrong, tell a manager.") });
   const when = parseWhen(msg.content, now);
   const hits = matchShifts(shifts, when);
@@ -290,26 +297,27 @@ export async function handleChannelMessage(env, msg, now = Date.now()) {
 
 /** Reads new messages in the approved channels (REST, once a minute). The first run only marks where to start. */
 export async function pollChannels(env, fetchImpl = fetch, now = Date.now()) {
-  if (env.CLERK_NL !== "on" || !env.DISCORD_BOT_TOKEN) return { skipped: true };
+  if (env.CLERK_NL !== "on" || !clerkBot(env)) return { skipped: true };
   const out = {};
-  for (const ch of nlChannels(env)) {
+  for (const ch of nlChannels(env)) try {
     const k = `clerk_nl_cursor:${ch}`;
     const cursor = (await one(env.DB, "SELECT v FROM kv WHERE k = ?", k))?.v;
     const setCursor = (v) => run(env.DB, "INSERT INTO kv(k, v, updated_at) VALUES (?,?,?) ON CONFLICT(k) DO UPDATE SET v = excluded.v, updated_at = excluded.updated_at", k, v, now);
     if (!cursor) {
-      const latest = await discordApi(fetchImpl, env.DISCORD_BOT_TOKEN, "GET", `/channels/${ch}/messages?limit=1`);
+      const latest = await discordApi(fetchImpl, clerkBot(env), "GET", `/channels/${ch}/messages?limit=1`);
       await setCursor(latest?.[0]?.id ?? "0");
       out[ch] = "started";
       continue;
     }
-    const msgs = await discordApi(fetchImpl, env.DISCORD_BOT_TOKEN, "GET", `/channels/${ch}/messages?after=${cursor}&limit=50`);
+    const msgs = await discordApi(fetchImpl, clerkBot(env), "GET", `/channels/${ch}/messages?after=${cursor}&limit=50`);
     const sorted = (msgs ?? []).slice().sort((a, b) => (BigInt(a.id) < BigInt(b.id) ? -1 : 1));
     for (const m of sorted) {
       await handleChannelMessage(env, { ...m, channel_id: m.channel_id ?? ch }, now);
       await setCursor(m.id);                                                      // advance only past what was handled
     }
     out[ch] = sorted.length;
-  }
+  } catch (e) { out[ch] = `error: ${String(e?.message ?? e).slice(0, 160)}`; }
+  await run(env.DB, "INSERT INTO kv(k, v, updated_at) VALUES ('clerk_nl_status', ?, ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v, updated_at = excluded.updated_at", JSON.stringify({ at: now, channels: out }), now);
   return out;
 }
 
@@ -321,22 +329,82 @@ export const COMMANDS = [
   { name: "claim", description: "Take an open DJ / host cover", options: [
     { type: 3, name: "cover", description: "Which cover", required: false, autocomplete: true }] },
 ];
-/** Installs /callout and /claim in the staff server (guild commands show up at once). Owner only, from Backstage Pass. */
+/**
+ * Installs /callout and /claim in the staff server (guild commands show up at once). Owner only, from Backstage Pass.
+ * CLERK_COMMANDS_PERMISSIONS (a Discord permission number, e.g. "8" = Administrator) hides them from everyone else while
+ * testing; the server still checks every caller's roles either way.
+ */
 export async function registerCommands(env, fetchImpl = fetch) {
-  if (!env.DISCORD_BOT_TOKEN || !env.DISCORD_CLIENT_ID || !staffGuild(env)) return { ok: false, error: "not_configured", message: "The bot token, application id and staff server id are needed." };
-  const r = await discordApi(fetchImpl, env.DISCORD_BOT_TOKEN, "PUT", `/applications/${env.DISCORD_CLIENT_ID}/guilds/${staffGuild(env)}/commands`, COMMANDS);
-  return { ok: true, commands: (r ?? []).map((c) => c.name) };
+  if (!clerkBot(env) || !clerkAppId(env) || !staffGuild(env)) return { ok: false, error: "not_configured", message: "The bot token, application id and staff server id are needed." };
+  const perms = /^\d+$/.test(env.CLERK_COMMANDS_PERMISSIONS ?? "") ? env.CLERK_COMMANDS_PERMISSIONS : null;
+  const r = await discordApi(fetchImpl, clerkBot(env), "PUT", `/applications/${clerkAppId(env)}/guilds/${staffGuild(env)}/commands`,
+    COMMANDS.map((c) => ({ ...c, default_member_permissions: perms })));
+  return { ok: true, commands: (r ?? []).map((c) => c.name), visible_to: perms ? `permission ${perms} only` : "everyone in the staff server" };
+}
+
+// ------------------------------------------------------------------ setup check (read only)
+const P = { view: 1n << 10n, send: 1n << 11n, embed: 1n << 14n, history: 1n << 16n, mention_all: 1n << 17n, admin: 1n << 3n };
+/** The bot's permissions in one channel: Discord's own order (base roles, then @everyone / role / member overwrites). */
+function channelPerms(base, ch, guildId, roleIds, botId) {
+  if (base & P.admin) return ~0n;
+  let p = base;
+  const ow = ch.permission_overwrites ?? [];
+  const everyone = ow.find((o) => o.id === guildId);
+  if (everyone) p = (p & ~BigInt(everyone.deny)) | BigInt(everyone.allow);
+  let deny = 0n, allow = 0n;
+  for (const o of ow) if (o.type === 0 && o.id !== guildId && roleIds.includes(o.id)) { deny |= BigInt(o.deny); allow |= BigInt(o.allow); }
+  p = (p & ~deny) | allow;
+  const me = ow.find((o) => o.type === 1 && o.id === botId);
+  if (me) p = (p & ~BigInt(me.deny)) | BigInt(me.allow);
+  return p;
+}
+/**
+ * What the Auto Clerk needs from Discord, read with the bot token (GET requests only, staff server only): the app's public
+ * key, its interactions URL and Message Content intent, the bot's rights in each text channel, the mapped roles, and
+ * whether /callout and /claim are installed. Owner only.
+ */
+export async function discordSetupCheck(env, fetchImpl = fetch) {
+  const token = clerkBot(env), guildId = staffGuild(env);
+  if (!token || !guildId) return { ok: false, error: "not_configured", message: "The bot token and staff server id are needed." };
+  const get = (path) => discordApi(fetchImpl, token, "GET", path).catch((e) => ({ failed: String(e?.message ?? e).slice(0, 120) }));
+  const [app, bot, roles, channels] = [await get("/applications/@me"), await get("/users/@me"), await get(`/guilds/${guildId}/roles`), await get(`/guilds/${guildId}/channels`)];
+  const member = bot?.id ? await get(`/guilds/${guildId}/members/${bot.id}`) : { failed: "no bot user" };
+  const commands = app?.id ? await get(`/applications/${app.id}/guilds/${guildId}/commands`) : [];
+  const flags = BigInt(app?.flags ?? 0);
+  const map = roleMap(env);
+  const roleList = Array.isArray(roles) ? roles : [];
+  const botRoles = [guildId, ...(member?.roles ?? [])];
+  const base = roleList.filter((r) => botRoles.includes(r.id)).reduce((a, r) => a | BigInt(r.permissions), 0n);
+  const cats = new Map((Array.isArray(channels) ? channels : []).filter((c) => c.type === 4).map((c) => [c.id, c.name]));
+  const has = (p, bit) => (p & bit) === bit;
+  const chosen = { dj: env.CLERK_DJ_CHANNEL ?? null, host: env.CLERK_HOST_CHANNEL ?? null, staff: env.CLERK_STAFF_CHANNEL ?? null, managers: env.CLERK_MGMT_CHANNEL ?? null };
+  return {
+    ok: !app?.failed && !bot?.failed && Array.isArray(roles) && Array.isArray(channels),
+    app: { id: app?.id ?? null, name: app?.name ?? null, public_key: app?.verify_key ?? null, interactions_url: app?.interactions_endpoint_url ?? null,
+      message_content_intent: (flags & (1n << 18n)) !== 0n || (flags & (1n << 19n)) !== 0n, error: app?.failed ?? null },
+    bot: { id: bot?.id ?? null, name: bot?.username ?? null, in_staff_server: !member?.failed, administrator: has(base, P.admin), mention_all_roles: has(base, P.mention_all) || has(base, P.admin) },
+    roles: roleList.filter((r) => map[r.id]).map((r) => ({ id: r.id, name: r.name, maps_to: map[r.id], mentionable: !!r.mentionable })),
+    channels: (Array.isArray(channels) ? channels : []).filter((c) => c.type === 0 || c.type === 5).sort((a, b) => a.position - b.position).map((c) => {
+      const p = channelPerms(base, c, guildId, botRoles, bot?.id);
+      return { id: c.id, name: c.name, category: cats.get(c.parent_id) ?? "", private: (c.permission_overwrites ?? []).some((o) => o.id === guildId && (BigInt(o.deny) & P.view)),
+        bot_can: { view: has(p, P.view), send: has(p, P.send), embed: has(p, P.embed), history: has(p, P.history) },
+        auto_clerk: Object.entries(chosen).filter(([, id]) => id === c.id).map(([k]) => k) };
+    }),
+    commands: Array.isArray(commands) ? commands.map((c) => ({ name: c.name, restricted_to: c.default_member_permissions ?? null })) : commands,
+    chosen,
+    listening: JSON.parse((await one(env.DB, "SELECT v FROM kv WHERE k = 'clerk_nl_status'"))?.v ?? "null"),   // the last channel read: message count or the error
+  };
 }
 
 /** POST /discord/interactions: Discord's signed requests. A test key (CLERK_TEST_PUBLIC_KEY) is honoured only off live. */
 export async function discordInteractionsHttp(request, env, ctx) {
   const body = await request.text();
   const sig = request.headers.get("x-signature-ed25519"), ts = request.headers.get("x-signature-timestamp");
-  const keys = [env.DISCORD_PUBLIC_KEY, env.DISCORD_MODE !== "live" ? env.CLERK_TEST_PUBLIC_KEY : null].filter(Boolean);
-  let ok = false;
-  for (const k of keys) if (await verifyDiscord(k, sig, ts, body)) { ok = true; break; }
+  const keys = [clerkPublicKey(env), env.DISCORD_MODE !== "live" ? env.CLERK_TEST_PUBLIC_KEY : null].filter(Boolean);
+  let ok = null;
+  for (const k of keys) if (await verifyDiscord(k, sig, ts, body)) { ok = k; break; }
   if (!ok) return new Response("invalid request signature", { status: 401 });
-  const res = await handleInteraction(env, JSON.parse(body), ctx);
+  const res = await handleInteraction(env, JSON.parse(body), ctx, Date.now(), { simulated: ok !== clerkPublicKey(env) });
   return new Response(JSON.stringify(res), { headers: { "content-type": "application/json" } });
 }
 
@@ -345,11 +413,33 @@ export async function discordTestMessageHttp(request, env) {
   if (!env.CLERK_TEST_PUBLIC_KEY || env.DISCORD_MODE === "live") return new Response("not found", { status: 404 });
   const body = await request.text();
   if (!(await verifyDiscord(env.CLERK_TEST_PUBLIC_KEY, request.headers.get("x-signature-ed25519"), request.headers.get("x-signature-timestamp"), body))) return new Response("invalid request signature", { status: 401 });
-  return new Response(JSON.stringify(await handleChannelMessage(env, JSON.parse(body))), { headers: { "content-type": "application/json" } });
+  return new Response(JSON.stringify(await handleChannelMessage(env, JSON.parse(body), Date.now(), { simulated: true })), { headers: { "content-type": "application/json" } });
+}
+
+/**
+ * TEST system only: removes what a Discord test left behind - the bot's own TEST-labelled posts in the approved channels
+ * (never anyone else's message), and, with commands: true, its slash commands.
+ */
+export async function purgeTestPosts(env, { commands = false } = {}, fetchImpl = fetch) {
+  if (!testOnly(env)) return { ok: false, error: "not_test", message: "Only the TEST system can purge its posts." };
+  const bot = clerkBot(env);
+  if (!bot) return { ok: false, error: "not_configured", message: "The bot token is needed." };
+  const me = await discordApi(fetchImpl, bot, "GET", "/users/@me");
+  const out = { ok: true, deleted: 0, channels: {} };
+  for (const ch of approvedChannels(env)) {
+    const msgs = await discordApi(fetchImpl, bot, "GET", `/channels/${ch}/messages?limit=100`);
+    const mine = (msgs ?? []).filter((m) => m.author?.id === me.id && String(m.content ?? "").startsWith(TEST_TAG));
+    for (const m of mine) { await discordApi(fetchImpl, bot, "DELETE", `/channels/${ch}/messages/${m.id}`); out.deleted++; }
+    out.channels[ch] = mine.length;
+  }
+  if (commands) { await discordApi(fetchImpl, bot, "PUT", `/applications/${clerkAppId(env)}/guilds/${staffGuild(env)}/commands`, []); out.commands_removed = true; }
+  return out;
 }
 
 /** Backstage Pass (owner): install the slash commands. */
 export function discordRoutes({ need, OWNER }) {
-  return [["POST", /^clerk\/discord\/commands$/, OWNER, async ({ env, fetchImpl }) => { const r = await registerCommands(env, fetchImpl); need(r.ok, 409, r.error, r.message); return r; }]];
+  return [["POST", /^clerk\/discord\/commands$/, OWNER, async ({ env, fetchImpl }) => { const r = await registerCommands(env, fetchImpl); need(r.ok, 409, r.error, r.message); return r; }],
+    ["POST", /^clerk\/discord\/purge-test$/, OWNER, async ({ env, body, fetchImpl }) => { const r = await purgeTestPosts(env, { commands: body?.commands === true }, fetchImpl); need(r.ok, 409, r.error, r.message); return r; }],
+    ["GET", /^clerk\/discord\/check$/, OWNER, async ({ env, fetchImpl }) => { const r = await discordSetupCheck(env, fetchImpl); need(r.ok !== false || r.error !== "not_configured", 409, r.error, r.message); return r; }]];
 }
 export { shiftLabel };

@@ -9,8 +9,8 @@ import { requestSig } from "../src/staff/clerk.js";
 
 const code = readFileSync(new URL("../../../google-apps-script/sanctuary-auto-clerk.gs", import.meta.url), "utf8");
 const gs = {};
-vm.runInNewContext(code + "\nthis.api = { writeSchedule_, readPending_, upsert_, sig_, TABS };", gs);
-const { writeSchedule_, upsert_, sig_, TABS } = gs.api;
+vm.runInNewContext(code + "\nthis.api = { writeSchedule_, readPending_, upsert_, sig_, purgeTest_, stats_, ORDER, TABS };", gs);
+const { writeSchedule_, upsert_, sig_, purgeTest_, stats_, TABS } = gs.api;
 const readPending_ = (sh) => JSON.parse(JSON.stringify(gs.api.readPending_(sh)));   // plain arrays from the script's sandbox
 
 // a tiny stand-in for a Google Sheets tab: a grid of strings, row 1 = headers
@@ -22,7 +22,8 @@ function fakeSheet(headers) {
     setValues(vals) { vals.forEach((row, i) => { grid[r - 1 + i] ??= []; row.forEach((v, j) => { grid[r - 1 + i][c - 1 + j] = v; }); }); return this; },
     setNumberFormat() { return this; },
   });
-  return { grid, getRange: range, getLastRow: () => grid.reduce((n, row, i) => (row.some((v) => String(v ?? "") !== "") ? i + 1 : n), 0) };
+  return { grid, getRange: range, getLastRow: () => grid.reduce((n, row, i) => (row.some((v) => String(v ?? "") !== "") ? i + 1 : n), 0),
+    getLastColumn: () => headers.length, deleteRow: (r) => { grid.splice(r - 1, 1); } };
 }
 const row = (id, status, answer = "", sig = "") => [id, "Sat Nov 7, 8:00 PM - 10:00 PM SLT", "Sat, Nov 7, 2026", "8:00 PM", "10:00 PM", "DJ", "Rock Night",
   "DJ Raven", "Raven", status, "", "", "2026-11-08T04:00:00Z", "2026-11-08T06:00:00Z", "2026-11-05T12:00:00Z", answer, sig];
@@ -56,4 +57,38 @@ test("SR Schedule: management's columns are never written; a newer Pending reque
 test("both sides describe a request the same way, whatever the spacing or capitals", () => {
   assert.equal(sig_("  assign COVER ", "blaze ", "Blaze  offered"), requestSig("Assign cover", "Blaze", "Blaze offered"));
   assert.notEqual(sig_("Assign cover", "Blaze", "reason A"), requestSig("Assign cover", "Blaze", "reason B"));
+});
+
+test("TEST rows the club system has removed are cleared from every tab; real rows and a check in progress stay", () => {
+  const sheets = Object.fromEntries(Object.entries(TABS).map(([k, t]) => [k, fakeSheet(t.headers)]));
+  writeSchedule_(sheets.schedule, [row("CAL-abc-DJ", "Scheduled"), row("TEST-1", "Covered"), row("TEST-2", "Needs Cover")]);
+  upsert_(sheets.callouts, [["7", "TEST-1", "x"], ["8", "CAL-abc-DJ", "y"]], 12);
+  upsert_(sheets.covers, [["7", "TEST-1", "x"], ["9", "TEST-2", "z"]], 13);
+  upsert_(sheets.changes, [["50", "t", "t", "TEST-1"], ["51", "t", "t", "CAL-abc-DJ"]], 11);
+  upsert_(sheets.log, [["60", "t", "t", "claim", "TEST-1"], ["61", "t", "t", "import_added", "CAL-abc-DJ"], ["62", "t", "t", "callout", "TEST-2"]], 14);
+  upsert_(sheets.registry, [["1", "DJ CharlieJo"], ["90", "TEST Sheet Raven"], ["91", "TEST Sheet Blaze"]], 10);
+  // the next sync: TEST-1 and Raven are gone from the club system, TEST-2 and Blaze are still being checked
+  const n = purgeTest_(sheets, { schedule: [row("CAL-abc-DJ", "Scheduled"), row("TEST-2", "Needs Cover")], registry: [["1", "DJ CharlieJo"], ["91", "TEST Sheet Blaze"]] });
+  const ids = (k, col) => sheets[k].grid.slice(1).map((r) => r[col]);
+  assert.deepEqual(ids("schedule", 0), ["CAL-abc-DJ", "TEST-2"]);
+  assert.deepEqual(ids("callouts", 1), ["CAL-abc-DJ"]);
+  assert.deepEqual(ids("covers", 1), ["TEST-2"]);
+  assert.deepEqual(ids("changes", 3), ["CAL-abc-DJ"]);
+  assert.deepEqual(ids("log", 4), ["CAL-abc-DJ", "TEST-2"]);
+  assert.deepEqual(ids("registry", 1), ["DJ CharlieJo", "TEST Sheet Blaze"]);
+  assert.equal(n, 6);
+  assert.equal(purgeTest_(sheets, { schedule: [], registry: [] }) >= 0, true);       // an empty sync never touches real rows
+  assert.deepEqual(ids("schedule", 0), ["CAL-abc-DJ"]);
+});
+
+test("each sync reports the tabs' size, repeated ids and TEST rows", () => {
+  const sheets = Object.fromEntries(Object.entries(TABS).map(([k, t]) => [k, fakeSheet(t.headers)]));
+  writeSchedule_(sheets.schedule, [row("CAL-abc-DJ", "Scheduled"), row("TEST-1", "Covered")]);
+  upsert_(sheets.log, [["60", "t", "t", "claim", "TEST-1"], ["61", "t", "t", "import_added", "CAL-abc-DJ"]], 14);
+  sheets.callouts.grid.push(["7", "CAL-abc-DJ"], ["7", "CAL-abc-DJ"]);                 // a repeated id (what we must never see)
+  const st = JSON.parse(JSON.stringify(stats_(sheets)));
+  assert.deepEqual(st.schedule, { rows: 2, duplicate_ids: 0, test_rows: 1 });
+  assert.deepEqual(st.log, { rows: 2, duplicate_ids: 0, test_rows: 1 });
+  assert.deepEqual(st.callouts, { rows: 2, duplicate_ids: 1, test_rows: 0 });
+  assert.deepEqual(st.registry, { rows: 0, duplicate_ids: 0, test_rows: 0 });
 });
