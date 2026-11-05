@@ -1,5 +1,4 @@
 ﻿import type { Metadata } from "next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import DragonCursor from "./components/DragonCursor";
 import SiteHeader from "./components/SiteHeader";
@@ -21,7 +20,6 @@ export default function RootLayout({
         <SiteHeader />
         {children}
         <DragonCursor />
-        <SpeedInsights />
       </body>
     </html>
   );
