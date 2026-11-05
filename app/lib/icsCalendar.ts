@@ -15,9 +15,11 @@ export type IcsEvent = {
   timeZone: string;
   rrule?: string;
   exdates: Date[];
+  // set on a changed single occurrence of a repeating event ("this event only"): the start it replaces
+  recurrenceId?: Date;
 };
 
-export type CalendarOccurrence = Omit<IcsEvent, "rrule" | "exdates">;
+export type CalendarOccurrence = Omit<IcsEvent, "rrule" | "exdates" | "recurrenceId">;
 
 type IcsEventDraft = {
   uid?: string;
@@ -29,6 +31,8 @@ type IcsEventDraft = {
   endParams?: Record<string, string>;
   timeZone: string;
   rrule?: string;
+  recurrenceIdValue?: string;
+  recurrenceIdParams?: Record<string, string>;
   exdates: Array<{
     value: string;
     params: Record<string, string>;
@@ -486,6 +490,9 @@ export function parseCalendarEvents(
           exdates: currentEvent.exdates.map((exdate) =>
             parseIcsDate(exdate.value, exdate.params),
           ),
+          ...(currentEvent.recurrenceIdValue
+            ? { recurrenceId: parseIcsDate(currentEvent.recurrenceIdValue, currentEvent.recurrenceIdParams) }
+            : {}),
         });
       }
 
@@ -500,6 +507,11 @@ export function parseCalendarEvents(
 
     if (property.name === "UID") {
       currentEvent.uid = decodeIcsText(property.value);
+    }
+
+    if (property.name === "RECURRENCE-ID") {
+      currentEvent.recurrenceIdValue = property.value;
+      currentEvent.recurrenceIdParams = property.params;
     }
 
     if (property.name === "SUMMARY") {

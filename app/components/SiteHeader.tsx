@@ -11,12 +11,14 @@ const navLinks = [
   { href: "/lineup", label: "DJ Lineup" },
   { href: "/gallery", label: "Gallery" },
   { href: "/crew", label: "Crew" },
+  { href: "/backstage-pass", label: "Backstage Pass" },
   { href: "/contact", label: "Contact" },
+  { href: "/backstage-pass/staff", label: "Staff Login" },
 ];
 
 // Redesigned pages that use the forged-metal dragon navigation; every other
 // page keeps this header exactly as it was.
-const DRAGON_NAV_PAGES = new Set(["/", "/about", "/contact", "/crew", "/gallery", "/lineup", "/events", "/join"]);
+const DRAGON_NAV_PAGES = new Set(["/", "/about", "/contact", "/crew", "/gallery", "/lineup", "/events", "/join", "/backstage-pass", "/backstage-pass/staff"]);
 
 export default function SiteHeader() {
   const pathname = usePathname();

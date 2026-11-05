@@ -1,0 +1,107 @@
+# Sanctuary Rocks 2.0 backend - DEVELOPMENT worker (approved 2026-10-18). Production needs separate approval.
+# Deploy from this folder:  npx wrangler deploy
+# Secrets (never in files):  npx wrangler secret put SL_SECRET     (same value as the SR2 boards' secret notecard)
+#                            npx wrangler secret put OWNER_UUIDS   (comma-separated avatar keys of the club owners)
+name = "sr2-api-dev"
+main = "src/worker.js"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "sr2-dev"
+database_id = "f42e1c50-63a7-48cf-8eea-731b664019ed"
+migrations_dir = "migrations"
+
+[triggers]
+crons = ["* * * * *", "7 * * * *"]
+
+[vars]
+# Owner / senior SL usernames: their first signed touch on any SR2 board makes them senior (can add admins by legacy name)
+OWNER_USERNAMES = "charliejo11,moose.houston"
+# Only the exact value "live" lets anything be sent to Discord. The old webhook is exposed: keep this off until it is regenerated.
+DISCORD_MODE = "dry-run"
+
+# STAGING: its own worker and database, nothing shared with dev or production. No Discord or Sheets secrets are set here.
+# Deploy:      npx wrangler deploy --env staging -c wrangler.toml
+# Migrations:  npx wrangler d1 migrations apply sr2-staging --env staging --remote -c wrangler.toml
+[env.staging]
+name = "sr2-api-staging"
+compatibility_flags = ["global_fetch_strictly_public"]   # lets it read the staging site's calendar
+
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "sr2-staging"
+database_id = "c6531e6d-7814-444b-aee7-072b61607a0e"
+migrations_dir = "migrations"
+
+[env.staging.vars]
+OWNER_USERNAMES = "charliejo11,moose.houston"
+# Staging never sends. Production runs the Discord events.
+DISCORD_MODE = "dry-run"
+SITE_URL = "https://sanctuary-rocks-staging.elfavina89.workers.dev"
+# Discord sign-in: the staff server, and which of its tags open which part of Backstage Pass. Tags not listed get no access.
+# owner: @owner, tech wizard | management: @GM, @Sr Club Manager | dj: @DJs, @Cover-DJs | host: @Hosts, @Cover-Host
+# Servers allowed Discord events. VIP is added only once it's approved.
+DISCORD_EVENT_DESTS = "staff"
+DISCORD_CLIENT_ID = "1566291698835783680"
+DISCORD_STAFF_GUILD_ID = "421390161620893710"
+DISCORD_ROLE_MAP = '{"421391530125950979":"owner","1562631109504663672":"owner","676629987184345108":"management","1523828687068200980":"management","421391780936810498":"dj","813936040372994092":"dj","421391980078170112":"host","862779998195679293":"host"}'
+# Auto Clerk in Discord, STAGING: the controlled test runs in #staff-lounge (the project owner's choice, 2026-11-04).
+# Only CLERK_TESTERS (Discord user ids) get answers there; every post is labelled TEST and its pings notify nobody.
+# CLERK_TEST_PUBLIC_KEY lets scripts/clerk_discord_staging_check.mjs sign simulated interactions; it is a PUBLIC key
+# and is ignored whenever DISCORD_MODE is "live". Never add it to production.
+CLERK_DJ_CHANNEL = "682329780598997019"
+CLERK_HOST_CHANNEL = "682329780598997019"
+CLERK_STAFF_CHANNEL = "682329780598997019"
+# CLERK_TESTERS = "<Discord user ids>"   (set it again for the next live test; left out of the public repo)
+CLERK_DISCORD = "off"                     # the live test is finished (2026-11-04); "on" + the two below re-run it
+CLERK_DISCORD_TEST_SEND = "off"
+CLERK_NL = "off"
+CLERK_TEST_PUBLIC_KEY = "d481bc6b92df59aa62fa4d794ca9d85b8c5b8a37d32b129f4e1e485a517871e8"
+# Staging is a TEST system: only TEST- shifts can be called out / claimed, and pings name the roles without notifying.
+# Its Discord tests use a SEPARATE app ("SR Auto Clerk TEST": CLERK_APP_ID, CLERK_PUBLIC_KEY, secret CLERK_BOT_TOKEN);
+# the club's own Discord app, its sign-in, commands and endpoint are never used for them.
+CLERK_TEST_ONLY = "on"
+CLERK_PING_SILENT = "on"
+# The test app became the production "SR Auto Clerk" (2026-11-04), so staging has no Discord app of its own now.
+# A future Discord test needs a new test app: CLERK_APP_ID, CLERK_PUBLIC_KEY, secret CLERK_BOT_TOKEN, CLERK_COMMANDS_PERMISSIONS = "8".
+
+# PRODUCTION: the backend behind the live site's Backstage Pass. Its own worker and database.
+# Deploy:      npx wrangler deploy --env production -c wrangler.toml
+# Migrations:  npx wrangler d1 migrations apply sr2-prod --env production --remote -c wrangler.toml
+[env.production]
+name = "sr2-api-prod"
+compatibility_flags = ["global_fetch_strictly_public"]
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "sr2-prod"
+database_id = "6af9fcce-b53d-4336-8b11-08568759fe3a"
+migrations_dir = "migrations"
+
+[env.production.vars]
+OWNER_USERNAMES = "charliejo11,moose.houston"
+# Events are on at the project owner's request. Channel messages are off (migration 0009), and events reach the staff server only until VIP is approved.
+DISCORD_MODE = "live"
+DISCORD_EVENTS = "on"
+DISCORD_EVENT_DESTS = "staff"
+SITE_URL = "https://sanctuary-rocks.elfavina89.workers.dev"
+# owner: @owner, tech wizard | management: @GM, @Sr Club Manager | dj: @DJs, @Cover-DJs | host: @Hosts, @Cover-Host
+DISCORD_CLIENT_ID = "1566291698835783680"
+DISCORD_STAFF_GUILD_ID = "421390161620893710"
+DISCORD_ROLE_MAP = '{"421391530125950979":"owner","1562631109504663672":"owner","676629987184345108":"management","1523828687068200980":"management","421391780936810498":"dj","813936040372994092":"dj","421391980078170112":"host","862779998195679293":"host"}'
+# Auto Clerk in Discord (approved 2026-11-04). It speaks as its OWN app "SR Auto Clerk" (the former test app), so the club's
+# app, its sign-in and endpoint are never touched. Secret: CLERK_BOT_TOKEN. Covers: #sr-cover-staff; callouts are also read in
+# #sr-djs and #sr-hosts; URGENT / still-open / UNCOVERED alerts go to #club-managers-channel.
+CLERK_APP_ID = "1567664647753171035"
+CLERK_PUBLIC_KEY = "dc73f113f2ca1cccd6d3ee1c094894175d7967f75d1540ce5f588bf81070edda"
+CLERK_DJ_CHANNEL = "1522672230918520972"
+CLERK_HOST_CHANNEL = "1522672230918520972"
+CLERK_MGMT_CHANNEL = "1146569007336521729"
+# #sr-cover-staff, #sr-djs (421393278500601857), #sr-hosts (421394242103935017): the last two added once their rights were fixed.
+CLERK_CHANNELS = "1522672230918520972,421393278500601857,421394242103935017"
+CLERK_NL_CHANNELS = "1522672230918520972,421393278500601857,421394242103935017"
+# Switched on 2026-11-04 after the setup check (token, endpoint, intent, rights in #sr-cover-staff + #club-managers-channel).
+CLERK_DISCORD = "on"
+CLERK_NL = "on"

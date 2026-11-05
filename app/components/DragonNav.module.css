@@ -171,7 +171,7 @@
 .links a {
   position: relative;
   display: block;
-  padding: 0.55rem clamp(0.8rem, 1.6vw, 1.7rem);
+  padding: 0.55rem clamp(0.35rem, 0.8vw, 1.2rem);
   color: #e3ddd6;
   font-size: clamp(0.92rem, 1.05vw, 1.1rem);
   font-weight: 500;
@@ -230,7 +230,7 @@
 }
 
 /* Folded menu: logo on the left, menu button on the right. */
-@media (max-width: 960px) {
+@media (max-width: 1270px) {
   .header {
     --bar-h: 50px;
     --bar-top: 52px;

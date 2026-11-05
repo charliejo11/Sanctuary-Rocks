@@ -13,5 +13,9 @@
 		// this delegates image resizing to Cloudflare's own image service.
 		// see https://opennext.js.org/cloudflare/howtos/image
 		"binding": "IMAGES"
+	},
+	// Opens Backstage Pass. Remove this and redeploy to close the staff area without touching the rest of the site.
+	"vars": {
+		"STAFF_API_URL": "https://sr2-api-prod.elfavina89.workers.dev"
 	}
 }
