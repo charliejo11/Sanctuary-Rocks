@@ -37,11 +37,11 @@ const ORIENTATION = [
 const GUIDES: Record<string, { title: string; intro: string; steps: string[]; check: string[] }> = {
   dj: {
     title: "DJ Quick Guide",
-    intro: "Your menu on the Staff Control Board: DJ Log In, Trial Set, Radio, My Stream, Now Playing, Schedule, Tips, Help.",
+    intro: "Your menu on the Staff Control Board: DJ Log In, DJ Log Out, Trial Set, Radio, My Stream, Now Playing, Schedule, Help.",
     steps: [
       "Press DJ on the board, then DJ Log In. You take over the board straight away, even if the last DJ never logged out.",
       "Logging in puts your name on the board. It doesn't prove your audio is reaching the club, so check you can hear yourself.",
-      "You don't need to log out. The next DJ logs in and takes over. Management has a DJ Log Out for when one is needed.",
+      "When your set ends, press DJ, then DJ Log Out. The music keeps playing. If you forget, the next DJ's login takes over anyway.",
       "Radio switches the club to the radio only when someone picks it on purpose.",
       "My Stream shows the one shared SR stream. Please don't change it without coordinating first.",
     ],
@@ -49,7 +49,7 @@ const GUIDES: Record<string, { title: string; intro: string; steps: string[]; ch
   },
   host: {
     title: "Host Quick Guide",
-    intro: "Your menu on the Staff Control Board: Host Log In, Host Log Out, Host Trial, Announcements, Schedule, Coverage Request, Tips, Help.",
+    intro: "Your menu on the Staff Control Board: Host Log In, Host Log Out, Host Trial, Announcements, Schedule, Coverage Request, Help.",
     steps: [
       "Press HOST on the board, then Host Log In, when you start. Host Log Out when you finish.",
       "Announcements takes you to the current staff notices.",
@@ -60,7 +60,7 @@ const GUIDES: Record<string, { title: string; intro: string; steps: string[]; ch
   },
   management: {
     title: "Management Quick Guide",
-    intro: "Your menu on the Staff Control Board: Current Staff, Schedule and Coverage, Trials, Announcements, Music Control, Board Override, DJ Log Out, Chat Extender, Reports, Unresolved Issues, Donation Summary. Tips is under My Shift.",
+    intro: "Your menu on the Staff Control Board: Current Staff, Schedule and Coverage, Trials, Announcements, Music Control, Board Override, DJ Log Out, Chat Extender, Reports, Unresolved Issues, Donation Summary.",
     steps: [
       "Backstage Pass → Management is the overview: who's on, open shifts, trials, issues and donations.",
       "DJ Log Out is there for when it has to be used. Normally the next DJ just logs in and takes over. It never touches the music.",

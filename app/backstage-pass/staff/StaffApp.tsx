@@ -172,8 +172,9 @@ export default function StaffApp() {
   if (!me) {
     return (
       <div className={styles.wrap}>
-        <Ticket onOpen={() => { setAsked(true); document.getElementById("staff-sign-in")?.scrollIntoView({ block: "center" }); }} />
+        {/* sign-in first, above the ticket artwork, so nobody has to scroll for it */}
         <SignIn discordReady={discordReady} loginNote={loginNote} asked={asked} onDone={load} />
+        <Ticket onOpen={() => { setAsked(true); document.getElementById("staff-sign-in")?.scrollIntoView({ block: "start", behavior: "smooth" }); }} />
       </div>
     );
   }

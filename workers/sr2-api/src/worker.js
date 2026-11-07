@@ -109,6 +109,25 @@ export async function pollStream(env, now = Date.now(), fetchImpl = fetch) {
   return { changed: true, status: "online", play: await startPlay(env, parsed, now, "stream") };
 }
 
+/**
+ * The receiver's dead-air check: is the club stream's source connected right now (a DJ or AutoDJ sending)?
+ * Read live and shared for 8 s, so a receiver asking every 10 s sees a drop within seconds. SHOUTcast can't show
+ * silence on a connected source, so that still counts as music. Only reads; the receiver decides what to play.
+ */
+export async function streamCheck(env, now = Date.now(), fetchImpl = fetch) {
+  const cached = JSON.parse((await kvGet(env.DB, "stream_check")) ?? "null");
+  if (cached && now - cached.at >= 0 && now - cached.at < 8e3) return cached;
+  let state = "unreachable";
+  try {
+    const r = await fetchImpl(`${STREAM}/7.html`, { headers: { "user-agent": "Mozilla/5.0 (SR2 metadata)" }, cf: { cacheTtl: 0 } });
+    const info = r.ok ? parseSevenHtml(await r.text()) : null;
+    if (info) state = info.online ? "online" : "offline";
+  } catch { /* stays "unreachable" */ }
+  const out = { at: now, music: state === "online", state };
+  await kvSet(env.DB, "stream_check", JSON.stringify(out));
+  return out;
+}
+
 async function startPlay(env, p, now, source) {
   const db = env.DB;
   await run(db, "UPDATE plays SET ended_at = ? WHERE ended_at IS NULL", now);
@@ -389,9 +408,13 @@ const ACTIONS = {
   },
 
   async receiver_status(env, d) {
-    await kvSet(env.DB, "receiver_status", JSON.stringify({ parcel_url_ok: !!d.ok, url: d.url ?? null, region: d.region ?? null }));
+    await kvSet(env.DB, "receiver_status", JSON.stringify({ parcel_url_ok: !!d.ok, url: d.url ?? null, region: d.region ?? null, why: d.why ?? null }));
     await kvSet(env.DB, "receiver_at", Date.now());
     return { ok: true };
+  },
+  // the receiver asks every 10 s; after a minute without the stream's source it switches the club to its own radio
+  async stream_check(env) {
+    return { ok: true, ...(await streamCheck(env)) };
   },
 
   // ---- manager tools (all audited)

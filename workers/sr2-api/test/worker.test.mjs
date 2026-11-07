@@ -3,7 +3,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";
 import { makeD1 } from "./d1shim.mjs";
-import worker, { ACTIONS, pollStream, finaliseWeek, bootstrapOwners } from "../src/worker.js";
+import worker, { ACTIONS, pollStream, streamCheck, finaliseWeek, bootstrapOwners } from "../src/worker.js";
 import { hmacBase64 } from "../src/lib/auth.js";
 
 const MIG = ["0001_init.sql", "0002_radio.sql", "0003_trials.sql"].map((f) => fileURLToPath(new URL("../migrations/" + f, import.meta.url)));
@@ -212,3 +212,20 @@ test("radio stations: staff add (validated, no duplicates), managers remove, gue
   assert.equal((await ACTIONS.radio_remove(e, { by: MOOSE, id: list[0].id })).error, "forbidden");
   assert.ok((await ACTIONS.radio_remove(e, { by: MGR, id: list[0].id })).ok);
 });
+
+test("receiver dead-air check: live stream state, shared for a few seconds, never a guess", async () => {
+  const e = env();
+  let calls = 0;
+  const count = (f) => async (...a) => { calls++; return f(...a); };
+  assert.deepEqual(await streamCheck(e, 10_000, count(stream("DJ Moose @ Sanctuary Rocks - AC/DC - Back in Black"))), { at: 10_000, music: true, state: "online" });
+  assert.equal((await streamCheck(e, 15_000, count(stream("x", 0)))).music, true);         // within 8 s: the shared answer
+  assert.equal(calls, 1);
+  assert.deepEqual(await streamCheck(e, 20_000, count(stream("x", 0))), { at: 20_000, music: false, state: "offline" });
+  assert.equal((await streamCheck(e, 30_000, async () => { throw new Error("down"); })).state, "unreachable");
+  assert.equal((await streamCheck(e, 40_000, async () => new Response("not a status page"))).state, "unreachable");
+  assert.equal((await streamCheck(e, 50_000, async () => new Response("", { status: 503 }))).music, false);
+  await streamCheck(e, Date.now(), stream("DJ Moose @ Sanctuary Rocks - Rammstein - Sonne"));
+  assert.deepEqual(await ACTIONS.stream_check(e), { ok: true, at: JSON.parse(await kvOf(e, "stream_check")).at, music: true, state: "online" });   // the signed SL action, shared answer
+});
+
+const kvOf = async (e, k) => (await e.DB.prepare("SELECT v FROM kv WHERE k = ?").bind(k).first())?.v;
