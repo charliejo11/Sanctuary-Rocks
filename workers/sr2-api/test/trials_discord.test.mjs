@@ -49,7 +49,7 @@ test("trials: only managers start one, for someone not on the DJ list; it reads 
   assert.equal((await ACTIONS.state(e)).dj.trial, true);
   let asked = "";
   await pollStream(e, Date.now(), async (url) => { asked = url; return new Response("<html><body>3,1,5,100,3,128,Metallica - One</body></html>"); });
-  assert.match(asked, /sor1\.digistream\.info/);
+  assert.match(asked, /sanctuary\.hostcrate\.rocks\/8018\//);
 });
 
 test("trials: songs + votes go in the trial report, never in the charts; a normal login ends the trial", async () => {

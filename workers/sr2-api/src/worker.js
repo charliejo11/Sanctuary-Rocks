@@ -18,8 +18,11 @@ import { makeVoteBoard } from "./lib/voteboard.js";
 import { clerkActions, clerkTick } from "./staff/clerk.js";
 import { discordInteractionsHttp, discordTestMessageHttp, pollChannels, ensureCommands } from "./staff/clerk_discord.js";
 
-const STREAM = "http://sor.digistream.info:10206";
-const TRIAL_STREAM = "http://sor1.digistream.info:10206";   // the BACKUP stream: used for DJ trials
+const STREAM = "http://169.197.87.130:8036";         // what listeners / SL play (shown in the Discord event)
+const TRIAL_STREAM = "http://169.197.87.130:8018";   // the BACKUP stream: used for DJ trials
+// Status pages are read by hostname: Cloudflare Workers can't fetch a bare IP address. Same server (sanctuary.hostcrate.rocks = 169.197.87.130).
+const STREAM_STATUS = "https://sanctuary.hostcrate.rocks/8036";
+const TRIAL_STATUS = "https://sanctuary.hostcrate.rocks/8018";
 const MILESTONES = [10, 25, 50];
 const CONTRIB_CAP_PER_CATEGORY = 5;          // per manager per week
 
@@ -92,7 +95,7 @@ export async function pollStream(env, now = Date.now(), fetchImpl = fetch) {
   let info = null;
   const trial = await one(db, "SELECT id FROM dj_sets WHERE ended_at IS NULL AND trial = 1 LIMIT 1");
   try {
-    const r = await fetchImpl(`${trial ? TRIAL_STREAM : STREAM}/7.html`, { headers: { "user-agent": "Mozilla/5.0 (SR2 metadata)" }, cf: { cacheTtl: 0 } });
+    const r = await fetchImpl(`${trial ? TRIAL_STATUS : STREAM_STATUS}/7.html`, { headers: { "user-agent": "Mozilla/5.0 (SR2 metadata)" }, cf: { cacheTtl: 0 } });
     if (r.ok) info = parseSevenHtml(await r.text());
   } catch { /* stream unreachable: keep everything as it is */ }
   await kvSet(db, "last_poll", now);
@@ -119,7 +122,7 @@ export async function streamCheck(env, now = Date.now(), fetchImpl = fetch) {
   if (cached && now - cached.at >= 0 && now - cached.at < 8e3) return cached;
   let state = "unreachable";
   try {
-    const r = await fetchImpl(`${STREAM}/7.html`, { headers: { "user-agent": "Mozilla/5.0 (SR2 metadata)" }, cf: { cacheTtl: 0 } });
+    const r = await fetchImpl(`${STREAM_STATUS}/7.html`, { headers: { "user-agent": "Mozilla/5.0 (SR2 metadata)" }, cf: { cacheTtl: 0 } });
     const info = r.ok ? parseSevenHtml(await r.text()) : null;
     if (info) state = info.online ? "online" : "offline";
   } catch { /* stays "unreachable" */ }
@@ -413,8 +416,12 @@ const ACTIONS = {
     return { ok: true };
   },
   // the receiver asks every 10 s; after a minute without the stream's source it switches the club to its own radio
+  // If the status page can't be read, the answer is "don't know" (ok:false): the receiver then changes nothing,
+  // so a status-page outage never cuts a live DJ over to the radio (the project owner's request, 2026-11-08).
   async stream_check(env) {
-    return { ok: true, ...(await streamCheck(env)) };
+    const c = await streamCheck(env);
+    if (c.state === "unreachable") return { ok: false, error: "stream_unreachable", ...c };
+    return { ok: true, ...c };
   },
 
   // ---- manager tools (all audited)

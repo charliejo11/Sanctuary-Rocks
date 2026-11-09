@@ -2,7 +2,8 @@ export const dynamic = "force-dynamic";
 
 export const runtime = "nodejs";
 
-const STREAM_BASE_URL = "http://sor.digistream.info:10206";
+// Status is read by hostname (Cloudflare Workers cant fetch a bare IP); same server as the SR stream http://169.197.87.130:8036/
+const STREAM_BASE_URL = "https://sanctuary.hostcrate.rocks/8036";
 const CALENDAR_EMAIL = "ba33d2d221fc80a1a2bf0d55439608ea1f7896d48077388fd77f36dbc622a70e@group.calendar.google.com";
 
 import {

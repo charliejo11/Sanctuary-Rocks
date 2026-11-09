@@ -9,7 +9,8 @@
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-const STATUS_URL = "http://sor.digistream.info:10206/7.html";
+// Read by hostname: Cloudflare Workers cant fetch a bare IP. Same server as the SR stream http://169.197.87.130:8036/
+const STATUS_URL = "https://sanctuary.hostcrate.rocks/8036/7.html";
 const CACHE_MS = 15000;
 
 type Listeners = {

@@ -228,4 +228,19 @@ test("receiver dead-air check: live stream state, shared for a few seconds, neve
   assert.deepEqual(await ACTIONS.stream_check(e), { ok: true, at: JSON.parse(await kvOf(e, "stream_check")).at, music: true, state: "online" });   // the signed SL action, shared answer
 });
 
+test("receiver dead-air check: an unreadable status page is 'don't know' (ok:false), never dead air", async () => {
+  const e = env();
+  const realFetch = globalThis.fetch;
+  try {
+    globalThis.fetch = async () => { throw new Error("status page down"); };
+    const r = await ACTIONS.stream_check(e);
+    assert.equal(r.ok, false);               // the receiver ignores ok:false and leaves the music alone
+    assert.equal(r.state, "unreachable");
+    await e.DB.prepare("DELETE FROM kv WHERE k = ?").bind("stream_check").run();   // drop the 8 s shared answer
+    globalThis.fetch = async () => new Response("<html><body>0,0,0,100,0,0,</body></html>");
+    const off = await ACTIONS.stream_check(e);
+    assert.deepEqual([off.ok, off.music, off.state], [true, false, "offline"]);   // a clearly empty stream still counts
+  } finally { globalThis.fetch = realFetch; }
+});
+
 const kvOf = async (e, k) => (await e.DB.prepare("SELECT v FROM kv WHERE k = ?").bind(k).first())?.v;
