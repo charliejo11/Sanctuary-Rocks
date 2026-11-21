@@ -19,5 +19,19 @@
   "image": "/images/sponsors/CryBunBun.com.jpg",
   "bio": "Proud supporter of Sanctuary Rocks.",
   "normalizedName": "crybunbuncom"
+ },
+ {
+  "name": "Hostcrate",
+  "role": "Sponsor",
+  "image": "/images/sponsors/Hostcrate_Logo_Sept_2025_resize.png",
+  "bio": "Proud supporter of Sanctuary Rocks.",
+  "normalizedName": "hostcrate"
+ },
+ {
+  "name": "Zombified",
+  "role": "Sponsor",
+  "image": "/images/sponsors/ZOMBIFIED%20LOGO.png",
+  "bio": "Proud supporter of Sanctuary Rocks.",
+  "normalizedName": "zombified"
  }
 ]

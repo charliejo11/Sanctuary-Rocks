@@ -41,7 +41,7 @@ export const CREW_BIOS: CrewBioEntry[] = [
     id: "dj-angelo",
     name: "DJ Angelo",
     role: "DJ",
-    image: "/images/djs/DJ%20Angelo.png.jpg",
+    image: "/images/djs/Dj_Angelo.png",
     bio: "- I was born at a very young age!\n- USAF retired\n- BA degree in Broadcast Production\n- Former RL radio and skating rink DJ\n- Enjoy all types of music, save for country.\n- Favorite HR/Metal genres =\n--- 80's and 90's Hard Rock\n--- 80's Hair/Glam Metal\n--- Symphonic Metal\n--- Nu Metal\n--- Power Metal\n--- Pirate Metal\n--- Traditional Heavy Metal\n--- A mix of tunes from across all sub-genres\n\n- Love taking requests and discovering new to me music/bands!\n\n- DJ at Sanctuary Rocks since July, 2024! See my profile for current set times/days!",
   },
   {
@@ -299,17 +299,6 @@ export const CREW_BIOS: CrewBioEntry[] = [
     role: "DJ",
     image: "/images/djs/Shann.png.png",
     bio: "As a retired United States Coast Guard Rescue Swimmer, dedication, teamwork, and serving others have always been at the heart of who I am. That same passion now lives on through music.\n\nWhen I'm behind the decks, my goal is simpleâ€”to bring people together through the power of music. Whether I'm playing for newcomers discovering Sanctuary Rocks for the first time or entertaining our amazing VIPs, I strive to create an atmosphere where everyone feels welcome, included, and connected.\n\nMusic has always been more than just sound to me; it's a universal language that unites people from all walks of life. Every set I play is about building energy, creating memories, and keeping the good vibes flowing. I believe rhythm has the power to bring souls together as one, regardless of where we come from.",
-  },
-  {
-    // Bio image (public/images/Bios/DJ Tweek Bio.png.png) is cropped and
-    // starts mid-sentence - no earlier text exists anywhere on disk. Added
-    // verbatim at the user's request rather than inventing an opening; the
-    // missing beginning can be pasted in later if it turns up.
-    id: "dj-tweek",
-    name: "DJ Tweek",
-    role: "DJ",
-    image: "/images/djs/DJ%20Tweek.png.jpg",
-    bio: "the recognition; I do it for the love of the music and the feeling it creates when the right song hits at the right moment.\n\nI love bringing people together through music, whether that's filling a dance floor, sparking a singalong, or introducing someone to a track they didn't know they needed. My sets are built around rock and metal at heart, but if it fits the vibe and keeps the energy flowing, you'll hear it. Every crowd is different, and that's what makes every set its own experience.\n\nIf you've spent any time around me, you'll know I don't take life too seriously. I'm cheeky, I love a laugh, and I'm always up for a bit of banter. Life's too short not to have fun, and I try to bring that same energy every time I jump behind the decks.\n\nFor me, DJing has never been about pressing playâ€”it's about creating memories, sharing the music I love, and giving people a few hours where nothing else matters except good tunes and good company.\n\nSo if you're looking for good vibes, loud music, and someone who's just as happy singing along with the crowd as he is behind the decks, you've found the right DJ. Come say hi, throw me a request, and let's make it a night to remember.",
   },
 
   // ---- Hosts (public/images/hosts) ----
@@ -632,8 +621,15 @@ export const CREW_BIOS: CrewBioEntry[] = [
     id: "dj-rick-blood",
     name: "DJ Rick Blood",
     role: "DJ",
-    image: "/images/djs/DJ%20RICK%20BLOOD.png",
+    image: "/images/djs/RickBlood.png",
     bio: "",
+  },
+  {
+    id: "dj-jade",
+    name: "DJ Jade",
+    role: "DJ",
+    image: "/images/djs/DJ%20Jade.png",
+    bio: "British Born and Bred, bringing the T in LGBT to Sanctuary Rocks whenever she is needed. She lurks in the shadows, ready to come out and put on a show with a multitude of different Metal and Rock bands which come blaring out of her decks like she's a guitarist in a Rock concert.\n\nShe was born and raised on Rock and Metal ever since she could walk, coming across Papa Roach to start with their song Last Resort in 2000, but now she comes to Sanctuary Rocks, unjudged in the eyes of both Staff and Vips, she plays the music, takes the requests and calls out the shout outs.\n\nDJ Jade, bringing the Metal hand of hardcore to Sanctuary Rocks. Always listening to other DJs play, whether it's in world or busy in the real world, this Elven Babe is always around and ready to take the stage if needed.",
   },
   {
     id: "host-lila",

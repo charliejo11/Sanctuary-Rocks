@@ -1,12 +1,5 @@
 [
  {
-  "name": "Bebe",
-  "role": "Host",
-  "image": "/images/hosts/Bebe.png.jpg",
-  "bio": "Keeping the crowd moving and the night alive.",
-  "normalizedName": "bebe"
- },
- {
   "name": "Dante",
   "role": "Host",
   "image": "/images/hosts/Dante.png",
@@ -40,13 +33,6 @@
   "image": "/images/hosts/Imogen.png.jpg",
   "bio": "Keeping the crowd moving and the night alive.",
   "normalizedName": "imogen"
- },
- {
-  "name": "Irish Beauty",
-  "role": "Host",
-  "image": "/images/hosts/Irish_Beauty.png.png",
-  "bio": "Keeping the crowd moving and the night alive.",
-  "normalizedName": "irish beauty"
  },
  {
   "name": "Legs",
@@ -103,13 +89,6 @@
   "image": "/images/hosts/Rebekka.png.png",
   "bio": "Keeping the crowd moving and the night alive.",
   "normalizedName": "rebekka"
- },
- {
-  "name": "Shari",
-  "role": "Host",
-  "image": "/images/hosts/Shari.png.jpg",
-  "bio": "Keeping the crowd moving and the night alive.",
-  "normalizedName": "shari"
  },
  {
   "name": "Tea",

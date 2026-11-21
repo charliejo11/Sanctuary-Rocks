@@ -16,6 +16,7 @@ const CACHE_MS = 15000;
 type Listeners = {
   online: boolean;
   listeners: number;
+  connections: number;
   peak: number;
   max: number;
   unique: number;
@@ -37,9 +38,13 @@ async function readStatus(): Promise<Listeners> {
   const line = html.match(/<body>([^<]*)<\/body>/i)?.[1] ?? "";
   const [current, status, peak, max, unique, bitrate] = line.split(",").map((part) => Number.parseInt(part, 10));
   if (!Number.isFinite(current)) throw new Error("Unexpected status page format");
+  // "current" counts CONNECTIONS: one person tuned in twice (SL + a media player), or a dropped connection that
+  // hasn't timed out yet, counts twice. "unique" is the server's count of distinct listeners - the real number.
+  const people = Number.isFinite(unique) ? Math.min(unique, current) : current;
   return {
     online: status === 1,
-    listeners: current,
+    listeners: people,
+    connections: current,
     peak: Number.isFinite(peak) ? peak : 0,
     max: Number.isFinite(max) ? max : 0,
     unique: Number.isFinite(unique) ? unique : 0,

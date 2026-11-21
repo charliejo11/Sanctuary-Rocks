@@ -6,8 +6,9 @@
 // shifts: {id, host_uuid, host_name, started_at, ended_at}
 // apprs:  {shift_id, host_uuid, voter_uuid}
 
-export const POSITIVE = new Set(["love", "rock", "badass"]);
-export const REACTIONS = ["love", "rock", "badass", "nope"];
+// Website labels (2026-11-10): love = Love It, badass = Fire, rock = Rock On, fav = Favorite. The Vote Board keeps "nope".
+export const POSITIVE = new Set(["love", "rock", "badass", "fav"]);
+export const REACTIONS = ["love", "rock", "badass", "nope", "fav"];
 
 export const DEFAULTS = {
   topN: 10,
@@ -25,9 +26,9 @@ export function validVotes(plays, votes) {
 }
 
 function tally(votes) {
-  const t = { love: 0, rock: 0, badass: 0, nope: 0 };
+  const t = { love: 0, rock: 0, badass: 0, nope: 0, fav: 0 };
   for (const v of votes) if (t[v.reaction] !== undefined) t[v.reaction]++;
-  t.positive = t.love + t.rock + t.badass;
+  t.positive = t.love + t.rock + t.badass + t.fav;
   t.total = t.positive + t.nope;
   t.approval = t.total ? t.positive / t.total : null;
   return t;
@@ -179,4 +180,32 @@ export function awards(songs, history, djs, cfg = DEFAULTS) {
     dj_spotlight: spotlight && { dj_uuid: spotlight.dj_uuid, dj_name: spotlight.dj_name, unique_guests: spotlight.unique_guests,
       criteria: "most unique guests reacting during this DJ's sets (self-votes excluded)" },
   };
+}
+
+// ------------------------------------------------------------------ Backstage Pass 2.0: most-played charts
+// Ranked by PLAYS (user, 2026-11-10); likes only break ties. The worker aggregates in SQL and passes one row per song:
+//   {song_key, artist, title, plays, likes, last_at}
+// Main charts count live DJ plays only; AutoDJ plays are charted separately (see the worker's playChartRows).
+
+/** Rank aggregated rows: plays, then likes, then the most recently played, then the key (stable). */
+export function rankPlayChart(rows, topN) {
+  return rows.slice()
+    .sort((a, b) => b.plays - a.plays || b.likes - a.likes || b.last_at - a.last_at || a.song_key.localeCompare(b.song_key))
+    .slice(0, topN)
+    .map((r, i) => ({ rank: i + 1, song_key: r.song_key, artist: r.artist, title: r.title, plays: r.plays, likes: r.likes }));
+}
+
+/**
+ * Chart movement against the previous FINALISED period (prev: its top list, or null when none exists) and every older
+ * finalised chart (older: Set of song_keys that charted before). trend: up | down | same | new | reentry.
+ */
+export function withTrends(top, prev, older = new Set()) {
+  const last = new Map((prev ?? []).map((s) => [s.song_key, s.rank]));
+  return top.map((s) => {
+    const lr = last.get(s.song_key) ?? null;
+    let trend;
+    if (lr == null) trend = older.has(s.song_key) ? "reentry" : "new";
+    else trend = lr > s.rank ? "up" : lr < s.rank ? "down" : "same";
+    return { ...s, last_rank: lr, movement: lr == null ? null : lr - s.rank, trend };
+  });
 }

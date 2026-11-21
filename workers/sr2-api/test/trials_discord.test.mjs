@@ -6,7 +6,7 @@ import { makeD1 } from "./d1shim.mjs";
 import { ACTIONS, pollStream, finaliseWeek } from "../src/worker.js";
 import * as D from "../src/lib/discord.js";
 
-const MIG = ["0001_init.sql", "0002_radio.sql", "0003_trials.sql"].map((f) => fileURLToPath(new URL("../migrations/" + f, import.meta.url)));
+const MIG = ["0001_init.sql", "0002_radio.sql", "0003_trials.sql", "0016_backstage2_music.sql", "0017_live_source.sql"].map((f) => fileURLToPath(new URL("../migrations/" + f, import.meta.url)));
 const OWNER = "00000000-1111-2222-3333-000000000001";
 const MOOSE = "00000000-1111-2222-3333-0000000000a1";
 const MGR = "00000000-1111-2222-3333-0000000000c1";

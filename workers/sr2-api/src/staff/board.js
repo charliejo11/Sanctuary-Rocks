@@ -105,7 +105,7 @@ export function makeBoardActions(deps) {
       const code = str(d.code, 16).toUpperCase();
       if (!UUID_RE.test(d.by ?? "") || !code) return { ok: false, error: "bad_request" };
       const row = await one(env.DB, "SELECT user_id FROM portal_link_codes WHERE code = ? AND expires_at > ?", code, Date.now());
-      if (!row) return { ok: false, error: "bad_code", message: "That code isn't valid. Get a new one from Backstage Pass." };
+      if (!row) return { ok: false, error: "bad_code", message: "That code isn't valid. Ask a manager for a new one." };
       const taken = await one(env.DB, "SELECT id FROM portal_users WHERE sl_uuid = ? AND id != ?", d.by, row.user_id);
       if (taken) return { ok: false, error: "already_linked", message: "This avatar is already linked to another staff account." };
       const u = await one(env.DB, "SELECT id, display_name, roles FROM portal_users WHERE id = ? AND active = 1", row.user_id);

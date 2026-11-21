@@ -61,6 +61,16 @@ export function shiftMonth(key, months) {
   return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}`;
 }
 
+/** UTC ms of the 1st of a month, 00:00 SLT (searches the +7/+8 h offsets). */
+export function monthStartMs(key) {
+  for (const off of [7, 8]) {
+    const ms = Date.parse(key + "-01T00:00:00Z") + off * 3600e3;
+    const p = sltParts(ms);
+    if (p.d === 1 && p.h === 0 && p.min === 0) return ms;
+  }
+  throw new Error("cannot resolve month start for " + key);
+}
+
 /** "November 2026" */
 export function monthLabel(key) {
   const [y, m] = key.split("-").map(Number);

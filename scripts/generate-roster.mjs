@@ -34,7 +34,8 @@ const DJ_DEFAULT_BIO = "Keeps the Sanctuary loud, wild, and rocking.";
 const HOST_DEFAULT_BIO = "Keeping the crowd moving and the night alive.";
 const SPONSOR_DEFAULT_BIO = "Proud supporter of Sanctuary Rocks.";
 const DJ_OVERRIDES = {
-  "DJ RICK BLOOD.png": { name: "DJ Rick Blood" },
+  "Dj_Angelo.png": { name: "DJ Angelo" },
+  "RickBlood.png": { name: "DJ Rick Blood" },
   "DJ Rose - Profile - 09 30 2026.png": { name: "DJ Rose" },
   "DJ_Frenchie_Fry.jpg": { name: "DJ Frenchie" },
   "JIMMY_PROFILE_JUL25.png": { name: "DJ Jimmy" },
@@ -48,6 +49,8 @@ const HOST_OVERRIDES = {
 };
 const SPONSOR_OVERRIDES = {
   "Ashes_to_Ashes_Logo.png": { name: "Ashes to Ashes" },
+  "Hostcrate_Logo_Sept_2025_resize.png": { name: "Hostcrate" },
+  "ZOMBIFIED LOGO.png": { name: "Zombified" },
 };
 
 function stripAllExtensions(filename) {

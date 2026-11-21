@@ -151,3 +151,68 @@ npx opennextjs-cloudflare deploy --config wrangler.staging.jsonc
 Automatic DJ and host covers. The design, settings, the credentials still needed, and the deploy order are in
 `AUTO_CLERK.md`. Staging only so far. In production, migration `0013_auto_clerk.sql` must be applied before the API is
 deployed.
+
+## Backstage Pass 2.0, phase 1: music (added 2026-11-10)
+
+Most-played **Weekly Top 10** and **Monthly Top 20** (`lib/playcharts.js`, `/public/top10`, `/public/top20`), Top Song of
+the Week, the Love It / Fire / Rock On / Favorite reactions, and live-source tracking. Rules (user, 2026-11-10): rank by
+plays, likes break ties; live DJ plays only (AutoDJ charted separately; kv `chart_include_autodj = '1'` adds it).
+
+- **Live** comes from the stream server: the poller reads SHOUTcast `/stats?sid=1` (falls back to `/7.html`) and stores
+  `plays.live`, `song_type` (SAM songtype) and `source_name` (the encoder's SERVERTITLE). The club stream has no AutoDJ,
+  so a connected source is a DJ. If an AutoDJ is ever added, put its encoder name(s) in kv `autodj_sources`, one per line.
+- **Non-songs** (station ids, jingles, adverts, DJ mic breaks, SAM non-song types) never chart. After a rules change,
+  `playCharts.reclassify` (minute cron, 400 plays/run) re-checks old plays once: it only clears `song_key`, audits the
+  ids, and **no chart freezes until it has finished** (kv `plays_rules_version`).
+- **Exclusions:** `chart_exclusions` keeps a song (e.g. a show bumper) out of every unfrozen chart; its plays stay.
+- Finished weeks/months freeze once as kind `played` in `weekly_snapshots` / `monthly_snapshots` (INSERT OR IGNORE).
+
+**Staging:** done 2026-11-10 (API 40e7f6ed, was 99bc9bf1; site c8befd27). Backup before: `Documents\Sanctuary_Rocks_Build\SR2_System\Backups\2026-11-10_before_backstage2\sr2-staging.sql`.
+Checks: `node --test test/*.test.mjs` (149) and `test-browser/public_page.mjs` (18, read-only).
+
+**Production (needs the owner's go-ahead), in this order:**
+
+```
+npx wrangler d1 export sr2-prod --env production --remote -c wrangler.toml --output <backup folder>\sr2-prod.sql
+npx wrangler d1 migrations apply sr2-prod --env production --remote -c wrangler.toml     # 0016, 0017
+npx wrangler deploy --env production -c wrangler.toml
+# then the site (from the repo root): npm run cf:deploy
+```
+
+The API must go out before the site (the site asks for `/public/top10` + `/public/top20`); the migrations must go in
+before the API (it writes `plays.live`). Rollback: `npx wrangler rollback <previous version> --env production -c wrangler.toml`;
+the migrations only add (0016 copies `votes` row for row), so the old API keeps working on the new schema.
+
+## Backstage Pass 2.0, phase 2a: Chronicles, Song of the Day, Battle of the Bands (added 2026-11-10)
+
+User's choices (2026-11-10): news from **Loudwire**; Song of the Day and Battle of the Bands picked **at random**.
+Code: `src/lib/community.js`, migration `0018_chronicles_sotd_battle.sql`, site `app/backstage-pass/Community.tsx`.
+
+- **Chronicles:** the hourly cron reads `https://loudwire.com/category/news/feed/` (a read also refetches if it is over
+  2 hours old). Stored once per story (`news_items`, by guid): headline, Loudwire, date, author, the feed's own teaser
+  and the link. No article text and no feed photos (Getty-licensed); the club's artwork is used. Only the last 30 days
+  are shown. No manual control (user, 2026-11-10: managers only vote like anyone else), so `hidden` / `featured` stay unused and the newest story leads. Feed errors: kv `news_error:Loudwire`.
+- **Song of the Day:** one per SLT day, random from songs the club's DJs played (real songs, no trials, no chart
+  exclusions), no repeat within 30 days. The "club fact" is the play record (times played, first date, last verified DJ).
+  Reactions: one per visitor per day (Love It / Fire / Rock On / Favorite), changeable.
+- **Battle of the Bands:** one per chart week (Monday-Sunday SLT), two different bands with 2+ club plays, picked at
+  random; a band sits out the next 4 battles. One vote per visitor (salted address hash, like Now Playing), no switching.
+  Closes itself at Monday 00:00 SLT with frozen totals and the winner; past winners listed.
+
+**Staging:** done 2026-11-10 (API 72bf0694; site 09d70d75). Tests: 155 backend, 24 browser checks.
+**Production:** same order as phase 1 — backup, `migrations apply` (0016, 0017, 0018), API, then site.
+
+**Added 2026-11-10 (user): no manager controls anywhere - managers vote like anyone else; no fact-verification step.**
+- **VIP of the Month** (`community.vip`, `/public/vip`): automatic - the most interactive GUEST of the month (accepted
+  Vote Board activity + host appreciations; in-world avatars only, never staff or anonymous web visitors; max 10 count
+  per SLT day). Frozen once in `monthly_snapshots` kind `vip`; Hall of Fame from those. Name only, no photo. The first
+  one (November 2026) is crowned on Dec 1.
+- **Did You Know?** (`lib/bandfacts.js`, `/public/did-you-know`): one band fact per SLT day from a fixed list of 60
+  well-documented facts (name origins, line-ups, famous records); today's Song of the Day band gets its own fact if listed.
+- **Sanctuary Confessions:** not built (no human check is allowed, so nothing could be reviewed before publishing).
+Staging 2026-11-10: API 087c3e4a, site a27b04e0; 158 backend tests, 28 browser checks.
+
+**PRODUCTION LIVE 2026-11-11** (owner said "go live"): backup `Documents\Sanctuary_Rocks_Build\SR2_System\Backups\2026-11-10_before_backstage2\sr2-prod.sql`;
+migrations 0016-0018 on sr2-prod (36 votes before and after; 630 plays marked live); API 3888c640 (rollback 67ce808f);
+site 4ab8d4ae (rollback 565a185a). Re-check of old plays finished: 537 non-songs. Live browser checks 28/28.
+The site deploy also shipped the owner's own edits: sponsors Hostcrate + Zombified, DJ Tweek removed (roster + bio).

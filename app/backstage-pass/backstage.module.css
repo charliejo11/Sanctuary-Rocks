@@ -501,6 +501,80 @@
   letter-spacing: 0.14em;
 }
 
+/* Backstage Pass 2.0: archive selector, plays column, trend words, notes */
+.chartBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem 1.2rem;
+  margin-bottom: 0.8rem;
+}
+
+.chartBar .chartWeek {
+  margin: 0;
+}
+
+.chartPick {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--ash);
+  font-family: var(--label);
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.chartPick select {
+  max-width: 70vw;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid rgba(255, 90, 22, 0.5);
+  border-radius: 3px;
+  background: #140a09;
+  color: var(--bone);
+  font: inherit;
+  letter-spacing: 0.06em;
+}
+
+.chartPick select:focus-visible {
+  outline: 2px solid #ffb347;
+  outline-offset: 2px;
+}
+
+.plays {
+  color: #fff;
+  font-weight: 600;
+}
+
+.trendCell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.trendWord {
+  color: var(--ash);
+  font-size: 0.75em;
+  letter-spacing: 0.12em;
+}
+
+.chartNote {
+  margin: 0.9rem 0 0;
+  color: var(--ash);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 .chartEmpty {
   max-width: 46ch;
   margin: 1.5rem auto;
@@ -900,9 +974,44 @@
 }
 
 .np_love { --c: #ff2b2b; }
+.np_badass { --c: #ff7a1a; }
 .np_rock { --c: #ffb22e; }
-.np_badass { --c: #38a8ff; }
-.np_nope { --c: #e040fb; }
+.np_fav { --c: #ffd84a; }
+
+/* Backstage Pass 2.0: Live / AutoDJ badge and the word under each reaction */
+.npMode {
+  margin-left: auto;
+  padding: 0.15rem 0.6rem;
+  border: 1px solid rgba(255, 43, 28, 0.7);
+  border-radius: 3px;
+  color: #ffd2c8;
+  font-family: var(--label);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.npModeAuto {
+  border-color: rgba(255, 179, 71, 0.6);
+  color: #ffd9a0;
+}
+
+.npButtons {
+  margin-bottom: 1.2rem;
+}
+
+.npBtnLabel {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--bone);
+  font-family: var(--label);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
 
 .npCount {
   position: absolute;
@@ -945,5 +1054,51 @@
 @media (prefers-reduced-motion: reduce) {
   .npDot {
     animation: none;
+  }
+
+  .npButton,
+  .npButton:hover:not(:disabled),
+  .npButton:focus-visible {
+    transition: none;
+    transform: none;
+  }
+}
+
+/* Backstage Pass 2.0: charts on phones - the artist sits under the title, short column names, icons for the trend */
+.songBy,
+.narrow {
+  display: none;
+}
+
+.npMode {
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .colArtist,
+  .wide,
+  .trendWord {
+    display: none;
+  }
+
+  .narrow {
+    display: inline;
+    text-decoration: none;
+  }
+
+  .songBy {
+    display: block;
+    margin-top: 0.15rem;
+    color: var(--ash);
+    font-size: 0.8em;
+    font-weight: 400;
+  }
+
+  .table td.song {
+    white-space: normal;
+  }
+
+  .table {
+    letter-spacing: 0.03em;
   }
 }

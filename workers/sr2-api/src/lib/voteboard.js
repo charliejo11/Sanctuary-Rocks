@@ -130,7 +130,7 @@ const limitWord = (limit) => ({ month: "this month", week: "this week", day: "to
 // ------------------------------------------------------------------ the module
 export function makeVoteBoard(deps) {
   const { one, all, run, audit, currentPlay, playTally, checkMilestone, isManager } = deps;
-  const POSITIVE = new Set(["love", "rock", "badass"]);
+  const POSITIVE = new Set(["love", "rock", "badass", "fav"]);   // a web Favorite is already a like
 
   const staffRow = (db, uuid, flag) =>
     UUID_RE.test(uuid ?? "") ? one(db, `SELECT uuid, name, is_dj, is_host, is_manager, is_senior, photo_uuid FROM staff WHERE uuid = ? AND active = 1 AND public_show != 0${flag ? ` AND ${flag} = 1` : ""}`, uuid) : null;

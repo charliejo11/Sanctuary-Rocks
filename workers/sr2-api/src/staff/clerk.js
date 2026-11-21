@@ -184,7 +184,8 @@ function closeStmts(db, coverId, text, now, when = null) {
   ];
 }
 const ROLE_WORD = { dj: "DJ", host: "Host" };
-const portalLink = (env) => (env.SITE_URL ? `\nClaim it in Backstage Pass: ${env.SITE_URL}/backstage-pass/staff#schedule` : "");
+// The website's staff page was removed (2026-11-21), so cover notices no longer link to it.
+const portalLink = () => "";
 const hoursLeft = (start, now) => Math.max(0, Math.round((start - now) / H * 10) / 10);
 
 // ------------------------------------------------------------------ the engine
@@ -241,7 +242,7 @@ async function queueOpenNotice(env, cover, s, users, now) {
   const mgmtHere = urgent && !env.CLERK_MGMT_CHANNEL;                               // urgent: management is told here, or in its own channel
   const roles = [...(cfg.ping === "role" ? roleIds(env, s.role) : []), ...(mgmtHere ? roleIds(env, "management") : [])];
   const text = `${urgent ? "URGENT - " : ""}**Cover needed: ${ROLE_WORD[s.role]} shift**, ${s.local_label}${s.event ? ` (${plain(s.event)})` : ""}\n`
-    + `${plain(nameOf(users, cover.requester_id))} can't make it. Starts in ${hoursLeft(s.start_at, now)} h. First to claim it gets it: the button below, \`/claim\`, or Backstage Pass.${portalLink(env)}`;
+    + `${plain(nameOf(users, cover.requester_id))} can't make it. Starts in ${hoursLeft(s.start_at, now)} h. First to claim it gets it: the button below or \`/claim\`.${portalLink(env)}`;
   const body = { ...notice(env, text, { roles }), components: claimButton(cover.id) };
   await discordStmt(env.DB, `discord:${cover.id}:open`, post(s.role, cover.id, body, { store: true, only_if_open: true }), now).run();
   if (urgent && env.CLERK_MGMT_CHANNEL) await discordStmt(env.DB, `discord:${cover.id}:urgent`, mgmtPost(env, s.role, cover.id, notice(env,

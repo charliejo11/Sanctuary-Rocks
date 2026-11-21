@@ -4,9 +4,9 @@
 //   "DJ Frenchie Fry @ Sanctuary Rocks - Coke, Fry, Cheeseburger Intro"                  (talk / jingle)
 
 // "@ Sanctuary Rocks", "@ SR", "@ S.R." ... (DJs shorten the venue)
-const DJ_PREFIX = /^\s*dj\s+(.+?)\s*@\s*(?:sanctuary\s*rocks|s\.?\s*r\.?)\s*[-|:]\s*/i;
+const DJ_PREFIX = /^\s*(?:dj|djane)\s+(.+?)\s*@\s*(?:sanctuary\s*rocks|s\.?\s*r\.?)\s*[-|:]\s*/i;
 // ... or the tag at the end: "Aephanemer - Panta Rhei DJ PEACY @ SR"
-const DJ_SUFFIX = /[\s-]+dj\s+([^-]+?)\s*@\s*(?:sanctuary\s*rocks|s\.?\s*r\.?)\s*$/i;
+const DJ_SUFFIX = /[\s-]+(?:dj|djane)\s+([^-]+?)\s*@\s*(?:sanctuary\s*rocks|s\.?\s*r\.?)\s*$/i;
 
 /** Parse the 7th CSV field of /7.html into {raw, djTag, artist, title, live, isSong}. Never invents data. */
 export function parseStreamTitle(raw) {
@@ -81,8 +81,83 @@ export function normalizeTitle(title) {
   return { base, tags: [...tags].sort() };
 }
 
+// Station announcements, jingles, adverts and placeholder metadata are never songs (Backstage Pass 2.0, section 4).
+// Kept deliberately narrow: whole words only, so real songs with "Intro" or "Promo" in a longer title aren't lost.
+const STATION_ARTISTS = new Set(["sanctuaryrocks", "sanctuaryrocksradio", "sr", "srradio", "unknown", "unknownartist", "various", "variousartists", "na", "null", "undefined"]);
+// (not bare numbers or "Untitled": "1979", "2112" and several "Untitled" tracks are real songs)
+const NOT_A_SONG = /^(?:station\s*id|jingle|liner|sweeper|advert(?:isement)?|commercial|ad\s*break|promo|ident|id|track\s*\d+)$/i;
+const NOT_A_SONG_ANYWHERE = /\b(?:station\s*id|station\s*ident|jingle|sweeper|advertisement|commercial\s*break)\b/i;
+
+// DJ mic breaks, as the club's DJs actually label them (seen on the stream, 2026-11): the DJ's own name as the artist
+// ("DJ IcyHexx - Speak I Must", "DjRichbo - This is the Way", "!! DJ CANDI !! - Bla Bla Bla"), talking / chatter /
+// voice-over words ("Y - is Y talking", "Kova Is Talking!"), the venue in the metadata ("... @ SR CLUB",
+// "At Sanctuary Rocks With ..."), or a DJ intro ("Tomwolf22 - DJ Teags Intro").
+const DJ_ARTIST = /(?:^|[^a-z])(?:dj|djane)(?=[\s\-_.!'’]|$)|\bhost\s+\w/i;
+const DJ_GLUED = /^\W*D[jJ][A-Z]/;   // "DjRichbo" (case-sensitive, so the bands Django Django / Djinn stay songs)
+const TALK = /\bis\s+(?:\w+\s+)?talking\b|\btalking\s*!|\bchatter(?:ing)?\b|\bvoice\s*-?\s*over\b|\bon\s+the\s+mic\b|\bmic\s+break\b|\bshout\s*-?\s*outs?\b/i;
+const VENUE = /@\s*(?:sr\b|s\.r\.|sanctuary)|\bat\s+sanctuary\s+rocks\b/i;
+const DJ_INTRO = /\b(?:dj|djane)\b.*\b(?:intro|outro)\b|\b(?:intro|outro)\b.*\b(?:dj|djane)\b/i;
+const DASH_INTRO = /\s-\s*(?:intro|outro)\s*$/i;   // "Dafinya - Intro" (a set intro; a track simply called "Intro" stays a song)
+// More voice-over labels, as they slipped onto the charts (2026-11-21): "Kova is Yappin' - Mick Gordon - Rip & Tear",
+// "Blah...Blah..Blah - Miami Vice Theme Song", "Tap...Tap..of the Mic...is This Thing On??? (The Crystal Method) - Bones
+// Theme", "Rock On!! - The Incredible Hulk Theme", "HalfTime Fuckery!!! (Dextron) - Suck My Wobble": the DJ's own words
+// in the artist slot, talking over a bed track. ("Ramble On", "Talk Dirty to Me" stay songs: "is" has to come first.)
+const TALK_MORE = /\bis\s+(?:\w+\s+)?(?:yappin[g']?|rambling|babbling|chatting)(?=\W|$)|\byappin[g']?(?=\W|$)|\bblah\W+blah\b|\btap\W+tap\b|\bis\s+this\s+thing\s+on\b|\bmic\s*check\b/i;
+// Shouted / trailing-off artist slots: "Rock On!!", "Thing On???", "Blah...Blah..". Artist only, and it takes TWO
+// ".." runs, so the band "...And You Will Know Us by the Trail of Dead" (and "Panic! At the Disco") stay songs.
+const SHOUTY_ARTIST = /[!?]{2,}|\.{2,}.*\.{2,}/;
+
+/** A DJ talking / introducing themselves rather than playing a song. */
+export function isMicBreak(artist, title) {
+  const a = String(artist ?? ""), t = String(title ?? "");
+  return DJ_ARTIST.test(a) || DJ_GLUED.test(a) || TALK.test(a) || TALK.test(t) || VENUE.test(a) || VENUE.test(t) || DJ_INTRO.test(t) || DASH_INTRO.test(t)
+    || TALK_MORE.test(a) || TALK_MORE.test(t) || SHOUTY_ARTIST.test(a);
+}
+
+/** True when parsed stream metadata is an announcement / jingle / advert / mic break / placeholder rather than a song. */
+export function isNonSong(artist, title) {
+  const a = normalizeArtist(artist);
+  const t = String(title ?? "").replace(/\s+/g, " ").trim();
+  if (!a || !t) return true;
+  if (STATION_ARTISTS.has(a)) return true;
+  if (isMicBreak(artist, t)) return true;
+  return NOT_A_SONG.test(t) || NOT_A_SONG_ANYWHERE.test(t) || NOT_A_SONG_ANYWHERE.test(String(artist ?? ""));
+}
+
+const xmlTag = (xml, tag) => {
+  const m = String(xml).match(new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`, "i"));
+  return m ? m[1].replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, "&").trim() : null;
+};
+
+/**
+ * Parse SHOUTcast 2 /stats?sid=1 (XML). Besides the title it carries what the CONNECTED SOURCE sends: SERVERTITLE (the
+ * DJ encoder's station name, e.g. "DJ Frenchie Fy @ Sanctuary Rocks") and, from SAM Broadcaster, SONGURL with
+ * songtype (S = song; I/J/P/A/N/V/X... = station id, jingle, promo, advert, news, voice, fx) and duration in ms.
+ */
+export function parseStatsXml(xml) {
+  if (!/<SHOUTCASTSERVER>/i.test(String(xml ?? ""))) return null;
+  const n = (t) => { const v = Number.parseInt(xmlTag(xml, t) ?? "", 10); return Number.isNaN(v) ? 0 : v; };
+  const songUrl = xmlTag(xml, "SONGURL") ?? "";
+  const q = new URLSearchParams(songUrl.replace(/^[^&]*&/, ""));
+  const st = (q.get("songtype") ?? "").trim().toUpperCase();
+  const dur = Number.parseInt(q.get("duration") ?? "", 10);
+  return {
+    listeners: n("CURRENTLISTENERS"), online: n("STREAMSTATUS") === 1, peak: n("PEAKLISTENERS"), max: n("MAXLISTENERS"),
+    unique: n("UNIQUELISTENERS"), bitrate: n("BITRATE"),
+    title: xmlTag(xml, "SONGTITLE") ?? "", serverTitle: xmlTag(xml, "SERVERTITLE") ?? "",
+    songType: /^[A-Z]$/.test(st) ? st : null, durationMs: Number.isFinite(dur) && dur > 0 ? dur : null,
+  };
+}
+
+/** The DJ name in an encoder station name: "DJ Frenchie Fy @ Sanctuary Rocks" -> "Frenchie Fy". Null if none. */
+export function djFromServerTitle(serverTitle) {
+  const m = String(serverTitle ?? "").match(/^\s*(?:dj|djane)\s+(.+?)\s*(?:@|$)/i);
+  return m ? m[1].trim() || null : null;
+}
+
 /** One chart identity per recording: "artist|title[|tags]". Null when it isn't a real song. */
 export function songKey(artist, title) {
+  if (isNonSong(artist, title)) return null;
   const a = normalizeArtist(artist);
   const t = normalizeTitle(title);
   if (!a || !t.base) return null;

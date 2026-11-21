@@ -6,8 +6,8 @@
 // Rules: no DJ logout (the next DJ login hands over and closes the previous set with its report);
 // never logs anyone out by itself; never changes the music (the receiver does, in-world).
 
-import { parseSevenHtml, parseStreamTitle, songKey, djNameMatches } from "./lib/songs.js";
-import { weekKey, shiftWeek, weekStartMs, weekLabel } from "./lib/time.js";
+import { parseSevenHtml, parseStatsXml, parseStreamTitle, songKey, djNameMatches, djFromServerTitle } from "./lib/songs.js";
+import { weekKey, shiftWeek, weekStartMs, weekLabel, monthKey } from "./lib/time.js";
 import { verifySigned, UUID_RE, NULL_KEY } from "./lib/auth.js";
 import { songChart, songChartPerPlay, djChart, hostChart, awards, POSITIVE, REACTIONS, DEFAULTS } from "./lib/charts.js";
 import * as D from "./lib/discord.js";
@@ -17,6 +17,8 @@ import { syncStage, syncScheduledEvents, syncLiveEvent, calendarStage } from "./
 import { makeVoteBoard } from "./lib/voteboard.js";
 import { clerkActions, clerkTick } from "./staff/clerk.js";
 import { discordInteractionsHttp, discordTestMessageHttp, pollChannels, ensureCommands } from "./staff/clerk_discord.js";
+import { makePlayCharts } from "./lib/playcharts.js";
+import { makeCommunity, webVoter } from "./lib/community.js";
 
 const STREAM = "http://169.197.87.130:8036";         // what listeners / SL play (shown in the Discord event)
 const TRIAL_STREAM = "http://169.197.87.130:8018";   // the BACKUP stream: used for DJ trials
@@ -29,6 +31,7 @@ const CONTRIB_CAP_PER_CATEGORY = 5;          // per manager per week
 const json = (data, status = 200, extra = {}) =>
   new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8", ...extra } });
 const CORS = { "access-control-allow-origin": "*", "cache-control": "public, max-age=20" };
+const NO_STORE = { "access-control-allow-origin": "*", "cache-control": "no-store" };
 
 export const photoUrl = (uuid) => (uuid && UUID_RE.test(uuid) && uuid !== NULL_KEY ? `https://picture-service.secondlife.com/${uuid}/256x192.jpg` : null);
 
@@ -94,10 +97,20 @@ export async function pollStream(env, now = Date.now(), fetchImpl = fetch) {
   const db = env.DB;
   let info = null;
   const trial = await one(db, "SELECT id FROM dj_sets WHERE ended_at IS NULL AND trial = 1 LIMIT 1");
+  // SHOUTcast 2 /stats first: it also says what the connected source sends (encoder name, SAM song type); /7.html
+  // (title + status only) is the fallback, e.g. for a SHOUTcast v1 server.
+  const base = trial ? TRIAL_STATUS : STREAM_STATUS;
+  const opts = { headers: { "user-agent": "Mozilla/5.0 (SR2 metadata)" }, cf: { cacheTtl: 0 } };
   try {
-    const r = await fetchImpl(`${trial ? TRIAL_STATUS : STREAM_STATUS}/7.html`, { headers: { "user-agent": "Mozilla/5.0 (SR2 metadata)" }, cf: { cacheTtl: 0 } });
-    if (r.ok) info = parseSevenHtml(await r.text());
-  } catch { /* stream unreachable: keep everything as it is */ }
+    const r = await fetchImpl(`${base}/stats?sid=1`, opts);
+    if (r.ok) info = parseStatsXml(await r.text());
+  } catch { /* try /7.html */ }
+  if (!info) {
+    try {
+      const r = await fetchImpl(`${base}/7.html`, opts);
+      if (r.ok) info = parseSevenHtml(await r.text());
+    } catch { /* stream unreachable: keep everything as it is */ }
+  }
   await kvSet(db, "last_poll", now);
   if (!info || !info.online || !info.title) {
     await kvSet(db, "stream_status", info ? "offline" : "unreachable");
@@ -105,11 +118,16 @@ export async function pollStream(env, now = Date.now(), fetchImpl = fetch) {
   }
   await kvSet(db, "stream_status", "online");
   await kvSet(db, "listeners", info.listeners);
+  await kvSet(db, "stream_source", info.serverTitle ?? "");
   const last = await kvGet(db, "stream_title");
   if (last === info.title) return { changed: false, status: "online" };     // duplicate metadata update
   await kvSet(db, "stream_title", info.title);
   const parsed = parseStreamTitle(info.title);
-  return { changed: true, status: "online", play: await startPlay(env, parsed, now, "stream") };
+  // the club stream has no AutoDJ (offline unless a DJ encoder is connected); kv autodj_sources lists encoder names
+  // that ARE an AutoDJ, should one ever be added (one per line, matched case-insensitively)
+  const autodj = ((await kvGet(db, "autodj_sources")) ?? "").split(/\r?\n/).map((x) => x.trim().toLowerCase()).filter(Boolean);
+  const src = { live: autodj.includes(String(info.serverTitle ?? "").trim().toLowerCase()) ? 0 : 1, songType: info.songType ?? null, sourceName: info.serverTitle || null };
+  return { changed: true, status: "online", play: await startPlay(env, parsed, now, "stream", src) };
 }
 
 /**
@@ -131,8 +149,23 @@ export async function streamCheck(env, now = Date.now(), fetchImpl = fetch) {
   return out;
 }
 
-async function startPlay(env, p, now, source) {
+// A stream drop / reconnect can show "Song A" -> station id or blank -> "Song A" again. If the same song comes back
+// within this gap after only non-song metadata, it is the SAME play (reopened), not a second one.
+const RECONNECT_GAP_MS = 120e3;
+
+async function startPlay(env, p, now, source, src = {}) {
   const db = env.DB;
+  // SAM Broadcaster says what it is sending: anything but S (song) is a station id, jingle, promo, advert, voice...
+  const key = p.isSong && (!src.songType || src.songType === "S") ? songKey(p.artist, p.title) : null;
+  if (key) {
+    const lastSong = await one(db, "SELECT id, playback_id, song_key, ended_at FROM plays WHERE song_key IS NOT NULL ORDER BY started_at DESC, id DESC LIMIT 1");
+    if (lastSong?.song_key === key && lastSong.ended_at != null && now - lastSong.ended_at <= RECONNECT_GAP_MS) {
+      await run(db, "UPDATE plays SET ended_at = ? WHERE ended_at IS NULL", now);
+      await run(db, "UPDATE plays SET ended_at = NULL WHERE id = ?", lastSong.id);
+      await kvSet(db, "current_play", lastSong.id);
+      return { id: lastSong.id, playback_id: lastSong.playback_id, artist: p.artist, title: p.title, resumed: true };
+    }
+  }
   await run(db, "UPDATE plays SET ended_at = ? WHERE ended_at IS NULL", now);
   const set = await one(db, "SELECT * FROM dj_sets WHERE ended_at IS NULL ORDER BY started_at DESC LIMIT 1");
   // Credit a DJ only when the stream metadata names the DJ who is logged in on the board.
@@ -143,18 +176,22 @@ async function startPlay(env, p, now, source) {
     attribution = "trial"; djUuid = set.dj_uuid; djName = set.dj_name; setId = set.id;   // the backup stream is theirs
   } else if (set && p.djTag && djNameMatches(p.djTag, set.dj_name)) {
     attribution = "ok"; djUuid = set.dj_uuid; djName = set.dj_name; setId = set.id;
+  } else if (set && !p.djTag && src.live === 1 && djFromServerTitle(src.sourceName) && djNameMatches(djFromServerTitle(src.sourceName), set.dj_name)) {
+    // untagged titles, but the connected encoder is named for the logged-in DJ ("DJ Frenchie Fy @ Sanctuary Rocks")
+    attribution = "ok"; djUuid = set.dj_uuid; djName = set.dj_name; setId = set.id;
   } else if (set && p.djTag) {
     attribution = "mismatch"; setId = set.id;
   }
-  const key = p.isSong ? songKey(p.artist, p.title) : null;
-  // Every real song counts in the song chart, AutoDJ included (user, 2026-11-04); trial sets never enter the charts.
+  // chart_ok = a real song outside a trial. Which plays a chart counts (live DJs only by default, user 2026-11-10) is
+  // decided by the chart itself (lib/playcharts.js), so the stored history never has to be rewritten.
   // A DJ is only CREDITED with a play when attribution is "ok" (dj_uuid set).
   const chartOk = attribution !== "trial" && key ? 1 : 0;
   const pid = await playbackId(p.raw, now);
   const res = await run(db,
-    `INSERT INTO plays(playback_id, raw_title, artist, title, song_key, dj_tag, set_id, dj_uuid, dj_name, attribution, chart_ok, source, started_at, week)
-     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-    pid, p.raw, p.artist, p.title, key, p.djTag, setId, djUuid, djName, attribution, chartOk, source, now, weekKey(now));
+    `INSERT INTO plays(playback_id, raw_title, artist, title, song_key, dj_tag, set_id, dj_uuid, dj_name, attribution, chart_ok, source, started_at, week, live, song_type, source_name)
+     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+    pid, p.raw, p.artist, p.title, key, p.djTag, setId, djUuid, djName, attribution, chartOk, source, now, weekKey(now),
+    attribution === "trial" ? null : src.live ?? null, src.songType ?? null, src.sourceName ?? null);
   await kvSet(db, "current_play", res.meta.last_row_id);
   return { id: res.meta.last_row_id, playback_id: pid, artist: p.artist, title: p.title, attribution };
 }
@@ -187,7 +224,7 @@ async function playTally(db, playId) {
   const rows = await all(db, "SELECT reaction, COUNT(*) n FROM votes v JOIN plays p ON p.id = v.play_id WHERE v.play_id = ? AND (p.dj_uuid IS NULL OR v.voter_uuid != p.dj_uuid) GROUP BY reaction", playId);
   const t = Object.fromEntries(REACTIONS.map((r) => [r, 0]));
   for (const r of rows) t[r.reaction] = r.n;
-  t.positive = t.love + t.rock + t.badass;
+  t.positive = t.love + t.rock + t.badass + t.fav;
   t.total = t.positive + t.nope;
   t.approval = t.total ? +(t.positive / t.total).toFixed(3) : null;
   return t;
@@ -617,15 +654,37 @@ async function publicLive(env) {
   for (const h of st.hosts) if ((await staff(db, h.uuid))?.public_show !== 0) pubHosts.push({ name: h.name, photo_url: photoUrl(h.photo), since: h.since });
   const pubMgrs = [];
   for (const m of st.managers) if ((await staff(db, m.uuid))?.public_show !== 0) pubMgrs.push({ name: m.name, photo_url: photoUrl(m.photo), since: m.since });
-  // the DJ logged in on the board; otherwise the DJ named in the stream title ("DJ X @ SR - ...")
-  const dj = st.dj ? { name: st.dj.name, photo_url: photoUrl(st.dj.photo), since: st.dj.since, board: true, trial: st.dj.trial }
-    : st.song?.dj_tag ? { name: st.song.dj_tag, photo_url: null, since: null, board: false } : null;
+  // Who is on air.
+  //  - live vs AutoDJ: what the stream server reported for the current play (plays.live). The club stream has no
+  //    AutoDJ, so a connected source is a DJ; plays from before 2026-11-08 (live NULL) use the old DJ-tag rule.
+  //  - which DJ: the DJ logged in on the board, when the stream backs it up (the title's DJ tag or the encoder's name
+  //    matches, or neither names anyone and the login is under 3 hours old: DJs never log out, so an old login proves
+  //    nothing). Otherwise the name the DJ's own stream sends (title tag, then encoder name). Never a song title.
+  let mode = st.health.stream === "online" ? "autodj" : "offline";
+  let dj = null;
+  if (mode !== "offline") {
+    const cur = await currentPlay(db);
+    const tag = st.song?.dj_tag ?? null;
+    const sourceDj = djFromServerTitle(await kvGet(db, "stream_source"));
+    const isLive = cur?.live === 1 || (cur?.live == null && (tag || cur?.dj_uuid)) || (cur?.live == null && st.dj);
+    const set = st.dj ? await one(db, "SELECT id, started_at FROM dj_sets WHERE ended_at IS NULL ORDER BY started_at DESC LIMIT 1") : null;
+    const named = tag || sourceDj;
+    const boardIsOn = set && (st.dj.trial || (named ? djNameMatches(named, st.dj.name) : set.started_at >= Date.now() - 3 * 3600e3));
+    if (st.dj?.trial && set) {
+      mode = "trial";
+      dj = { name: st.dj.name, photo_url: photoUrl(st.dj.photo), since: st.dj.since, board: true, trial: true };
+    } else if (isLive) {
+      mode = "live";
+      if (boardIsOn) dj = { name: st.dj.name, photo_url: photoUrl(st.dj.photo), since: st.dj.since, board: true, trial: false };
+      else if (named) dj = { name: named, photo_url: null, since: null, board: false };
+    }
+  }
+  const t = st.song?.tally;
   return {
-    dj,
+    dj, mode,
     hosts: pubHosts, managers: pubMgrs,
     song: st.song && { playback_id: st.song.playback_id, artist: st.song.artist, title: st.song.title, is_song: st.song.is_song, since: st.song.since,
-      reactions: st.song.tally && { love: st.song.tally.love, rock: st.song.tally.rock, badass: st.song.tally.badass, nope: st.song.tally.nope,
-        total: st.song.tally.total, approval: st.song.tally.approval } },
+      reactions: t && { love: t.love, rock: t.rock, badass: t.badass, nope: t.nope, fav: t.fav, total: t.total, positive: t.positive, approval: t.approval } },
     stream: st.health.stream, recent,
     mow: st.mow?.status !== "awaiting" ? { week: st.mow.week, name: st.mow.manager_name, photo_url: photoUrl(st.mow.photo_uuid), citation: st.mow.citation } : { status: "awaiting" },
   };
@@ -679,7 +738,7 @@ async function webVote(request, env) {
                  ON CONFLICT(play_id, voter_uuid) DO UPDATE SET reaction = excluded.reaction, updated_at = excluded.updated_at`,
     play.id, voter, d.reaction, now, now);
   await checkMilestone(env, play);
-  return { ok: true, playback_id: play.playback_id, reaction: d.reaction, tally: await playTally(db, play.id) };
+  return { ok: true, playback_id: play.playback_id, artist: play.artist, title: play.title, reaction: d.reaction, tally: await playTally(db, play.id) };
 }
 
 // ------------------------------------------------------------------ staff portal + 2.0 boards
@@ -691,6 +750,35 @@ const boardActions = makeBoardActions({ ACTIONS, kvSet, closeOpenSets });
 Object.assign(ACTIONS, boardActions.actions);
 // the club's 4-button Vote Board (lib/voteboard.js): DJ / Host votes, song likes + requests, staff shoutouts
 const voteBoard = makeVoteBoard({ one, all, run, audit, currentPlay, playTally, checkMilestone, isManager });
+// Backstage Pass 2.0: most-played Weekly Top 10 / Monthly Top 20 (lib/playcharts.js)
+const playCharts = makePlayCharts({ one, all, run, audit });
+// Backstage Pass 2.0: Chronicles news (Loudwire RSS), Song of the Day, Battle of the Bands (lib/community.js)
+const community = makeCommunity({ one, all, run });
+async function publicWrite(request, env, fn) {
+  let d = {};
+  try { d = JSON.parse((await request.text()).slice(0, 2000)); } catch { return { ok: false, error: "bad_request" }; }
+  const voter = await webVoter(request, env);
+  if (!voter) return { ok: false, error: "no_client" };
+  return fn(env.DB, voter, d);
+}
+async function publicChronicles(env) {
+  // the hourly cron keeps it fresh; if it hasn't run for two hours (or ever), fetch now
+  if (Date.now() - +((await kvGet(env.DB, "news_fetched_at")) ?? 0) > 2 * 3600e3) await community.fetchNews(env.DB).catch(() => {});
+  return community.chronicles(env.DB);
+}
+const WEEK_RE = /^\d{4}-\d{2}-\d{2}$/, MONTH_RE = /^\d{4}-(0[1-9]|1[0-2])$/;
+async function publicTop10(env, url) {
+  const q = url.searchParams.get("week");
+  if (q && !WEEK_RE.test(q)) return { error: "bad week" };
+  const chart = await playCharts.weekChart(env.DB, q || weekKey(Date.now()));
+  return { ...chart, weeks: await playCharts.weekList(env.DB) };
+}
+async function publicTop20(env, url) {
+  const q = url.searchParams.get("month");
+  if (q && !MONTH_RE.test(q)) return { error: "bad month" };
+  const chart = await playCharts.monthChart(env.DB, q || monthKey(Date.now()));
+  return { ...chart, months: await playCharts.monthList(env.DB) };
+}
 Object.assign(ACTIONS, voteBoard.actions);
 // the Auto Clerk's in-world actions (staff/clerk.js): my shifts, call out, claim, cancel - linked avatars only
 Object.assign(ACTIONS, clerkActions);
@@ -778,6 +866,15 @@ export default {
       if (request.method === "GET" && url.pathname === "/public/live") return json(await publicLive(env), 200, CORS);
       if (request.method === "GET" && url.pathname === "/public/charts") return json(await publicCharts(env, url), 200, CORS);
       if (request.method === "GET" && url.pathname === "/public/archive") return json(await publicArchive(env), 200, CORS);
+      if (request.method === "GET" && url.pathname === "/public/top10") return json(await publicTop10(env, url), 200, CORS);
+      if (request.method === "GET" && url.pathname === "/public/top20") return json(await publicTop20(env, url), 200, CORS);
+      if (request.method === "GET" && url.pathname === "/public/chronicles") return json(await publicChronicles(env), 200, CORS);
+      if (request.method === "GET" && url.pathname === "/public/song-of-day") return json(await community.songOfDay(env.DB), 200, CORS);
+      if (request.method === "GET" && url.pathname === "/public/battle") return json(await community.battle(env.DB), 200, CORS);
+      if (request.method === "GET" && url.pathname === "/public/vip") return json(await community.vip(env.DB), 200, CORS);
+      if (request.method === "GET" && url.pathname === "/public/did-you-know") return json(await community.didYouKnow(env.DB), 200, CORS);
+      if (request.method === "POST" && url.pathname === "/public/song-of-day") return json(await publicWrite(request, env, community.reactSongOfDay), 200, NO_STORE);
+      if (request.method === "POST" && url.pathname === "/public/battle") return json(await publicWrite(request, env, community.voteBattle), 200, NO_STORE);
       if (request.method === "GET" && url.pathname === "/public/votes") return json(await voteBoard.publicVotes(env, url, photoUrl), 200, CORS);
       if (request.method === "POST" && url.pathname === "/public/vote") return json(await webVote(request, env), 200, { "access-control-allow-origin": "*", "cache-control": "no-store" });
       if (request.method === "OPTIONS" && url.pathname === "/public/vote")
@@ -805,12 +902,19 @@ export default {
   async scheduled(event, env, ctx) {
     if (event.cron === "* * * * *") {
       ctx.waitUntil(pollStream(env).then(() => trackStreamDown(env)).catch(() => {}));
+      ctx.waitUntil(playCharts.reclassify(env.DB).catch(() => {}));   // once per rules version, 400 plays a minute
       ctx.waitUntil(refreshStage(env).catch(() => {}));     // recovers a failed or deleted status message
       ctx.waitUntil(clerkTick(env).catch(() => {}));         // Auto Clerk: Sheet import, reminders, escalation, outbox
       ctx.waitUntil(pollChannels(env).catch(() => {}));      // Auto Clerk: callouts written as ordinary Discord messages
       ctx.waitUntil(ensureCommands(env).catch(() => {}));    // Auto Clerk: /callout + /claim installed once Discord is on
     } else {
       ctx.waitUntil(finaliseWeek(env));
+      ctx.waitUntil(playCharts.finaliseWeekChart(env.DB).catch(() => {}));    // most-played Top 10: freeze last week once
+      ctx.waitUntil(playCharts.finaliseMonthChart(env.DB).catch(() => {}));   // most-played Top 20: freeze last month once
+      ctx.waitUntil(community.fetchNews(env.DB).catch(() => {}));             // Chronicles: Loudwire headlines, hourly
+      ctx.waitUntil(community.ensureBattle(env.DB).catch(() => {}));          // closes last week's battle, opens this week's
+      ctx.waitUntil(community.ensureSongOfDay(env.DB).catch(() => {}));       // today's song, picked once
+      ctx.waitUntil(community.vip(env.DB).catch(() => {}));                   // freezes last month's VIP once
       ctx.waitUntil(voteBoard.finaliseMonth(env).catch(() => {}));
       ctx.waitUntil(run(env.DB, "DELETE FROM nonces WHERE ts < ?", Math.floor(Date.now() / 1000) - 600));
       ctx.waitUntil(syncSheets(env).catch(() => {}));
@@ -819,4 +923,4 @@ export default {
   },
 };
 
-export { ACTIONS };
+export { ACTIONS, playCharts, community };

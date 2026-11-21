@@ -6,8 +6,8 @@ export const dynamic = "force-dynamic";
 
 type Ctx = { params: Promise<{ path: string[] }> };
 
-const READS = new Set(["public/live", "public/charts", "public/archive", "public/votes"]);
-const WRITES = new Set(["public/vote"]);
+const READS = new Set(["public/live", "public/charts", "public/archive", "public/votes", "public/top10", "public/top20", "public/chronicles", "public/song-of-day", "public/battle", "public/vip", "public/did-you-know"]);
+const WRITES = new Set(["public/vote", "public/song-of-day", "public/battle"]);
 
 async function forward(request: Request, { params }: Ctx) {
   const base = process.env.STAFF_API_URL;

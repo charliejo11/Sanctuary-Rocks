@@ -9,7 +9,7 @@ import { sanitizeHtml } from "../src/staff/sanitize.js";
 import { sha256, randomToken, handleStaff } from "../src/staff/portal.js";
 import { composeStage, syncStage, syncScheduledEvents, syncLiveEvent, calendarStage } from "../src/staff/stage.js";
 
-const MIG = ["0001_init", "0002_radio", "0003_trials", "0004_staff_portal", "0005_manual_seed", "0010_calendar_name", "0011_vote_board", "0012_autodj_in_song_chart", "0013_auto_clerk", "0014_clerk_discord", "0015_clerk_sheet"].map((f) => fileURLToPath(new URL(`../migrations/${f}.sql`, import.meta.url)));
+const MIG = ["0001_init", "0002_radio", "0003_trials", "0004_staff_portal", "0005_manual_seed", "0010_calendar_name", "0011_vote_board", "0012_autodj_in_song_chart", "0013_auto_clerk", "0014_clerk_discord", "0015_clerk_sheet", "0016_backstage2_music", "0017_live_source"].map((f) => fileURLToPath(new URL(`../migrations/${f}.sql`, import.meta.url)));
 const ctx = { waitUntil() {} };
 const AV = (n) => `aaaaaaaa-0000-0000-0000-${String(n).padStart(12, "0")}`;
 

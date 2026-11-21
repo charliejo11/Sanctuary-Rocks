@@ -7,13 +7,6 @@
   "normalizedName": "dann"
  },
  {
-  "name": "DJ Angelo",
-  "role": "Resident DJ",
-  "image": "/images/djs/DJ%20Angelo.png.jpg",
-  "bio": "Keeps the Sanctuary loud, wild, and rocking.",
-  "normalizedName": "angelo"
- },
- {
   "name": "DJ Bratty",
   "role": "Resident DJ",
   "image": "/images/djs/DJ%20Bratty.png.jpg",
@@ -63,6 +56,13 @@
   "normalizedName": "eros"
  },
  {
+  "name": "DJ Jade",
+  "role": "Resident DJ",
+  "image": "/images/djs/DJ%20Jade.png",
+  "bio": "Keeps the Sanctuary loud, wild, and rocking.",
+  "normalizedName": "jade"
+ },
+ {
   "name": "DJ Junglist",
   "role": "Resident DJ",
   "image": "/images/djs/DJ%20Junglist.png.png",
@@ -91,13 +91,6 @@
   "normalizedName": "lucky"
  },
  {
-  "name": "DJ Rick Blood",
-  "role": "Resident DJ",
-  "image": "/images/djs/DJ%20RICK%20BLOOD.png",
-  "bio": "Keeps the Sanctuary loud, wild, and rocking.",
-  "normalizedName": "rick blood"
- },
- {
   "name": "DJ Rose",
   "role": "Resident DJ",
   "image": "/images/djs/DJ%20Rose%20-%20Profile%20-%2009%2030%202026.png",
@@ -112,11 +105,18 @@
   "normalizedName": "trelk"
  },
  {
-  "name": "DJ Tweek",
+  "name": "DJ Y",
   "role": "Resident DJ",
-  "image": "/images/djs/DJ%20Tweek.png.jpg",
+  "image": "/images/djs/DJ%20Y.png",
   "bio": "Keeps the Sanctuary loud, wild, and rocking.",
-  "normalizedName": "tweek"
+  "normalizedName": "y"
+ },
+ {
+  "name": "DJ Angelo",
+  "role": "Resident DJ",
+  "image": "/images/djs/Dj_Angelo.png",
+  "bio": "Keeps the Sanctuary loud, wild, and rocking.",
+  "normalizedName": "angelo"
  },
  {
   "name": "DJ Frenchie",
@@ -194,6 +194,13 @@
   "image": "/images/djs/Richbo.png",
   "bio": "Keeps the Sanctuary loud, wild, and rocking.",
   "normalizedName": "richbo"
+ },
+ {
+  "name": "DJ Rick Blood",
+  "role": "Resident DJ",
+  "image": "/images/djs/RickBlood.png",
+  "bio": "Keeps the Sanctuary loud, wild, and rocking.",
+  "normalizedName": "rick blood"
  },
  {
   "name": "Rox",

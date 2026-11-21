@@ -53,7 +53,7 @@ export async function discordActor(env, i) {
   const du = i.member?.user;
   if (!i.guild_id || i.guild_id !== staffGuild(env) || !du?.id) return { error: "The Auto Clerk only works in the Sanctuary Rocks staff server." };
   const u = await one(env.DB, "SELECT id, display_name, roles FROM portal_users WHERE discord_id = ? AND active = 1", du.id);
-  if (!u) return { error: "I can't match your Discord account to a Backstage Pass staff account. Sign in to Backstage Pass with Discord once, then try again." };
+  if (!u) return { error: "I can't match your Discord account to a staff account. Ask a manager to check your staff account." };
   const map = roleMap(env);
   const live = new Set((i.member.roles ?? []).map((r) => map[r]).filter(Boolean));
   const roles = parseList(u.roles).filter((r) => live.has(r));
@@ -299,7 +299,7 @@ export async function handleChannelMessage(env, msg, now = Date.now(), { simulat
     return body;
   };
   const u = await one(db, "SELECT id, display_name FROM portal_users WHERE discord_id = ? AND active = 1", msg.author?.id ?? "");
-  if (!u) return done("not linked", { reply: await say("I can't match your Discord account to a Backstage Pass staff account yet. Sign in to Backstage Pass with Discord once, then try again.") });
+  if (!u) return done("not linked", { reply: await say("I can't match your Discord account to a staff account yet. Ask a manager to check your staff account.") });
   const actor = { user: { id: u.id, roles: [], name: u.display_name }, source: "discord", discord: msg.author.id };
   const shifts = (await myShifts(db, u.id, now, testOnly(env))).filter((s) => s.start_at < now + clerkConfig(env).window_days * 24 * H);
   if (!shifts.length) return done("no shifts", { reply: await say("You don't have any upcoming shifts on the schedule, so there's nothing to call out of. If that's wrong, tell a manager.") });

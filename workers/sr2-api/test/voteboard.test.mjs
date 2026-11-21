@@ -8,7 +8,7 @@ import { hmacBase64 } from "../src/lib/auth.js";
 import { screenText, parseRequest } from "../src/lib/voteboard.js";
 import { weekKey, shiftWeek, weekStartMs } from "../src/lib/time.js";
 
-const MIG = ["0001_init", "0002_radio", "0003_trials", "0004_staff_portal", "0005_manual_seed", "0010_calendar_name", "0011_vote_board", "0012_autodj_in_song_chart"]
+const MIG = ["0001_init", "0002_radio", "0003_trials", "0004_staff_portal", "0005_manual_seed", "0010_calendar_name", "0011_vote_board", "0012_autodj_in_song_chart", "0016_backstage2_music", "0017_live_source"]
   .map((f) => fileURLToPath(new URL(`../migrations/${f}.sql`, import.meta.url)));
 const OWNER = "00000000-1111-2222-3333-000000000001";
 const CHARLIE = "00000000-1111-2222-3333-0000000000a2";
@@ -259,7 +259,7 @@ test("rankings: weekly + monthly from accepted votes only, ties share a rank, ar
     await worker.scheduled({ cron: "7 * * * *" }, e, { waitUntil: (p) => jobs.push(p) });
     await Promise.allSettled(jobs);
   }
-  const rows = await e.DB.prepare("SELECT COUNT(*) n FROM monthly_snapshots").first();
+  const rows = await e.DB.prepare("SELECT COUNT(*) n FROM monthly_snapshots WHERE kind = 'votes'").first();   // (the cron also freezes other monthly results, e.g. the VIP)
   assert.equal(rows.n, 1);
 });
 

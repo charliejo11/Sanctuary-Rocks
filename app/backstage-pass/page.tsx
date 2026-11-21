@@ -8,6 +8,7 @@ import backstage from "../data/backstage.json";
 import { distressed } from "../gallery/fonts";
 import BackstageCharts from "./BackstageCharts";
 import ClubVotes from "./ClubVotes";
+import Community from "./Community";
 import LiveWinner from "./LiveWinner";
 import NowPlaying from "./NowPlaying";
 import styles from "./backstage.module.css";
@@ -112,6 +113,7 @@ export default function BackstagePassPage() {
       <div className={home.wrap}>
         <NowPlaying />
         <BackstageCharts manager={backstage.managerOfTheWeek} />
+        <Community />
 
         {/* --------------------------------------------------- staff appreciation */}
         <section className={`${home.panel} ${styles.staffPanel}`} aria-labelledby="staff-title">
